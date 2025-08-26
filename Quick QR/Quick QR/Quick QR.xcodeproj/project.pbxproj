@@ -169,8 +169,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z78BNUN8G3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Quick QR/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "QR Scanner";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This allows us to provide you with more personalized ads experience.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -181,7 +184,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ProductBoilerPlate.ProductBoilerPlate;
+				PRODUCT_BUNDLE_IDENTIFIER = ProductBoilerPlate.QuickQR;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -196,8 +199,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z78BNUN8G3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Quick QR/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "QR Scanner";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This allows us to provide you with more personalized ads experience.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -208,7 +214,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ProductBoilerPlate.ProductBoilerPlate;
+				PRODUCT_BUNDLE_IDENTIFIER = ProductBoilerPlate.QuickQR;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
