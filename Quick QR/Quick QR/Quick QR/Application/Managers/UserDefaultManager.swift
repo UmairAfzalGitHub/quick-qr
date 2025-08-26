@@ -1,9 +1,4 @@
-//
-//  UserDefaultManager.swift
-//  Photo Recovery
-//
-//  Created by Umair Afzal on 27/05/2025.
-//
+
 
 import Foundation
 

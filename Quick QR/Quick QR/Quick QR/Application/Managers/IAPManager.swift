@@ -1,9 +1,3 @@
-//
-//  IAPManager.swift
-//  PhotoRecovery
-//
-//  Created by Haider on 20/01/2025.
-//
 
 import StoreKit
 

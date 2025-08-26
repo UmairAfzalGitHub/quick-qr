@@ -1,9 +1,3 @@
-//
-//  OnboardingScreenViewController.swift
-//  PhotoRecovery
-//
-//  Created by Haider on 27/12/2024.
-//
 
 import UIKit
 import StoreKit

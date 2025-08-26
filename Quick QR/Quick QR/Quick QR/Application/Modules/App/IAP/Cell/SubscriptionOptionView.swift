@@ -1,9 +1,3 @@
-//
-//  SubscriptionOptionView.swift
-//  GhostVPN
-//
-//  Created by Haider on 11/11/2024.
-//
 
 import UIKit
 

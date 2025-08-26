@@ -1,9 +1,3 @@
-//
-//  AdConsentManager.swift
-//  Phone Number Tracker
-//
-//  Created by Umair Afzal on 06/03/2025.
-//
 
 import Foundation
 import AppTrackingTransparency

@@ -1,9 +1,4 @@
-//
-//  LanguageManager.swift
-//  Quick QR
-//
-//  Created by Umair Afzal on 26/08/2025.
-//
+
 
 import Foundation
 import UIKit

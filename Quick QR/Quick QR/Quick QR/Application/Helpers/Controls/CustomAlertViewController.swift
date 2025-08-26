@@ -1,9 +1,3 @@
-//
-//  CustomAlertViewController.swift
-//  Photo Recovery
-//
-//  Created by Umair Afzal on 20/06/2025.
-//
 
 import Foundation
 import UIKit

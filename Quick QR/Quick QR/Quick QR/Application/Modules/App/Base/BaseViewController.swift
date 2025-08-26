@@ -1,9 +1,3 @@
-//
-//  BaseViewController.swift
-//  Photo Recovery
-//
-//  Created by Umair Afzal on 07/03/2025.
-//
 
 import Foundation
 import UIKit

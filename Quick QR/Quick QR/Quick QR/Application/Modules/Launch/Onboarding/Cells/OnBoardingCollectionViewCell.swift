@@ -1,10 +1,3 @@
-//
-//  OnBoardingCollectionViewCell.swift
-//  OnBoarding
-//
-//  Created by Umair Afzal on 03/02/2019.
-//  Copyright © 2019 Umair Afzal. All rights reserved.
-//
 
 import UIKit
 
