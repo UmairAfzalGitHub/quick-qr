@@ -225,10 +225,10 @@ class LanguageCell: UICollectionViewCell {
         checkmarkImageView.isHidden = !isSelected
         
         if isSelected {
-            // Apply shadow to CELL, not inner view
             cellContentView.layer.borderColor = UIColor.appPrimary.cgColor
             cellContentView.layer.borderWidth = 1
-            
+
+            // Apply shadow to CELL, not inner view
             layer.shadowColor = UIColor.appPrimary.cgColor
             layer.shadowOpacity = 0.4
             layer.shadowOffset = CGSize(width: 0, height: 2)
