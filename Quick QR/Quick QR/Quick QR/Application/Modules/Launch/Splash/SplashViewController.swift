@@ -5,10 +5,9 @@ import IOS_Helpers
 import GoogleMobileAds
 
 class SplashViewController: BaseViewController, UITextViewDelegate {
-    
-    @IBOutlet weak var bannerViewHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var loadingAnimationView: LottieAnimationView!
-    @IBOutlet weak var appTitleLabel: UILabel!
+        
+    @IBOutlet weak var messageLabel: UILabel!
+    @IBOutlet weak var progressBar: AnimatedProgressBar!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -16,7 +15,6 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
         hideCustomNavigationBar()
         IAPManager.shared.fetchSubscriptions()
         IAPManager.shared.checkSubscriptionStatus(completion: {[weak self] isSubscribed in
-            self?.bannerViewHeightConstraint.constant = isSubscribed ? 0 : 60
             guard let self, !isSubscribed else {
                 self?.animateForTwoSeconds()
                 return
@@ -38,13 +36,13 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
 
     override func setup() {
         super.setup()
-        loadingAnimationView.loopMode = .loop
-        loadingAnimationView.animationSpeed = 0.65
-        loadingAnimationView.play()
+        
+        progressBar.animateIndeterminate(duration: 4.0, speed: 1.5)
     }
 
     func localize() {
-        appTitleLabel.text = Strings.Label.phoneNumberLocator
+        // TODO: - Localize Here
+        messageLabel.text = Strings.Label.phoneNumberLocator
     }
 
     func checkLanguageStatus() {
@@ -73,7 +71,6 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
     }
     
     func animateForTwoSeconds() {
-        loadingAnimationView.isHidden = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: {
             self.checkLanguageStatus()
         })
@@ -83,6 +80,6 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
         UserDefaults.standard.set(true, forKey: "isTermAccecpted")
         UserDefaults.standard.synchronize()
         self.checkLanguageStatus()
-        self.loadingAnimationView.stop() //This is important
+//        self.loadingAnimationView.stop() //This is important
     }
 }
