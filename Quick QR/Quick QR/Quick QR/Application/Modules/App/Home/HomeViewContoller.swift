@@ -1,13 +1,272 @@
+//
+//  HomeViewController.swift
+//
+//  Created by Haider Rathore on 27/08/2025.
+//
 
-
-import Foundation
 import UIKit
 
-class HomeViewContoller: UIViewController {
+// MARK: - QR Code Types Enum
+enum QRCodeType: CaseIterable {
+    case wifi, phone, text, contact, email, website, location, events
+    
+    var title: String {
+        switch self {
+        case .wifi: return "Wi-Fi"
+        case .phone: return "Phone"
+        case .text: return "Text"
+        case .contact: return "Contact"
+        case .email: return "Email"
+        case .website: return "Website"
+        case .location: return "Location"
+        case .events: return "Events"
+        }
+    }
+    
+    var icon: UIImage? {
+        switch self {
+        case .wifi: return UIImage(named: "wifi-icon")
+        case .phone: return UIImage(named: "phone-icon")
+        case .text: return UIImage(named: "text-icon")
+        case .contact: return UIImage(named: "contact-icon")
+        case .email: return UIImage(named: "email-icon")
+        case .website: return UIImage(named: "website-icon")
+        case .location: return UIImage(named: "location-icon")
+        case .events: return UIImage(named: "events-icon")
+        }
+    }
+}
+
+// MARK: - Social Media QR Types Enum
+enum SocialQRCodeType: CaseIterable {
+    case tiktok, instagram, facebook, x, whatsapp, youtube, spotify, viber
+    
+    var title: String {
+        switch self {
+        case .tiktok: return "TikTok"
+        case .instagram: return "Instagram"
+        case .facebook: return "Facebook"
+        case .x: return "X"
+        case .whatsapp: return "WhatsApp"
+        case .youtube: return "Youtube"
+        case .spotify: return "Spotify"
+        case .viber: return "Viber"
+        }
+    }
+    
+    var icon: UIImage? {
+        switch self {
+        case .tiktok: return UIImage(named: "tiktok-icon")
+        case .instagram: return UIImage(named: "insta-icon")
+        case .facebook: return UIImage(named: "facebook-icon")
+        case .x: return UIImage(named: "x-icon")
+        case .whatsapp: return UIImage(named: "whatsapp-icon")
+        case .youtube: return UIImage(named: "yt-icon")
+        case .spotify: return UIImage(named: "spotify-icon")
+        case .viber: return UIImage(named: "viber-icon")
+        }
+    }
+}
+
+// MARK: - CollectionView Cell
+class QRTypeCell: UICollectionViewCell {
+    static let identifier = "QRTypeCell"
+    
+    private let iconView: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFit
+        iv.tintColor = .black
+        return iv
+    }()
+    
+    private let titleLabel: UILabel = {
+        let lbl = UILabel()
+        lbl.textAlignment = .center
+        lbl.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        lbl.textColor = .black
+        return lbl
+    }()
+    
+    private let boxView: UIView = {
+        let v = UIView()
+        v.layer.cornerRadius = 11
+        v.layer.borderWidth = 1
+        v.layer.borderColor = UIColor.appBorderDark.cgColor
+        return v
+    }()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        contentView.addSubview(boxView)
+        contentView.addSubview(titleLabel)
+        boxView.addSubview(iconView)
+        
+        boxView.translatesAutoresizingMaskIntoConstraints = false
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            // Box constraints
+            boxView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            boxView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            boxView.widthAnchor.constraint(equalToConstant: 60),
+            boxView.heightAnchor.constraint(equalToConstant: 60),
+            
+            // Icon inside box
+            iconView.centerXAnchor.constraint(equalTo: boxView.centerXAnchor),
+            iconView.centerYAnchor.constraint(equalTo: boxView.centerYAnchor),
+            iconView.widthAnchor.constraint(equalToConstant: 28),
+            iconView.heightAnchor.constraint(equalToConstant: 28),
+            
+            // Title below box
+            titleLabel.topAnchor.constraint(equalTo: boxView.bottomAnchor, constant: 6),
+            titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor),
+            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor)
+        ])
+    }
+    
+    required init?(coder: NSCoder) { fatalError() }
+    
+    func configure(title: String, icon: UIImage?) {
+        titleLabel.text = title
+        iconView.image = icon
+    }
+}
+
+// MARK: - Header View
+class HeaderView: UICollectionReusableView {
+    static let identifier = "HeaderView"
+    
+    private let label: UILabel = {
+        let lbl = UILabel()
+        lbl.font = UIFont.boldSystemFont(ofSize: 16)
+        lbl.textColor = .black
+        return lbl
+    }()
+    
+    var title: String? {
+        didSet { label.text = title }
+    }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(label)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
+            label.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4)
+        ])
+    }
+    
+    required init?(coder: NSCoder) { fatalError() }
+}
+
+// MARK: - HomeViewController
+class HomeViewController: UIViewController {
+    
+    private let segment: UISegmentedControl = {
+        let seg = UISegmentedControl(items: ["QR Code", "Bar Code"])
+        seg.selectedSegmentIndex = 0
+        seg.selectedSegmentTintColor = .appPrimary
+        seg.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
+        seg.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
+        return seg
+    }()
+    
+    private var collectionView: UICollectionView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
+        setupUI()
+    }
+    
+    private func setupUI() {
+        // Add Segment
+        view.addSubview(segment)
+        segment.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            segment.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            segment.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            segment.widthAnchor.constraint(equalToConstant: 250)
+        ])
         
-        view.backgroundColor = .purple
+        // Setup CollectionView
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumInteritemSpacing = 16
+        layout.minimumLineSpacing = 20
+        layout.headerReferenceSize = CGSize(width: view.frame.width, height: 40)
+        layout.sectionInset = UIEdgeInsets(top: 12, left: 16, bottom: 20, right: 16)
+        
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.register(QRTypeCell.self, forCellWithReuseIdentifier: QRTypeCell.identifier)
+        collectionView.register(HeaderView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: HeaderView.identifier)
+        
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        
+        view.addSubview(collectionView)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: segment.bottomAnchor, constant: 20),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+}
+
+// MARK: - CollectionView DataSource + Delegate
+extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return section == 0 ? QRCodeType.allCases.count : SocialQRCodeType.allCases.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: QRTypeCell.identifier, for: indexPath) as? QRTypeCell else {
+            return UICollectionViewCell()
+        }
+        
+        if indexPath.section == 0 {
+            let type = QRCodeType.allCases[indexPath.item]
+            cell.configure(title: type.title, icon: type.icon)
+        } else {
+            let type = SocialQRCodeType.allCases[indexPath.item]
+            cell.configure(title: type.title, icon: type.icon)
+        }
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        viewForSupplementaryElementOfKind kind: String,
+                        at indexPath: IndexPath) -> UICollectionReusableView {
+        guard let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind, withReuseIdentifier: HeaderView.identifier, for: indexPath) as? HeaderView else {
+            return UICollectionReusableView()
+        }
+        header.title = indexPath.section == 0 ? "Choose QR Code Type" : "Choose Social Media QR Code Type"
+        return header
+    }
+    
+    // Adjust cell size to fit 4 per row
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let totalSpacing: CGFloat = 16 * 3 + 16 * 2 // (3 interitem gaps + left+right insets)
+        let availableWidth = collectionView.bounds.width - totalSpacing
+        let width = availableWidth / 4
+        return CGSize(width: width, height: 90) // 60 box + 6 gap + label
     }
 }
