@@ -170,9 +170,24 @@ class HomeViewController: UIViewController {
     private let segment: UISegmentedControl = {
         let seg = UISegmentedControl(items: ["QR Code", "Bar Code"])
         seg.selectedSegmentIndex = 0
-        seg.selectedSegmentTintColor = .appPrimary
-        seg.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
-        seg.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .normal)
+        
+        // Style the segmented control to match the reference
+        seg.backgroundColor = UIColor.systemGray6
+        seg.selectedSegmentTintColor = UIColor.systemBlue
+        seg.layer.cornerRadius = 22
+        seg.layer.masksToBounds = true
+        
+        // Text attributes
+        seg.setTitleTextAttributes([
+            .foregroundColor: UIColor.white,
+            .font: UIFont.systemFont(ofSize: 16, weight: .medium)
+        ], for: .selected)
+        
+        seg.setTitleTextAttributes([
+            .foregroundColor: UIColor.systemGray,
+            .font: UIFont.systemFont(ofSize: 16, weight: .medium)
+        ], for: .normal)
+        
         return seg
     }()
     
@@ -182,6 +197,15 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupUI()
+        setupNavigationBar()
+    }
+    
+    private func setupNavigationBar() {
+        title = "Choose Type"
+        navigationController?.navigationBar.titleTextAttributes = [
+            .foregroundColor: UIColor.black,
+            .font: UIFont.systemFont(ofSize: 18, weight: .semibold)
+        ]
     }
     
     private func setupUI() {
@@ -191,7 +215,8 @@ class HomeViewController: UIViewController {
         NSLayoutConstraint.activate([
             segment.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             segment.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            segment.widthAnchor.constraint(equalToConstant: 250)
+            segment.widthAnchor.constraint(equalToConstant: 200),
+            segment.heightAnchor.constraint(equalToConstant: 44)
         ])
         
         // Setup CollectionView
@@ -219,6 +244,93 @@ class HomeViewController: UIViewController {
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+}
+
+// MARK: - QR Code Type Methods
+extension HomeViewController {
+    
+    // MARK: - Regular QR Code Methods
+    @objc private func handleWiFiQRCode() {
+        print("Wi-Fi QR Code selected")
+        // Navigate to Wi-Fi QR code creation screen
+        // Example: navigationController?.pushViewController(WiFiQRViewController(), animated: true)
+    }
+    
+    @objc private func handlePhoneQRCode() {
+        print("Phone QR Code selected")
+        // Navigate to phone QR code creation screen
+    }
+    
+    @objc private func handleTextQRCode() {
+        print("Text QR Code selected")
+        // Navigate to text QR code creation screen
+    }
+    
+    @objc private func handleContactQRCode() {
+        print("Contact QR Code selected")
+        // Navigate to contact QR code creation screen
+    }
+    
+    @objc private func handleEmailQRCode() {
+        print("Email QR Code selected")
+        // Navigate to email QR code creation screen
+    }
+    
+    @objc private func handleWebsiteQRCode() {
+        print("Website QR Code selected")
+        // Navigate to website QR code creation screen
+    }
+    
+    @objc private func handleLocationQRCode() {
+        print("Location QR Code selected")
+        // Navigate to location QR code creation screen
+    }
+    
+    @objc private func handleEventsQRCode() {
+        print("Events QR Code selected")
+        // Navigate to events QR code creation screen
+    }
+    
+    // MARK: - Social Media QR Code Methods
+    @objc private func handleTikTokQRCode() {
+        print("TikTok QR Code selected")
+        // Navigate to TikTok QR code creation screen
+    }
+    
+    @objc private func handleInstagramQRCode() {
+        print("Instagram QR Code selected")
+        // Navigate to Instagram QR code creation screen
+    }
+    
+    @objc private func handleFacebookQRCode() {
+        print("Facebook QR Code selected")
+        // Navigate to Facebook QR code creation screen
+    }
+    
+    @objc private func handleXQRCode() {
+        print("X QR Code selected")
+        // Navigate to X QR code creation screen
+    }
+    
+    @objc private func handleWhatsAppQRCode() {
+        print("WhatsApp QR Code selected")
+        // Navigate to WhatsApp QR code creation screen
+    }
+    
+    @objc private func handleYouTubeQRCode() {
+        print("YouTube QR Code selected")
+        // Navigate to YouTube QR code creation screen
+    }
+    
+    @objc private func handleSpotifyQRCode() {
+        print("Spotify QR Code selected")
+        // Navigate to Spotify QR code creation screen
+    }
+    
+    @objc private func handleViberQRCode() {
+        print("Viber QR Code selected")
+        // Navigate to Viber QR code creation screen
     }
 }
 
@@ -258,6 +370,55 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         }
         header.title = indexPath.section == 0 ? "Choose QR Code Type" : "Choose Social Media QR Code Type"
         return header
+    }
+    
+    // MARK: - Cell Selection
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        
+        if indexPath.section == 0 {
+            // Regular QR Code Types
+            let type = QRCodeType.allCases[indexPath.item]
+            switch type {
+            case .wifi:
+                handleWiFiQRCode()
+            case .phone:
+                handlePhoneQRCode()
+            case .text:
+                handleTextQRCode()
+            case .contact:
+                handleContactQRCode()
+            case .email:
+                handleEmailQRCode()
+            case .website:
+                handleWebsiteQRCode()
+            case .location:
+                handleLocationQRCode()
+            case .events:
+                handleEventsQRCode()
+            }
+        } else {
+            // Social Media QR Code Types
+            let type = SocialQRCodeType.allCases[indexPath.item]
+            switch type {
+            case .tiktok:
+                handleTikTokQRCode()
+            case .instagram:
+                handleInstagramQRCode()
+            case .facebook:
+                handleFacebookQRCode()
+            case .x:
+                handleXQRCode()
+            case .whatsapp:
+                handleWhatsAppQRCode()
+            case .youtube:
+                handleYouTubeQRCode()
+            case .spotify:
+                handleSpotifyQRCode()
+            case .viber:
+                handleViberQRCode()
+            }
+        }
     }
     
     // Adjust cell size to fit 4 per row
