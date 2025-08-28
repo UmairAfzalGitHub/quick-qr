@@ -68,6 +68,41 @@ enum SocialQRCodeType: CaseIterable {
     }
 }
 
+// MARK: - Bar Code Types Enum
+enum BarCodeType: CaseIterable {
+    case isbn, ean8, upce, ean13, upca, code39, code93, code128, itf, pdf417
+    
+    var title: String {
+        switch self {
+        case .isbn: return "EAN-8"
+        case .ean8: return "EAN-13"
+        case .upce: return "UPC-A"
+        case .ean13: return "UPC-E"
+        case .upca: return "Code 39"
+        case .code39: return "Code 93"
+        case .code93: return "Code 128"
+        case .code128: return "PDF 417"
+        case .itf: return "PDF 417"
+        case .pdf417: return "PDF 417"
+        }
+    }
+    
+    var icon: UIImage? {
+        switch self {
+        case .isbn: return UIImage(named: "isbn-icon")
+        case .ean8: return UIImage(named: "ean8-icon")
+        case .upce: return UIImage(named: "upce-icon")
+        case .ean13: return UIImage(named: "ean13-icon")
+        case .upca: return UIImage(named: "upca-icon")
+        case .code39: return UIImage(named: "code39-icon")
+        case .code93: return UIImage(named: "code93-icon")
+        case .code128: return UIImage(named: "code128-icon")
+        case .itf: return UIImage(named: "itf-icon")
+        case .pdf417: return UIImage(named: "pdf417-icon")
+        }
+    }
+}
+
 // MARK: - CollectionView Cell
 class QRTypeCell: UICollectionViewCell {
     static let identifier = "QRTypeCell"
@@ -174,7 +209,7 @@ class HomeViewController: UIViewController {
         // Style the segmented control to match the reference
         seg.backgroundColor = UIColor.systemGray6
         seg.selectedSegmentTintColor = UIColor.systemBlue
-        seg.layer.cornerRadius = 22
+        seg.layer.cornerRadius = 27
         seg.layer.masksToBounds = true
         
         // Text attributes
@@ -192,6 +227,11 @@ class HomeViewController: UIViewController {
     }()
     
     private var collectionView: UICollectionView!
+    
+    // Track current segment state
+    private var isQRCodeSelected: Bool {
+        return segment.selectedSegmentIndex == 0
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -212,11 +252,15 @@ class HomeViewController: UIViewController {
         // Add Segment
         view.addSubview(segment)
         segment.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Add target for segment control
+        segment.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
+        
         NSLayoutConstraint.activate([
             segment.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             segment.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             segment.widthAnchor.constraint(equalToConstant: 200),
-            segment.heightAnchor.constraint(equalToConstant: 44)
+            segment.heightAnchor.constraint(equalToConstant: 54)
         ])
         
         // Setup CollectionView
@@ -244,6 +288,11 @@ class HomeViewController: UIViewController {
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    @objc private func segmentChanged(_ sender: UISegmentedControl) {
+        // Reload collection view when segment changes
+        collectionView.reloadData()
     }
 }
 
@@ -332,16 +381,61 @@ extension HomeViewController {
         print("Viber QR Code selected")
         // Navigate to Viber QR code creation screen
     }
+    
+    // MARK: - Bar Code Methods
+    @objc private func handleEAN8BarCode() {
+        print("EAN-8 Bar Code selected")
+        // Navigate to EAN-8 bar code creation screen
+    }
+    
+    @objc private func handleEAN13BarCode() {
+        print("EAN-13 Bar Code selected")
+        // Navigate to EAN-13 bar code creation screen
+    }
+    
+    @objc private func handleUPCABarCode() {
+        print("UPC-A Bar Code selected")
+        // Navigate to UPC-A bar code creation screen
+    }
+    
+    @objc private func handleUPCEBarCode() {
+        print("UPC-E Bar Code selected")
+        // Navigate to UPC-E bar code creation screen
+    }
+    
+    @objc private func handleCode39BarCode() {
+        print("Code 39 Bar Code selected")
+        // Navigate to Code 39 bar code creation screen
+    }
+    
+    @objc private func handleCode93BarCode() {
+        print("Code 93 Bar Code selected")
+        // Navigate to Code 93 bar code creation screen
+    }
+    
+    @objc private func handleCode128BarCode() {
+        print("Code 128 Bar Code selected")
+        // Navigate to Code 128 bar code creation screen
+    }
+    
+    @objc private func handlePDF417BarCode() {
+        print("PDF 417 Bar Code selected")
+        // Navigate to PDF 417 bar code creation screen
+    }
 }
 
 // MARK: - CollectionView DataSource + Delegate
 extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 2
+        return isQRCodeSelected ? 2 : 1 // QR Code has 2 sections, Bar Code has 1
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return section == 0 ? QRCodeType.allCases.count : SocialQRCodeType.allCases.count
+        if isQRCodeSelected {
+            return section == 0 ? QRCodeType.allCases.count : SocialQRCodeType.allCases.count
+        } else {
+            return BarCodeType.allCases.count
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView,
@@ -351,11 +445,16 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
             return UICollectionViewCell()
         }
         
-        if indexPath.section == 0 {
-            let type = QRCodeType.allCases[indexPath.item]
-            cell.configure(title: type.title, icon: type.icon)
+        if isQRCodeSelected {
+            if indexPath.section == 0 {
+                let type = QRCodeType.allCases[indexPath.item]
+                cell.configure(title: type.title, icon: type.icon)
+            } else {
+                let type = SocialQRCodeType.allCases[indexPath.item]
+                cell.configure(title: type.title, icon: type.icon)
+            }
         } else {
-            let type = SocialQRCodeType.allCases[indexPath.item]
+            let type = BarCodeType.allCases[indexPath.item]
             cell.configure(title: type.title, icon: type.icon)
         }
         return cell
@@ -368,7 +467,12 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
             ofKind: kind, withReuseIdentifier: HeaderView.identifier, for: indexPath) as? HeaderView else {
             return UICollectionReusableView()
         }
-        header.title = indexPath.section == 0 ? "Choose QR Code Type" : "Choose Social Media QR Code Type"
+        
+        if isQRCodeSelected {
+            header.title = indexPath.section == 0 ? "Choose QR Code Type" : "Choose Social Media QR Code Type"
+        } else {
+            header.title = "Choose Bar Code Type"
+        }
         return header
     }
     
@@ -376,47 +480,71 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         
-        if indexPath.section == 0 {
-            // Regular QR Code Types
-            let type = QRCodeType.allCases[indexPath.item]
-            switch type {
-            case .wifi:
-                handleWiFiQRCode()
-            case .phone:
-                handlePhoneQRCode()
-            case .text:
-                handleTextQRCode()
-            case .contact:
-                handleContactQRCode()
-            case .email:
-                handleEmailQRCode()
-            case .website:
-                handleWebsiteQRCode()
-            case .location:
-                handleLocationQRCode()
-            case .events:
-                handleEventsQRCode()
+        if isQRCodeSelected {
+            if indexPath.section == 0 {
+                // Regular QR Code Types
+                let type = QRCodeType.allCases[indexPath.item]
+                switch type {
+                case .wifi:
+                    handleWiFiQRCode()
+                case .phone:
+                    handlePhoneQRCode()
+                case .text:
+                    handleTextQRCode()
+                case .contact:
+                    handleContactQRCode()
+                case .email:
+                    handleEmailQRCode()
+                case .website:
+                    handleWebsiteQRCode()
+                case .location:
+                    handleLocationQRCode()
+                case .events:
+                    handleEventsQRCode()
+                }
+            } else {
+                // Social Media QR Code Types
+                let type = SocialQRCodeType.allCases[indexPath.item]
+                switch type {
+                case .tiktok:
+                    handleTikTokQRCode()
+                case .instagram:
+                    handleInstagramQRCode()
+                case .facebook:
+                    handleFacebookQRCode()
+                case .x:
+                    handleXQRCode()
+                case .whatsapp:
+                    handleWhatsAppQRCode()
+                case .youtube:
+                    handleYouTubeQRCode()
+                case .spotify:
+                    handleSpotifyQRCode()
+                case .viber:
+                    handleViberQRCode()
+                }
             }
         } else {
-            // Social Media QR Code Types
-            let type = SocialQRCodeType.allCases[indexPath.item]
+            // Bar Code Types
+            let type = BarCodeType.allCases[indexPath.item]
             switch type {
-            case .tiktok:
-                handleTikTokQRCode()
-            case .instagram:
-                handleInstagramQRCode()
-            case .facebook:
-                handleFacebookQRCode()
-            case .x:
-                handleXQRCode()
-            case .whatsapp:
-                handleWhatsAppQRCode()
-            case .youtube:
-                handleYouTubeQRCode()
-            case .spotify:
-                handleSpotifyQRCode()
-            case .viber:
-                handleViberQRCode()
+            case .ean8:
+                handleEAN8BarCode()
+            case .ean13:
+                handleEAN13BarCode()
+            case .upca:
+                handleUPCABarCode()
+            case .upce:
+                handleUPCEBarCode()
+            case .code39:
+                handleCode39BarCode()
+            case .code93:
+                handleCode93BarCode()
+            case .code128:
+                handleCode128BarCode()
+            case .pdf417:
+                handlePDF417BarCode()
+                
             }
         }
     }
