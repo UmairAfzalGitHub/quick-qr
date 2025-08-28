@@ -36,8 +36,6 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
 
     override func setup() {
         super.setup()
-        
-        progressBar.animateIndeterminate(duration: 4.0, speed: 1.5)
     }
 
     func localize() {
@@ -48,7 +46,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
     func checkLanguageStatus() {
         let onBoardingStatus = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
         if onBoardingStatus {
-            AdManager.shared.loadInterstitialAd(id: AdMobConfig.interstitial) { isLoaded, interstitial in
+//            AdManager.shared.loadInterstitialAd(id: AdMobConfig.interstitial) { isLoaded, interstitial in
 //                let nextController = UINavigationController(rootViewController: HomeViewController())
 //                nextController.isNavigationBarHidden = true
 //                if AdManager.shared.splashInterstitial {
@@ -57,23 +55,24 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
 //                AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
 //                    UIApplication.shared.updateRootViewController(to: nextController)
 //                }
-            }
+//            }
         } else {
-            AdManager.shared.loadNativeAd(adId: AdMobConfig.native,
-                                          from: self) { nativeAd in
-//                let controller = LanguageViewController(viewMode: .main,
-//                                                        intent: .onboarding,
-//                                                        nativeAd: nativeAd)
-//                let navController = UINavigationController(rootViewController: controller)
-//                UIApplication.shared.updateRootViewController(to: navController)
-            }
+            let controller = OnboardingViewController()
+            let navController = UINavigationController(rootViewController: controller)
+            navController.isNavigationBarHidden = true
+            UIApplication.shared.updateRootViewController(to: navController)
         }
     }
     
     func animateForTwoSeconds() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: {
-            self.checkLanguageStatus()
-        })
+        let onBoardingStatus = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
+        if onBoardingStatus == false {
+            AdManager.shared.preloadNativeAds()
+        }
+
+        progressBar.animateIndeterminate(duration: 4.0, speed: 1.5) {[weak self] in
+            self?.checkLanguageStatus()
+        }
     }
     
     @IBAction func didTapActionButton(_ sender: Any) {

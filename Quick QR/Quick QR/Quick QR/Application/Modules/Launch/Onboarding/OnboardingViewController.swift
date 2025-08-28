@@ -8,12 +8,10 @@ class OnboardingViewController: UIViewController,
                                 UICollectionViewDataSource,
                                 UICollectionViewDelegateFlowLayout {
     
-    @IBOutlet weak var nextArrowImage: UIImageView!
-    @IBOutlet weak var loaderView: UIActivityIndicatorView!
+    @IBOutlet weak var nextButton: AppButtonView!
     @IBOutlet weak var nativeAdParentView: UIView!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var pageControlCustom: CustomPageControl!
-    @IBOutlet weak var nextButton: UIButton!
 
     private var hasShownReviewPrompt = false
     private var nativeAdView: NativeAdView!
@@ -21,39 +19,67 @@ class OnboardingViewController: UIViewController,
 
     var dataSource: [OnBoarding] = [
         OnBoarding(image: UIImage(named: "onboard1")!, heading: Strings.Label.numberLocator, description: Strings.Label.effortlessly),
-        OnBoarding(image: UIImage(named: "onboard2")!, heading: Strings.Label.callerIdentification, description: Strings.Label.uncoverCallersIdentity),
-        OnBoarding(image: UIImage(named: "onboard3")!, heading: Strings.Label.searchNumbers, description: Strings.Label.noMoreGuesswork),
-        OnBoarding(image: UIImage(named: "onboard4")!, heading: Strings.Label.yourReviewMatters, description: Strings.Label.weAreConstantlyWorking)
+        OnBoarding(image: UIImage(named: "onboard2")!, heading: Strings.Label.numberLocator, description: Strings.Label.effortlessly),
+        OnBoarding(image: UIImage(named: "onboard3")!, heading: Strings.Label.numberLocator, description: Strings.Label.effortlessly)
     ]
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
+        
+        nativeAd = AdManager.shared.getNativeAd()
         if let googleAd = nativeAd {
             showGoogleNativeAd(nativeAd: googleAd)
         }
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        // Update flow layout item size to match collection view bounds
+        if let flowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            flowLayout.itemSize = collectionView.bounds.size
+            collectionView.collectionViewLayout.invalidateLayout()
+        }
+    }
+    
     //MARK: - Private Methods
     func setup() {
+        // First set up the page control with the full count
+        pageControlCustom.numberOfPages = 3
+        
         if AdManager.shared.onboardingReviewEnabled == false {
-            dataSource.removeLast()
+//            dataSource.removeLast()
+            // Update page control AFTER modifying the data source
+            //pageControlCustom.numberOfPages = dataSource.count
         }
 
         if AdManager.shared.splashInterstitial {
             AdManager.shared.loadInterstitialAd(id: AdMobConfig.interstitial) { isLoaded, interstitial in}
         }
+        
+        // Configure collection view layout
+        if let flowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            flowLayout.scrollDirection = .horizontal
+            flowLayout.minimumLineSpacing = 0
+            flowLayout.minimumInteritemSpacing = 0
+            // This ensures cells are properly sized
+            flowLayout.estimatedItemSize = .zero
+            flowLayout.itemSize = collectionView.frame.size
+        }
+        
+        collectionView.isPagingEnabled = true // Enable paging for smooth scrolling
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.bounces = false // Prevent bouncing at edges
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.isScrollEnabled = false
+        collectionView.reloadData()
 
-        pageControlCustom.numberOfPages = dataSource.count
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapNextButton))
+        nextButton.addGestureRecognizer(tapGestureRecognizer)
+        nextButton.configure(with: .primary(title: "Next", image: nil))
         self.navigationController?.navigationBar.isHidden = true
-        nextButton.layer.cornerRadius = nextButton.frame.width/2
-        nextButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
-        
-        loaderView.isHidden = true
-        loaderView.startAnimating()
     }
     
     func finishOnboarding() {
@@ -65,14 +91,14 @@ class OnboardingViewController: UIViewController,
                     AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
                 }
                 AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
-//                    let navController = UINavigationController(rootViewController:  HomeViewController())
-//                    navController.isNavigationBarHidden = true
-//                    UIApplication.shared.updateRootViewController(to: navController)
+                    let navController = UINavigationController(rootViewController:  HomeViewController())
+                    navController.isNavigationBarHidden = true
+                    UIApplication.shared.updateRootViewController(to: navController)
                 }
             } else {
-//                let navController = UINavigationController(rootViewController:  HomeViewController())
-//                navController.isNavigationBarHidden = true
-//                UIApplication.shared.updateRootViewController(to: navController)
+                let navController = UINavigationController(rootViewController:  HomeViewController())
+                navController.isNavigationBarHidden = true
+                UIApplication.shared.updateRootViewController(to: navController)
             }
         } else {
             requestAppStoreReview()
@@ -108,7 +134,7 @@ class OnboardingViewController: UIViewController,
     
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
-        let nibView = Bundle.main.loadNibNamed("NativeAdView", owner: nil, options: nil)?.first
+        let nibView = Bundle.main.loadNibNamed("OnBoardingNativeAdView", owner: nil, options: nil)?.first
         guard let nativeAdView = nibView as? NativeAdView else { return }
         setAdView(nativeAdView)
 
@@ -170,46 +196,34 @@ class OnboardingViewController: UIViewController,
             return
         }
         
-        collectionView.layoutIfNeeded() // ensure frames are up-to-date
+        // Calculate the target X offset based on page width
+        let pageWidth = collectionView.frame.width
+        let targetX = CGFloat(nextIndex) * pageWidth
         
-        let indexPath = IndexPath(item: nextIndex, section: 0)
+        // Use setContentOffset with animated:true to maintain vertical position
+        collectionView.setContentOffset(CGPoint(x: targetX, y: 0), animated: true)
         
-        // Try to read the exact attributes frame
-        if let attributes = collectionView.layoutAttributesForItem(at: indexPath) {
-            // attributes.frame.origin.x is relative to content; to include contentInset properly:
-            let targetX = attributes.frame.origin.x - collectionView.contentInset.left
-            collectionView.setContentOffset(CGPoint(x: round(targetX), y: 0), animated: true)
-        } else {
-            // fallback
-            collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
-        }
+        // Update page control
+        pageControlCustom.currentPage = nextIndex
     }
     
     //MARK: - IBActions
-    @IBAction func didTapNextButton(_ sender: Any) {
+    @objc func didTapNextButton() {
         let currentIndex = getCurrentPageIndex()
 
           switch currentIndex {
-          case 0, 1, 2:
-              // Load ad first, then scroll ONCE
-              loaderView.isHidden = false
-              nextArrowImage.isHidden = true
-              loadNativeAd { [weak self] googleAd in
-                  guard let self = self else { return }
+          case 0, 1:
+              if let googleAd = AdManager.shared.getNativeAd(stopPrefetch: true) {
                   self.nativeAd = googleAd
                   self.showGoogleNativeAd(nativeAd: googleAd)
-                  self.scrollToNextItem()
-                  
-                  loaderView.isHidden = true
-                  nextArrowImage.isHidden = false
               }
-
-          case 3:
-              if hasShownReviewPrompt {
+              self.scrollToNextItem()
+          case 2:
+//              if hasShownReviewPrompt {
                   finishOnboarding()
-              } else {
-                  requestAppStoreReview()
-              }
+//              } else {
+//                  requestAppStoreReview()
+//              }
 
           default:
               scrollToNextItem()
@@ -232,7 +246,7 @@ class OnboardingViewController: UIViewController,
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - 200)
+        return collectionView.frame.size
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
@@ -244,6 +258,11 @@ class OnboardingViewController: UIViewController,
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // Force Y offset to always be 0 to prevent vertical shifting
+        if scrollView.contentOffset.y != 0 {
+            scrollView.contentOffset.y = 0
+        }
+        
         let visibleRect = CGRect(origin: collectionView.contentOffset, size: collectionView.bounds.size)
         guard let visibleIndexPath = collectionView.indexPathForItem(at: CGPoint(x: visibleRect.midX, y: visibleRect.midY)) else {
             return

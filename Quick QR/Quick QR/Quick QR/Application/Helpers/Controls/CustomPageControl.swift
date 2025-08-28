@@ -16,10 +16,10 @@ class CustomPageControl: UIView {
         }
     }
     
-    var dotSize: CGFloat = 8.0
+    var dotSize: CGSize = CGSize(width: 20, height: 8.0)
     var spacing: CGFloat = 3.0
-    var activeColor: UIColor = .red
-    var inactiveColor: UIColor = .green
+    var activeColor: UIColor = .appPrimary
+    var inactiveColor: UIColor = .appBorderDark
     
     private let stackView = UIStackView()
     
@@ -60,8 +60,8 @@ class CustomPageControl: UIView {
             stackView.addArrangedSubview(dot)
             
             NSLayoutConstraint.activate([
-                dot.widthAnchor.constraint(equalToConstant: dotSize),
-                dot.heightAnchor.constraint(equalToConstant: dotSize)
+                dot.widthAnchor.constraint(equalToConstant: dotSize.width),
+                dot.heightAnchor.constraint(equalToConstant: dotSize.height)
             ])
         }
         
@@ -72,14 +72,14 @@ class CustomPageControl: UIView {
         for (index, view) in stackView.arrangedSubviews.enumerated() {
             if let dot = view as? UIView {
                 dot.backgroundColor = index == currentPage ? activeColor : inactiveColor
-                let newWidth = index == currentPage ? dotSize * 2.7 : dotSize // Width of Active Dot
-                dot.layer.cornerRadius = dotSize / 2
+                dot.layer.cornerRadius = dotSize.height / 2
                 
+                // Keep all dots the same size
                 dot.constraints.forEach { constraint in
                     if constraint.firstAttribute == .width {
-                        constraint.constant = newWidth
+                        constraint.constant = dotSize.width
                     } else if constraint.firstAttribute == .height {
-                        constraint.constant = dotSize
+                        constraint.constant = dotSize.height
                     }
                 }
             }
