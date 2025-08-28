@@ -207,12 +207,12 @@ class HomeViewController: UIViewController {
         let control = BetterSegmentedControl(
             frame: CGRect.zero,
             segments: LabelSegment.segments(withTitles: ["QR Code", "Bar Code"],
-                                          normalFont: UIFont.systemFont(ofSize: 16, weight: .medium),
+                                            normalFont: UIFont.systemFont(ofSize: 16, weight: .semibold),
                                           normalTextColor: UIColor.systemGray,
-                                          selectedFont: UIFont.systemFont(ofSize: 16, weight: .medium),
+                                            selectedFont: UIFont.systemFont(ofSize: 16, weight: .semibold),
                                           selectedTextColor: UIColor.white),
-            options: [.backgroundColor(UIColor.systemGray6),
-                     .indicatorViewBackgroundColor(UIColor.systemBlue),
+            options: [.backgroundColor(.appSecondaryBackground),
+                      .indicatorViewBackgroundColor(.appPrimary),
                      .cornerRadius(27),
                      .animationSpringDamping(1.0),
                      .animationDuration(0.3)])
@@ -256,7 +256,6 @@ class HomeViewController: UIViewController {
             betterSegmentedControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             betterSegmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 25),
             betterSegmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -25),
-//            betterSegmentedControl.widthAnchor.constraint(equalToConstant: 200),
             betterSegmentedControl.heightAnchor.constraint(equalToConstant: 54)
         ])
         
@@ -281,8 +280,8 @@ class HomeViewController: UIViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: betterSegmentedControl.bottomAnchor, constant: 20),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
