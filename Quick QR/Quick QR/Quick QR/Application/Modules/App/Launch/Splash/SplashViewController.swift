@@ -47,7 +47,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
         let onBoardingStatus = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
         if onBoardingStatus {
             AdManager.shared.loadInterstitialAd(id: AdMobConfig.interstitial) { isLoaded, interstitial in
-                let nextController = UINavigationController(rootViewController: HomeViewController())
+                let nextController = UINavigationController(rootViewController: TabBarController())
                 if AdManager.shared.splashInterstitial {
                     AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
                 }

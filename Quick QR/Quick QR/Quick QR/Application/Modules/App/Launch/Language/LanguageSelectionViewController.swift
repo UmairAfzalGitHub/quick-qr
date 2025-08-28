@@ -185,11 +185,11 @@ class LanguageSelectionViewController: UIViewController {
                 AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
             }
             AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
-                let navController = UINavigationController(rootViewController:  HomeViewController())
+                let navController = UINavigationController(rootViewController:  TabBarController())
                 UIApplication.shared.updateRootViewController(to: navController)
             }
         } else {
-            let navController = UINavigationController(rootViewController:  HomeViewController())
+            let navController = UINavigationController(rootViewController:  TabBarController())
             UIApplication.shared.updateRootViewController(to: navController)
         }
     }
