@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1DCE38A82E60A1F800413689 /* BetterSegmentedControl in Frameworks */ = {isa = PBXBuildFile; productRef = 1DCE38A72E60A1F800413689 /* BetterSegmentedControl */; };
 		6815AED02E3E0C2A008476CF /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 6815AECF2E3E0C2A008476CF /* Lottie */; };
 		6815AED32E3E0D03008476CF /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6815AED22E3E0D03008476CF /* FirebaseAnalytics */; };
 		6815AED62E3E0D4E008476CF /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 6815AED52E3E0D4E008476CF /* GoogleMobileAds */; };
@@ -49,6 +50,7 @@
 				6815AED02E3E0C2A008476CF /* Lottie in Frameworks */,
 				6815AED32E3E0D03008476CF /* FirebaseAnalytics in Frameworks */,
 				68413B8D2E3E11E800E05463 /* FirebaseRemoteConfig in Frameworks */,
+				1DCE38A82E60A1F800413689 /* BetterSegmentedControl in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +98,7 @@
 				6815AED52E3E0D4E008476CF /* GoogleMobileAds */,
 				68413B842E3E0FFF00E05463 /* IOS Helpers */,
 				68413B8C2E3E11E800E05463 /* FirebaseRemoteConfig */,
+				1DCE38A72E60A1F800413689 /* BetterSegmentedControl */,
 			);
 			productName = ProductBoilerPlate;
 			productReference = 6815AD892E3E0670008476CF /* Quick QR.app */;
@@ -130,6 +133,7 @@
 				6815AED12E3E0D03008476CF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				6815AED42E3E0D4E008476CF /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 				68413B832E3E0FFF00E05463 /* XCRemoteSwiftPackageReference "IOS-Helpers" */,
+				1DCE38A62E60A1F800413689 /* XCRemoteSwiftPackageReference "BetterSegmentedControl" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6815AD8A2E3E0670008476CF /* Products */;
@@ -365,6 +369,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		1DCE38A62E60A1F800413689 /* XCRemoteSwiftPackageReference "BetterSegmentedControl" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gmarm/BetterSegmentedControl";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.1;
+			};
+		};
 		6815AECE2E3E0C2A008476CF /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/airbnb/lottie-ios.git";
@@ -400,6 +412,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1DCE38A72E60A1F800413689 /* BetterSegmentedControl */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1DCE38A62E60A1F800413689 /* XCRemoteSwiftPackageReference "BetterSegmentedControl" */;
+			productName = BetterSegmentedControl;
+		};
 		6815AECF2E3E0C2A008476CF /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6815AECE2E3E0C2A008476CF /* XCRemoteSwiftPackageReference "lottie-ios" */;
