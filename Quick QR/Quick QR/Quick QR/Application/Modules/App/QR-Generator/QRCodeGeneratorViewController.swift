@@ -7,6 +7,53 @@
 
 import UIKit
 
+// MARK: - QR Code Type Enum
+enum CodeType: String, CaseIterable {
+    case wifi = "wifi"
+    case phone = "phone"
+    case text = "text"
+    case contact = "contact"
+    case email = "email"
+    case website = "website"
+    case location = "location"
+    case events = "events"
+    case tiktok = "tiktok"
+    case instagram = "instagram"
+    case facebook = "facebook"
+    case x = "x"
+    case whatsapp = "whatsapp"
+    case youtube = "youtube"
+    case spotify = "spotify"
+    case viber = "viber"
+    case barcode = "barcode"
+    
+    var displayName: String {
+        switch self {
+        case .wifi: return "WiFi"
+        case .phone: return "Phone"
+        case .text: return "Text"
+        case .contact: return "Contact"
+        case .email: return "Email"
+        case .website: return "Website"
+        case .location: return "Location"
+        case .events: return "Events"
+        case .tiktok: return "TikTok"
+        case .instagram: return "Instagram"
+        case .facebook: return "Facebook"
+        case .x: return "X (Twitter)"
+        case .whatsapp: return "WhatsApp"
+        case .youtube: return "YouTube"
+        case .spotify: return "Spotify"
+        case .viber: return "Viber"
+        case .barcode: return "Barcode"
+        }
+    }
+    
+    var buttonTitle: String {
+        return "Generate \(displayName) QR"
+    }
+}
+
 class QRCodeGeneratorViewController: UIViewController {
     
     // MARK: - UI Components
@@ -17,6 +64,10 @@ class QRCodeGeneratorViewController: UIViewController {
     
     // MARK: - Content View (to be replaced)
     private let replaceableContentView = UIView()
+    private var placeholderHeightConstraint: NSLayoutConstraint?
+    
+    // MARK: - QR Code Type
+    private var currentQRType: CodeType?
     
     // MARK: - Properties
     var buttonTitle: String = "Action" {
@@ -113,6 +164,11 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     private func setupConstraints() {
+        // Store the placeholder height constraint so we can remove it later
+        placeholderHeightConstraint = replaceableContentView.heightAnchor.constraint(equalToConstant: 200)
+        placeholderHeightConstraint?.priority = UILayoutPriority(999)
+        placeholderHeightConstraint?.isActive = true
+        
         NSLayoutConstraint.activate([
             // Ad Container - Fixed at bottom
             adContainerView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 18),
@@ -143,8 +199,7 @@ class QRCodeGeneratorViewController: UIViewController {
             replaceableContentView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
             replaceableContentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             replaceableContentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            replaceableContentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
-            replaceableContentView.heightAnchor.constraint(greaterThanOrEqualToConstant: 200)
+            replaceableContentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
         ])
     }
     
@@ -153,21 +208,211 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     @objc private func buttonTapped() {
-        buttonAction?()
+        // Handle QR code generation based on current type
+        guard let qrType = currentQRType else {
+            print("No QR type configured")
+            return
+        }
+        
+        // Call custom button action if provided, otherwise handle default generation
+        if let customAction = buttonAction {
+            customAction()
+        } else {
+            handleQRGeneration(for: qrType)
+        }
+    }
+    
+    /// Default QR generation handler
+    private func handleQRGeneration(for qrType: CodeType) {
+        print("Generating QR code for: \(qrType.displayName)")
+        // This will be implemented when creating specific view content extraction
     }
     
     // MARK: - Public Methods
+    
+    /// Configure the view controller with a specific QR code type
+    func configure(with qrType: CodeType) {
+        currentQRType = qrType
+        title = qrType.displayName
+        buttonTitle = qrType.buttonTitle
+        
+        // Load the appropriate content view for the QR type
+        loadContentView(for: qrType)
+    }
+    
+    /// Load the appropriate content view based on QR code type
+    private func loadContentView(for qrType: CodeType) {
+        let contentView = createContentView(for: qrType)
+        replaceContentView(with: contentView)
+    }
+    
+    /// Factory method to create content view for each QR code type
+    private func createContentView(for qrType: CodeType) -> UIView {
+        switch qrType {
+        case .wifi:
+            return createWiFiView()
+        case .phone:
+            return createPhoneView()
+        case .text:
+            return createTextView()
+        case .contact:
+            return createContactView()
+        case .email:
+            return createEmailView()
+        case .website:
+            return createWebsiteView()
+        case .location:
+            return createLocationView()
+        case .events:
+            return createEventsView()
+        case .tiktok:
+            return createTikTokView()
+        case .instagram:
+            return createInstagramView()
+        case .facebook:
+            return createFacebookView()
+        case .x:
+            return createXView()
+        case .whatsapp:
+            return createWhatsAppView()
+        case .youtube:
+            return createYouTubeView()
+        case .spotify:
+            return createSpotifyView()
+        case .viber:
+            return createViberView()
+        case .barcode:
+            return createBarcodeView()
+        }
+    }
+    
+    // MARK: - Content View Creation Methods (Placeholder implementations)
+    
+    private func createWiFiView() -> UIView {
+        return createPlaceholderView(for: "WiFi", description: "WiFi network configuration form will go here")
+    }
+    
+    private func createPhoneView() -> UIView {
+        return createPlaceholderView(for: "Phone", description: "Phone number input form will go here")
+    }
+    
+    private func createTextView() -> UIView {
+        return createPlaceholderView(for: "Text", description: "Text message input form will go here")
+    }
+    
+    private func createContactView() -> UIView {
+        return createPlaceholderView(for: "Contact", description: "Contact information form will go here")
+    }
+    
+    private func createEmailView() -> UIView {
+        return createPlaceholderView(for: "Email", description: "Email composition form will go here")
+    }
+    
+    private func createWebsiteView() -> UIView {
+        return createPlaceholderView(for: "Website", description: "Website URL input form will go here")
+    }
+    
+    private func createLocationView() -> UIView {
+        return createPlaceholderView(for: "Location", description: "Location coordinates form will go here")
+    }
+    
+    private func createEventsView() -> UIView {
+        return createPlaceholderView(for: "Events", description: "Calendar event form will go here")
+    }
+    
+    private func createTikTokView() -> UIView {
+        return createPlaceholderView(for: "TikTok", description: "TikTok profile/video form will go here")
+    }
+    
+    private func createInstagramView() -> UIView {
+        return createPlaceholderView(for: "Instagram", description: "Instagram profile form will go here")
+    }
+    
+    private func createFacebookView() -> UIView {
+        return createPlaceholderView(for: "Facebook", description: "Facebook profile form will go here")
+    }
+    
+    private func createXView() -> UIView {
+        return createPlaceholderView(for: "X (Twitter)", description: "X profile form will go here")
+    }
+    
+    private func createWhatsAppView() -> UIView {
+        return createPlaceholderView(for: "WhatsApp", description: "WhatsApp message form will go here")
+    }
+    
+    private func createYouTubeView() -> UIView {
+        return createPlaceholderView(for: "YouTube", description: "YouTube channel/video form will go here")
+    }
+    
+    private func createSpotifyView() -> UIView {
+        return createPlaceholderView(for: "Spotify", description: "Spotify track/playlist form will go here")
+    }
+    
+    private func createViberView() -> UIView {
+        return createPlaceholderView(for: "Viber", description: "Viber message form will go here")
+    }
+    
+    private func createBarcodeView() -> UIView {
+        return createPlaceholderView(for: "Barcode", description: "Barcode data input form will go here")
+    }
+    
+    /// Helper method to create placeholder views for each type
+    private func createPlaceholderView(for type: String, description: String) -> UIView {
+        let containerView = UIView()
+        containerView.backgroundColor = .systemBackground
+        
+        let titleLabel = UILabel()
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = type
+        titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
+        titleLabel.textAlignment = .center
+        titleLabel.textColor = .label
+        
+        let descriptionLabel = UILabel()
+        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+        descriptionLabel.text = description
+        descriptionLabel.font = .systemFont(ofSize: 16)
+        descriptionLabel.textAlignment = .center
+        descriptionLabel.textColor = .secondaryLabel
+        descriptionLabel.numberOfLines = 0
+        
+        containerView.addSubview(titleLabel)
+        containerView.addSubview(descriptionLabel)
+        
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 40),
+            titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            
+            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
+            descriptionLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            descriptionLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            descriptionLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -40)
+        ])
+        
+        return containerView
+    }
+    
+    /// Get the current QR code type
+    func getCurrentQRType() -> CodeType? {
+        return currentQRType
+    }
     
     /// Replace the content view with a custom view from the previous screen
     func replaceContentView(with newView: UIView) {
         // Remove all subviews from the replaceable content view
         replaceableContentView.subviews.forEach { $0.removeFromSuperview() }
         
+        // Remove the placeholder height constraint to allow dynamic sizing
+        placeholderHeightConstraint?.isActive = false
+        placeholderHeightConstraint = nil
+        
         // Add the new view
         newView.translatesAutoresizingMaskIntoConstraints = false
         replaceableContentView.addSubview(newView)
         
         // Constraint the new view to fill the replaceable content view
+        // The height will now be determined by the internal content of newView
         NSLayoutConstraint.activate([
             newView.topAnchor.constraint(equalTo: replaceableContentView.topAnchor),
             newView.leadingAnchor.constraint(equalTo: replaceableContentView.leadingAnchor),
@@ -178,6 +423,9 @@ class QRCodeGeneratorViewController: UIViewController {
         // Remove the border and background since content is loaded
         replaceableContentView.layer.borderWidth = 0
         replaceableContentView.backgroundColor = .clear
+        
+        // Force layout update to recalculate the scroll view's content size
+        view.layoutIfNeeded()
     }
     
     /// Add custom content to the scroll view (in addition to replaceable content)
@@ -249,79 +497,34 @@ class QRCodeGeneratorViewController: UIViewController {
 
 // MARK: - Usage Example
 /*
- class EmailViewController: QRCodeGeneratorViewController {
+ // From the previous screen (QR type selection screen):
  
- override func viewDidLoad() {
- super.viewDidLoad()
+ let qrGeneratorVC = QRCodeGeneratorViewController()
  
- title = "Email QR Generator"
- buttonTitle = "Generate QR Code"
- buttonAction = { [weak self] in
- self?.generateEmailQR()
+ // Configure with the selected QR type
+ qrGeneratorVC.configure(with: .email) // or any other QRCodeType
+ 
+ // Optional: Override button action
+ qrGeneratorVC.buttonAction = { [weak qrGeneratorVC] in
+     // Custom handling for QR generation
+     print("Custom QR generation logic")
  }
  
- // Replace the content view with email form
- setupEmailContent()
+ navigationController?.pushViewController(qrGeneratorVC, animated: true)
+ 
+ // Alternative initialization patterns:
+ 
+ class EmailQRViewController: QRCodeGeneratorViewController {
+     override func viewDidLoad() {
+         super.viewDidLoad()
+         configure(with: .email)
+     }
  }
  
- private func setupEmailContent() {
- let containerView = UIView()
- containerView.backgroundColor = .systemBackground
- 
- let emailAddressField = createTextField(placeholder: "Email address")
- let subjectField = createTextField(placeholder: "Subject")
- let contentTextView = createTextView(placeholder: "Email content")
- 
- containerView.addSubview(emailAddressField)
- containerView.addSubview(subjectField)
- containerView.addSubview(contentTextView)
- 
- // Set up constraints for the form elements
- emailAddressField.translatesAutoresizingMaskIntoConstraints = false
- subjectField.translatesAutoresizingMaskIntoConstraints = false
- contentTextView.translatesAutoresizingMaskIntoConstraints = false
- 
- NSLayoutConstraint.activate([
- emailAddressField.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
- emailAddressField.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
- emailAddressField.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
- emailAddressField.heightAnchor.constraint(equalToConstant: 44),
- 
- subjectField.topAnchor.constraint(equalTo: emailAddressField.bottomAnchor, constant: 16),
- subjectField.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
- subjectField.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
- subjectField.heightAnchor.constraint(equalToConstant: 44),
- 
- contentTextView.topAnchor.constraint(equalTo: subjectField.bottomAnchor, constant: 16),
- contentTextView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
- contentTextView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
- contentTextView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -20),
- contentTextView.heightAnchor.constraint(equalToConstant: 200)
- ])
- 
- // Replace the placeholder content with the email form
- replaceContentView(with: containerView)
- }
- 
- private func createTextField(placeholder: String) -> UITextField {
- let textField = UITextField()
- textField.placeholder = placeholder
- textField.borderStyle = .roundedRect
- return textField
- }
- 
- private func createTextView(placeholder: String) -> UITextView {
- let textView = UITextView()
- textView.layer.borderColor = UIColor.systemGray4.cgColor
- textView.layer.borderWidth = 1
- textView.layer.cornerRadius = 8
- textView.font = .systemFont(ofSize: 16)
- return textView
- }
- 
- private func generateEmailQR() {
- // Handle QR code generation for email
- print("Generating email QR code...")
- }
+ class WiFiQRViewController: QRCodeGeneratorViewController {
+     override func viewDidLoad() {
+         super.viewDidLoad()
+         configure(with: .wifi)
+     }
  }
  */
