@@ -83,8 +83,7 @@ class OnboardingViewController: UIViewController,
     }
     
     func finishOnboarding() {
-        let navController = UINavigationController(rootViewController:  LanguageSelectionViewController())
-        UIApplication.shared.updateRootViewController(to: navController)
+        UIApplication.shared.updateRootViewController(to: LanguageSelectionViewController())
     }
     
     private func loadNativeAd(completion: ((GoogleMobileAds.NativeAd?) -> Void)?) {

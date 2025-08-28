@@ -24,6 +24,10 @@ final class AppButtonView: UIView {
 
     // MARK: - Config
     var tapHandler: (() -> Void)?
+    
+    // MARK: - Properties
+    private var isButtonEnabled: Bool = true
+    private var currentStyle: AppButtonStyle?
 
     // MARK: - Init
     override init(frame: CGRect) {
@@ -119,14 +123,48 @@ final class AppButtonView: UIView {
     }
 
     @objc private func handleTap() {
-        tapHandler?()
+        if isButtonEnabled {
+            tapHandler?()
+        }
     }
 
     // MARK: - Public API
+    func setEnabled(_ enabled: Bool) {
+        isButtonEnabled = enabled
+        
+        // Apply visual changes based on enabled state
+        if enabled {
+            // Restore original appearance based on current style
+            if let style = currentStyle {
+                applyStyle(style)
+            }
+            shadowView.layer.shadowOpacity = 0.48
+        } else {
+            // Apply disabled appearance
+            containerView.backgroundColor = UIColor(white: 0.85, alpha: 1.0) // Light grey
+            containerView.layer.borderWidth = 0
+            titleLabel.textColor = UIColor(white: 0.6, alpha: 1.0) // Darker grey for text
+            shadowView.layer.shadowOpacity = 0 // Remove shadow when disabled
+        }
+    }
+    
     func configure(with style: AppButtonStyle) {
+        // Store current style for later use when toggling enabled state
+        currentStyle = style
+        
         // Clear previous views
         contentStack.arrangedSubviews.forEach { contentStack.removeArrangedSubview($0); $0.removeFromSuperview() }
         
+        // Apply the style
+        applyStyle(style)
+        
+        // If button is disabled, override with disabled appearance
+        if !isButtonEnabled {
+            setEnabled(false)
+        }
+    }
+    
+    private func applyStyle(_ style: AppButtonStyle) {
         // Update stack distribution based on whether we have an image
         switch style {
         case let .primary(title, image):

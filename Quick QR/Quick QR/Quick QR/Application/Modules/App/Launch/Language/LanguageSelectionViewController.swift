@@ -83,6 +83,7 @@ class LanguageSelectionViewController: UIViewController {
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSelect))
         selectCTA.addGestureRecognizer(tapGesture)
+        selectCTA.setEnabled(false)
     }
     
     // MARK: - Setup Layout
@@ -102,12 +103,12 @@ class LanguageSelectionViewController: UIViewController {
         selectCTA.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            headerStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            headerStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             headerStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             headerStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
-            selectCTA.widthAnchor.constraint(equalToConstant: 80),
-            selectCTA.heightAnchor.constraint(equalToConstant: 35),
+            selectCTA.widthAnchor.constraint(equalToConstant: 120),
+            selectCTA.heightAnchor.constraint(equalToConstant: 54),
             
             collectionView.topAnchor.constraint(equalTo: headerStack.bottomAnchor, constant: 20),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
@@ -184,11 +185,11 @@ class LanguageSelectionViewController: UIViewController {
                 AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
             }
             AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
-                let navController = UINavigationController(rootViewController:  HomeViewController())
+                let navController = UINavigationController(rootViewController:  TabBarController())
                 UIApplication.shared.updateRootViewController(to: navController)
             }
         } else {
-            let navController = UINavigationController(rootViewController:  HomeViewController())
+            let navController = UINavigationController(rootViewController:  TabBarController())
             UIApplication.shared.updateRootViewController(to: navController)
         }
     }
@@ -213,6 +214,7 @@ extension LanguageSelectionViewController: UICollectionViewDataSource, UICollect
         var reloads: [IndexPath] = [indexPath]
         if let prev = previous { reloads.append(prev) }
         collectionView.reloadItems(at: reloads)
+        selectCTA.setEnabled(true)
     }
     
     // Grid layout 2 columns
