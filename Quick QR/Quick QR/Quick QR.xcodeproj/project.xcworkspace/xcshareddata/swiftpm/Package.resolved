@@ -1,5 +1,5 @@
 {
-  "originHash" : "69a7e08ebc91ade93e72e504e5150b50380d21cd484b71c4d24c653ffa56bb00",
+  "originHash" : "9eabcc012aed790d2924ad93ecc6b2675a55b90cd851618ffe01e1dcb7ee9b73",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "61b85103a1aeed8218f17c794687781505fbbef5",
         "version" : "11.2.0"
+      }
+    },
+    {
+      "identity" : "bettersegmentedcontrol",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gmarm/BetterSegmentedControl",
+      "state" : {
+        "revision" : "a2b2116761f71320cee7e69b4249863f0f372c71",
+        "version" : "2.0.1"
       }
     },
     {
