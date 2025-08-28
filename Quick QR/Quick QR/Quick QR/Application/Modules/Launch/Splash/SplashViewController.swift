@@ -46,16 +46,15 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
     func checkLanguageStatus() {
         let onBoardingStatus = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
         if onBoardingStatus {
-//            AdManager.shared.loadInterstitialAd(id: AdMobConfig.interstitial) { isLoaded, interstitial in
-//                let nextController = UINavigationController(rootViewController: HomeViewController())
-//                nextController.isNavigationBarHidden = true
-//                if AdManager.shared.splashInterstitial {
-//                    AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
-//                }
-//                AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
-//                    UIApplication.shared.updateRootViewController(to: nextController)
-//                }
-//            }
+            AdManager.shared.loadInterstitialAd(id: AdMobConfig.interstitial) { isLoaded, interstitial in
+                let nextController = UINavigationController(rootViewController: HomeViewController())
+                if AdManager.shared.splashInterstitial {
+                    AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
+                }
+                AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
+                    UIApplication.shared.updateRootViewController(to: nextController)
+                }
+            }
         } else {
             let controller = OnboardingViewController()
             let navController = UINavigationController(rootViewController: controller)

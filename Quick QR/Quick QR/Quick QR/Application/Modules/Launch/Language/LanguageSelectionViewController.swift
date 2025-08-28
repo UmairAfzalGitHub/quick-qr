@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import GoogleMobileAds
 
 class LanguageSelectionViewController: UIViewController {
     
@@ -18,31 +19,23 @@ class LanguageSelectionViewController: UIViewController {
         return label
     }()
     
-    private let selectCTA: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.systemBlue
-        view.layer.cornerRadius = 15
-        let label = UILabel()
-        label.text = "Select"
-        label.font = UIFont.systemFont(ofSize: 15, weight: .medium)
-        label.textColor = .white
-        label.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label)
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
+    private let selectCTA: AppButtonView = {
+        let view = AppButtonView()
+        view.configure(with: .primary(title: "Select", image: nil))
         return view
     }()
     
     private var collectionView: UICollectionView!
     
-    private let adContainer: UIView = {
+    private let nativeAdParentView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemOrange
         return view
     }()
     
+    private var nativeAdView: NativeAdView!
+    var nativeAd: GoogleMobileAds.NativeAd?
+
     // MARK: - Data
     struct Language {
         let name: String
@@ -70,6 +63,9 @@ class LanguageSelectionViewController: UIViewController {
         view.backgroundColor = .white
         setupCollectionView()
         setupLayout()
+        
+        nativeAd = AdManager.shared.getNativeAd()
+        showGoogleNativeAd(nativeAd: nativeAd)
     }
     
     // MARK: - Setup Collection View
@@ -84,6 +80,9 @@ class LanguageSelectionViewController: UIViewController {
         collectionView.register(LanguageCell.self, forCellWithReuseIdentifier: "LanguageCell")
         collectionView.dataSource = self
         collectionView.delegate = self
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSelect))
+        selectCTA.addGestureRecognizer(tapGesture)
     }
     
     // MARK: - Setup Layout
@@ -95,11 +94,11 @@ class LanguageSelectionViewController: UIViewController {
         
         view.addSubview(headerStack)
         view.addSubview(collectionView)
-        view.addSubview(adContainer)
+        view.addSubview(nativeAdParentView)
         
         headerStack.translatesAutoresizingMaskIntoConstraints = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        adContainer.translatesAutoresizingMaskIntoConstraints = false
+        nativeAdParentView.translatesAutoresizingMaskIntoConstraints = false
         selectCTA.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
@@ -113,13 +112,85 @@ class LanguageSelectionViewController: UIViewController {
             collectionView.topAnchor.constraint(equalTo: headerStack.bottomAnchor, constant: 20),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            collectionView.bottomAnchor.constraint(equalTo: adContainer.topAnchor, constant: -10),
+            collectionView.bottomAnchor.constraint(equalTo: nativeAdParentView.topAnchor, constant: -10),
             
-            adContainer.heightAnchor.constraint(equalToConstant: 280),
-            adContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            adContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            adContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            nativeAdParentView.heightAnchor.constraint(equalToConstant: 240),
+            nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
+    }
+    
+    private func setAdView(_ view: NativeAdView) {
+        // Remove the previous ad view
+        if nativeAdView != nil {
+            nativeAdView.removeFromSuperview()
+        }
+
+        nativeAdView = view
+        nativeAdView.tag = 2500
+        nativeAdParentView.addSubview(nativeAdView)
+        nativeAdView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Layout constraints for positioning the native ad view
+        let viewDictionary = ["_nativeAdView": nativeAdView!]
+        nativeAdParentView.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "H:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+        nativeAdParentView.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "V:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+    }
+    
+    private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
+        guard let nativeAd else { return }
+        let nibView = Bundle.main.loadNibNamed("OnBoardingNativeAdView", owner: nil, options: nil)?.first
+        guard let nativeAdView = nibView as? NativeAdView else { return }
+        setAdView(nativeAdView)
+
+        (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+        nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+
+        // Configure optional assets
+        (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
+        nativeAdView.bodyView?.isHidden = nativeAd.body == nil
+        
+        (nativeAdView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
+        nativeAdView.callToActionView?.isHidden = nativeAd.callToAction == nil
+        nativeAdView.callToActionView?.layer.cornerRadius = 12.0
+        
+        (nativeAdView.iconView as? UIImageView)?.image = nativeAd.icon?.image
+//        nativeAdView.iconView?.isHidden = nativeAd.icon == nil
+        
+        (nativeAdView.advertiserView as? UILabel)?.text = nativeAd.advertiser
+//        nativeAdView.advertiserView?.isHidden = nativeAd.advertiser == nil
+        
+        // Disable user interaction on call-to-action view for SDK to handle touches
+        nativeAdView.callToActionView?.isUserInteractionEnabled = false
+        
+        nativeAdView.nativeAd = nativeAd
+    }
+
+
+    @objc private func didTapSelect() {
+        UserDefaults.standard.set(true, forKey: "isOnboardingComplete")
+
+        if AdManager.shared.splashInterstitial == true {
+            if AdManager.shared.splashInterstitial {
+                AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
+            }
+            AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
+                let navController = UINavigationController(rootViewController:  HomeViewController())
+                UIApplication.shared.updateRootViewController(to: navController)
+            }
+        } else {
+            let navController = UINavigationController(rootViewController:  HomeViewController())
+            UIApplication.shared.updateRootViewController(to: navController)
+        }
     }
 }
 

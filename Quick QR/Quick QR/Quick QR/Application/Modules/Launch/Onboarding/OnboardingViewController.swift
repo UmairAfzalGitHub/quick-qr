@@ -83,26 +83,8 @@ class OnboardingViewController: UIViewController,
     }
     
     func finishOnboarding() {
-        if hasShownReviewPrompt || AdManager.shared.onboardingReviewEnabled == false {
-            UserDefaults.standard.set(true, forKey: "isOnboardingComplete")
-            
-            if AdManager.shared.splashInterstitial == true {
-                if AdManager.shared.splashInterstitial {
-                    AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
-                }
-                AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
-                    let navController = UINavigationController(rootViewController:  HomeViewController())
-                    navController.isNavigationBarHidden = true
-                    UIApplication.shared.updateRootViewController(to: navController)
-                }
-            } else {
-                let navController = UINavigationController(rootViewController:  HomeViewController())
-                navController.isNavigationBarHidden = true
-                UIApplication.shared.updateRootViewController(to: navController)
-            }
-        } else {
-            requestAppStoreReview()
-        }
+        let navController = UINavigationController(rootViewController:  LanguageSelectionViewController())
+        UIApplication.shared.updateRootViewController(to: navController)
     }
     
     private func loadNativeAd(completion: ((GoogleMobileAds.NativeAd?) -> Void)?) {
@@ -219,12 +201,7 @@ class OnboardingViewController: UIViewController,
               }
               self.scrollToNextItem()
           case 2:
-//              if hasShownReviewPrompt {
-                  finishOnboarding()
-//              } else {
-//                  requestAppStoreReview()
-//              }
-
+              finishOnboarding()
           default:
               scrollToNextItem()
           }
