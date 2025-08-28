@@ -74,15 +74,15 @@ enum BarCodeType: CaseIterable {
     
     var title: String {
         switch self {
-        case .isbn: return "EAN-8"
-        case .ean8: return "EAN-13"
-        case .upce: return "UPC-A"
-        case .ean13: return "UPC-E"
-        case .upca: return "Code 39"
-        case .code39: return "Code 93"
-        case .code93: return "Code 128"
-        case .code128: return "PDF 417"
-        case .itf: return "PDF 417"
+        case .isbn: return "ISBN"
+        case .ean8: return "EAN 8"
+        case .upce: return "UPC E"
+        case .ean13: return "EAN 13"
+        case .upca: return "UPC A"
+        case .code39: return "Code 39"
+        case .code93: return "Code 93"
+        case .code128: return "Code 128"
+        case .itf: return "ITF"
         case .pdf417: return "PDF 417"
         }
     }
@@ -118,7 +118,7 @@ class QRTypeCell: UICollectionViewCell {
         let lbl = UILabel()
         lbl.textAlignment = .center
         lbl.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
-        lbl.textColor = .black
+        lbl.textColor = .textPrimary
         return lbl
     }()
     
