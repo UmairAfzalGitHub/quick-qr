@@ -65,9 +65,13 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
     }
     
     func animateForTwoSeconds() {
+        let onBoardingStatus = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
+        if onBoardingStatus == false {
+            AdManager.shared.preloadNativeAds()
+        }
+
         progressBar.animateIndeterminate(duration: 4.0, speed: 1.5) {[weak self] in
             self?.checkLanguageStatus()
-
         }
     }
     

@@ -38,7 +38,7 @@
                             <cells/>
                         </collectionView>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0w7-IR-X8R" customClass="CustomPageControl" customModule="Quick_QR" customModuleProvider="target">
-                            <rect key="frame" x="12" y="670" width="80" height="12"/>
+                            <rect key="frame" x="12" y="609" width="80" height="12"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="12" id="88K-AF-5Av"/>
@@ -46,7 +46,7 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IAQ-1X-eJx" customClass="AppButtonView" customModule="Quick_QR" customModuleProvider="target">
-                            <rect key="frame" x="280" y="649" width="148" height="54"/>
+                            <rect key="frame" x="280" y="588" width="148" height="54"/>
                             <color key="backgroundColor" systemColor="systemMintColor"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="54" id="4Ig-01-kjR"/>
@@ -54,21 +54,21 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4OG-0M-FWC">
-                            <rect key="frame" x="16" y="763" width="408" height="159"/>
+                            <rect key="frame" x="16" y="682" width="408" height="240"/>
                             <subviews>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="93k-5A-heV">
-                                    <rect key="frame" x="0.0" y="0.0" width="408" height="159"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="408" height="240"/>
                                     <viewLayoutGuide key="safeArea" id="pAC-Jq-MXB"/>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <constraints>
-                                        <constraint firstAttribute="height" constant="159" id="Ris-zr-avw"/>
+                                        <constraint firstAttribute="height" constant="240" id="Ris-zr-avw"/>
                                     </constraints>
                                 </view>
                             </subviews>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstItem="93k-5A-heV" firstAttribute="leading" secondItem="4OG-0M-FWC" secondAttribute="leading" id="EP2-eB-5aU"/>
-                                <constraint firstAttribute="height" constant="159" id="Ert-qV-Uz3"/>
+                                <constraint firstAttribute="height" constant="240" id="Ert-qV-Uz3"/>
                                 <constraint firstAttribute="bottom" secondItem="93k-5A-heV" secondAttribute="bottom" id="PNM-NK-sov"/>
                                 <constraint firstAttribute="trailing" secondItem="93k-5A-heV" secondAttribute="trailing" id="h6v-ML-9hP"/>
                                 <constraint firstItem="93k-5A-heV" firstAttribute="top" secondItem="4OG-0M-FWC" secondAttribute="top" id="qR2-st-h1x"/>
@@ -80,7 +80,7 @@
                     <constraints>
                         <constraint firstItem="xBe-uY-Wxf" firstAttribute="trailing" secondItem="4OG-0M-FWC" secondAttribute="trailing" constant="16" id="8Bm-KN-ovd"/>
                         <constraint firstItem="0w7-IR-X8R" firstAttribute="centerY" secondItem="IAQ-1X-eJx" secondAttribute="centerY" id="8e3-le-Gpo"/>
-                        <constraint firstItem="4OG-0M-FWC" firstAttribute="top" secondItem="IAQ-1X-eJx" secondAttribute="bottom" constant="60" id="IZ0-og-ddU"/>
+                        <constraint firstItem="4OG-0M-FWC" firstAttribute="top" secondItem="IAQ-1X-eJx" secondAttribute="bottom" constant="40" id="IZ0-og-ddU"/>
                         <constraint firstItem="xBe-uY-Wxf" firstAttribute="bottom" secondItem="4OG-0M-FWC" secondAttribute="bottom" id="O9u-Xd-csP"/>
                         <constraint firstItem="0w7-IR-X8R" firstAttribute="leading" secondItem="xBe-uY-Wxf" secondAttribute="leading" constant="12" id="VBV-hm-Vq9"/>
                         <constraint firstAttribute="trailing" secondItem="p6m-qV-yGr" secondAttribute="trailing" id="Ws5-ji-8mz"/>

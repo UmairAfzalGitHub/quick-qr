@@ -1,4 +1,3 @@
-
 import Foundation
 import Foundation
 import GoogleMobileAds
@@ -47,6 +46,7 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     var interstitialAd: InterstitialAd?
     var rewardedAd: RewardedAd?
     private var nativeAdLoader: AdLoader?
+    private var nativeAdCompletions: [AdLoader: (NativeAd?) -> Void] = [:]
     
     // State Management
     private var isLoadingAppOpenAd = false
@@ -56,6 +56,10 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     private var adDidDismissRewardedCallback: ((Bool) -> Void)?
     private var didGetNativeAd: ((NativeAd?) -> Void)?
     
+    private var nativeAdPool: [NativeAd] = []
+    private let maxNativeAds = 3
+    private var shouldPrefetchNativeAds = true
+
     var isRewardGranted = false
     var avilableNativeAd: NativeAd?
     var isShowingAd = false
@@ -309,8 +313,45 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
             Analytics.logEvent("ad_"+adId.analyticsId.rawValue, parameters: nil)
         })
     }
-    
+
     // MARK: - Native Ads
+
+    func preloadNativeAds() {
+        let adsToLoad = maxNativeAds - nativeAdPool.count
+        guard adsToLoad > 0, let root = UIApplication.shared.sceneWindow?.rootViewController else { return }
+        for _ in 0..<adsToLoad {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {[weak self] in
+                self?.loadNativeAd(adId: AdMobConfig.native, from: root) {[weak self] ad in
+                    if let ad = ad {
+                        self?.nativeAdPool.append(ad)
+                    }
+                }
+            })
+        }
+    }
+
+    func getNativeAd(stopPrefetch: Bool = false) -> NativeAd? {
+        if stopPrefetch {
+            shouldPrefetchNativeAds = false
+        }
+        if !nativeAdPool.isEmpty {
+            let ad = nativeAdPool.removeFirst()
+            if shouldPrefetchNativeAds {
+                preloadNativeAds()
+            }
+            return ad
+        }
+        if shouldPrefetchNativeAds {
+            preloadNativeAds()
+        }
+        return nil
+    }
+    
+    func resumeNativeAdPrefetch() {
+        shouldPrefetchNativeAds = true
+        preloadNativeAds()
+    }
+
     func loadNativeAd(adId: AdMobId, from viewController: UIViewController,
                       completion: ((GoogleMobileAds.NativeAd?) -> Void)?) {
         print("📱 Attempting to load Native Ad...")
@@ -327,17 +368,10 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
                                                           options: nil)
             
             googleAdLoader.delegate = self
+            // Store the completion handler in our dictionary
+            self.nativeAdCompletions[googleAdLoader] = completion
             googleAdLoader.load(Request())
             self.nativeAdLoader = googleAdLoader
-            self.didGetNativeAd = { googleNativeAd in
-                if let googleNativeAd = googleNativeAd {
-                    print("✅ Google Native Ad loaded successfully")
-                } else {
-                    print("❌ Failed to load Google Native Ad")
-                }
-                
-                completion?(googleNativeAd)
-            }
             print("📱 Google Native Ad load request sent")
         })
     }
@@ -375,18 +409,26 @@ extension AdManager: FullScreenContentDelegate {
     func adLoader(_ adLoader: GoogleMobileAds.AdLoader, didReceive nativeAd: GoogleMobileAds.NativeAd) {
         print("✅ Native Ad loaded successfully")
         avilableNativeAd = nativeAd
-        didGetNativeAd?(nativeAd)
+        // Use the completion from our dictionary instead of the global property
+        if let completion = nativeAdCompletions[adLoader] {
+            completion(nativeAd)
+            nativeAdCompletions[adLoader] = nil // Clean up after use
+        }
     }
-    
+
     func adLoader(_ adLoader: GoogleMobileAds.AdLoader, didFailToReceiveAdWithError error: Error) {
         print("❌ Failed to load Native Ad: \(error.localizedDescription)")
-        didGetNativeAd?(nil)
+        // Use the completion from our dictionary instead of the global property
+        if let completion = nativeAdCompletions[adLoader] {
+            completion(nil)
+            nativeAdCompletions[adLoader] = nil // Clean up after use
+        }
     }
-    
+
     func adLoaderDidFinishLoading(_ adLoader: GoogleMobileAds.AdLoader) {
         print("ℹ️ AdLoader finished loading.")
     }
-    
+
     func adDidRecordImpression(_ ad: any GoogleMobileAds.FullScreenPresentingAd) {
         Analytics.logEvent("custom_ad_impression", parameters: nil)
     }
