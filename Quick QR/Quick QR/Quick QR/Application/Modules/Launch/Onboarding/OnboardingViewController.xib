@@ -4,19 +4,16 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
-        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="OnboardingViewController" customModule="PhoneNumberTracker" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="OnboardingViewController" customModule="Quick_QR" customModuleProvider="target">
             <connections>
                 <outlet property="collectionView" destination="p6m-qV-yGr" id="ZQ6-QJ-SRp"/>
-                <outlet property="loaderView" destination="kO3-Ze-v1e" id="7Tu-w2-1aZ"/>
                 <outlet property="nativeAdParentView" destination="93k-5A-heV" id="bmi-kI-VJz"/>
-                <outlet property="nextArrowImage" destination="VVs-de-9pn" id="GZp-ff-zeV"/>
-                <outlet property="nextButton" destination="mfm-kO-n4e" id="cps-Tf-lES"/>
+                <outlet property="nextButton" destination="IAQ-1X-eJx" id="Ud9-Xf-rF7"/>
                 <outlet property="pageControlCustom" destination="0w7-IR-X8R" id="fBW-7v-eUx"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
@@ -40,12 +37,20 @@
                             </collectionViewFlowLayout>
                             <cells/>
                         </collectionView>
-                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0w7-IR-X8R" customClass="CustomPageControl" customModule="PhoneNumberTracker" customModuleProvider="target">
-                            <rect key="frame" x="192.66666666666666" y="728" width="55" height="12"/>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0w7-IR-X8R" customClass="CustomPageControl" customModule="Quick_QR" customModuleProvider="target">
+                            <rect key="frame" x="12" y="670" width="80" height="12"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="12" id="88K-AF-5Av"/>
-                                <constraint firstAttribute="width" constant="55" id="WYp-o6-Taz"/>
+                                <constraint firstAttribute="width" constant="80" id="WYp-o6-Taz"/>
+                            </constraints>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IAQ-1X-eJx" customClass="AppButtonView" customModule="Quick_QR" customModuleProvider="target">
+                            <rect key="frame" x="280" y="649" width="148" height="54"/>
+                            <color key="backgroundColor" systemColor="systemMintColor"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="54" id="4Ig-01-kjR"/>
+                                <constraint firstAttribute="width" constant="148" id="h44-Ur-NK0"/>
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4OG-0M-FWC">
@@ -69,52 +74,21 @@
                                 <constraint firstItem="93k-5A-heV" firstAttribute="top" secondItem="4OG-0M-FWC" secondAttribute="top" id="qR2-st-h1x"/>
                             </constraints>
                         </view>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mfm-kO-n4e" userLabel="Next">
-                            <rect key="frame" x="382" y="713" width="42" height="42"/>
-                            <color key="backgroundColor" name="appPrimary"/>
-                            <constraints>
-                                <constraint firstAttribute="height" constant="42" id="42X-E4-JVo"/>
-                                <constraint firstAttribute="width" constant="42" id="om6-mL-3UB"/>
-                            </constraints>
-                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <state key="normal">
-                                <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            </state>
-                            <connections>
-                                <action selector="didTapNextButton:" destination="-1" eventType="touchUpInside" id="mvh-is-Aaj"/>
-                            </connections>
-                        </button>
-                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="arrow.forward" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="VVs-de-9pn">
-                            <rect key="frame" x="390.33333333333331" y="724.33333333333337" width="25.333333333333314" height="19.666666666666629"/>
-                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        </imageView>
-                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="kO3-Ze-v1e">
-                            <rect key="frame" x="382" y="713" width="42" height="42"/>
-                            <color key="color" red="0.99755853409999995" green="0.99755865340000005" blue="0.99755853409999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        </activityIndicatorView>
                     </subviews>
                     <viewLayoutGuide key="safeArea" id="xBe-uY-Wxf"/>
                     <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
                         <constraint firstItem="xBe-uY-Wxf" firstAttribute="trailing" secondItem="4OG-0M-FWC" secondAttribute="trailing" constant="16" id="8Bm-KN-ovd"/>
-                        <constraint firstItem="0w7-IR-X8R" firstAttribute="centerX" secondItem="8Ya-2N-blO" secondAttribute="centerX" id="8zS-qR-VSV"/>
-                        <constraint firstItem="kO3-Ze-v1e" firstAttribute="top" secondItem="mfm-kO-n4e" secondAttribute="top" id="9bH-Ce-9iR"/>
-                        <constraint firstItem="VVs-de-9pn" firstAttribute="height" secondItem="mfm-kO-n4e" secondAttribute="height" multiplier="0.6" id="Bcc-9V-ylB"/>
-                        <constraint firstItem="0w7-IR-X8R" firstAttribute="centerY" secondItem="VVs-de-9pn" secondAttribute="centerY" id="MNq-6U-RZ0"/>
+                        <constraint firstItem="0w7-IR-X8R" firstAttribute="centerY" secondItem="IAQ-1X-eJx" secondAttribute="centerY" id="8e3-le-Gpo"/>
+                        <constraint firstItem="4OG-0M-FWC" firstAttribute="top" secondItem="IAQ-1X-eJx" secondAttribute="bottom" constant="60" id="IZ0-og-ddU"/>
                         <constraint firstItem="xBe-uY-Wxf" firstAttribute="bottom" secondItem="4OG-0M-FWC" secondAttribute="bottom" id="O9u-Xd-csP"/>
-                        <constraint firstItem="xBe-uY-Wxf" firstAttribute="trailing" secondItem="mfm-kO-n4e" secondAttribute="trailing" constant="16" id="UqY-GM-44K"/>
+                        <constraint firstItem="0w7-IR-X8R" firstAttribute="leading" secondItem="xBe-uY-Wxf" secondAttribute="leading" constant="12" id="VBV-hm-Vq9"/>
                         <constraint firstAttribute="trailing" secondItem="p6m-qV-yGr" secondAttribute="trailing" id="Ws5-ji-8mz"/>
-                        <constraint firstItem="VVs-de-9pn" firstAttribute="width" secondItem="mfm-kO-n4e" secondAttribute="width" multiplier="0.6" id="YI1-xh-H4o"/>
                         <constraint firstItem="p6m-qV-yGr" firstAttribute="top" secondItem="8Ya-2N-blO" secondAttribute="top" id="b0j-Z5-zeB"/>
                         <constraint firstAttribute="bottom" secondItem="p6m-qV-yGr" secondAttribute="bottom" id="cja-7k-ddV"/>
-                        <constraint firstItem="4OG-0M-FWC" firstAttribute="top" secondItem="mfm-kO-n4e" secondAttribute="bottom" constant="8" id="gQA-26-3DP"/>
-                        <constraint firstItem="kO3-Ze-v1e" firstAttribute="bottom" secondItem="mfm-kO-n4e" secondAttribute="bottom" id="i2p-ri-fLr"/>
-                        <constraint firstItem="VVs-de-9pn" firstAttribute="centerX" secondItem="mfm-kO-n4e" secondAttribute="centerX" id="mjE-0y-p3u"/>
                         <constraint firstItem="p6m-qV-yGr" firstAttribute="leading" secondItem="8Ya-2N-blO" secondAttribute="leading" id="oZa-RY-Cs3"/>
-                        <constraint firstItem="kO3-Ze-v1e" firstAttribute="leading" secondItem="mfm-kO-n4e" secondAttribute="leading" id="rH1-QR-lmP"/>
-                        <constraint firstItem="VVs-de-9pn" firstAttribute="centerY" secondItem="mfm-kO-n4e" secondAttribute="centerY" id="sW2-cc-VW0"/>
+                        <constraint firstItem="xBe-uY-Wxf" firstAttribute="trailing" secondItem="IAQ-1X-eJx" secondAttribute="trailing" constant="12" id="qfU-Lp-qCg"/>
                         <constraint firstItem="4OG-0M-FWC" firstAttribute="leading" secondItem="xBe-uY-Wxf" secondAttribute="leading" constant="16" id="vye-1k-DQc"/>
-                        <constraint firstItem="kO3-Ze-v1e" firstAttribute="trailing" secondItem="mfm-kO-n4e" secondAttribute="trailing" id="wTN-HA-ykw"/>
                     </constraints>
                 </view>
             </subviews>
@@ -130,12 +104,11 @@
         </view>
     </objects>
     <resources>
-        <image name="arrow.forward" catalog="system" width="128" height="95"/>
-        <namedColor name="appPrimary">
-            <color red="0.35294117647058826" green="0.20392156862745098" blue="0.6470588235294118" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemMintColor">
+            <color red="0.0" green="0.78039215689999997" blue="0.74509803919999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

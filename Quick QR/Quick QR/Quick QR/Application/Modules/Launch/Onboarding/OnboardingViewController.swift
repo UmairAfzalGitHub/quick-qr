@@ -8,12 +8,10 @@ class OnboardingViewController: UIViewController,
                                 UICollectionViewDataSource,
                                 UICollectionViewDelegateFlowLayout {
     
-    @IBOutlet weak var nextArrowImage: UIImageView!
-    @IBOutlet weak var loaderView: UIActivityIndicatorView!
+    @IBOutlet weak var nextButton: AppButtonView!
     @IBOutlet weak var nativeAdParentView: UIView!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var pageControlCustom: CustomPageControl!
-    @IBOutlet weak var nextButton: UIButton!
 
     private var hasShownReviewPrompt = false
     private var nativeAdView: NativeAdView!
@@ -21,9 +19,8 @@ class OnboardingViewController: UIViewController,
 
     var dataSource: [OnBoarding] = [
         OnBoarding(image: UIImage(named: "onboard1")!, heading: Strings.Label.numberLocator, description: Strings.Label.effortlessly),
-        OnBoarding(image: UIImage(named: "onboard2")!, heading: Strings.Label.callerIdentification, description: Strings.Label.uncoverCallersIdentity),
-        OnBoarding(image: UIImage(named: "onboard3")!, heading: Strings.Label.searchNumbers, description: Strings.Label.noMoreGuesswork),
-        OnBoarding(image: UIImage(named: "onboard4")!, heading: Strings.Label.yourReviewMatters, description: Strings.Label.weAreConstantlyWorking)
+        OnBoarding(image: UIImage(named: "onboard2")!, heading: Strings.Label.numberLocator, description: Strings.Label.effortlessly),
+        OnBoarding(image: UIImage(named: "onboard3")!, heading: Strings.Label.numberLocator, description: Strings.Label.effortlessly)
     ]
 
     override func viewDidLoad() {
@@ -36,8 +33,13 @@ class OnboardingViewController: UIViewController,
     
     //MARK: - Private Methods
     func setup() {
+        // First set up the page control with the full count
+        pageControlCustom.numberOfPages = 3
+        
         if AdManager.shared.onboardingReviewEnabled == false {
-            dataSource.removeLast()
+//            dataSource.removeLast()
+            // Update page control AFTER modifying the data source
+            //pageControlCustom.numberOfPages = dataSource.count
         }
 
         if AdManager.shared.splashInterstitial {
@@ -46,14 +48,17 @@ class OnboardingViewController: UIViewController,
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.isScrollEnabled = false
+        collectionView.reloadData()
 
-        pageControlCustom.numberOfPages = dataSource.count
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapNextButton))
+        nextButton.addGestureRecognizer(tapGestureRecognizer)
+        nextButton.configure(with: .primary(title: "Next", image: nil))
         self.navigationController?.navigationBar.isHidden = true
-        nextButton.layer.cornerRadius = nextButton.frame.width/2
-        nextButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+//        nextButton.layer.cornerRadius = nextButton.frame.width/2
+//        nextButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         
-        loaderView.isHidden = true
-        loaderView.startAnimating()
+//        loaderView.isHidden = true
+//        loaderView.startAnimating()
     }
     
     func finishOnboarding() {
@@ -186,23 +191,23 @@ class OnboardingViewController: UIViewController,
     }
     
     //MARK: - IBActions
-    @IBAction func didTapNextButton(_ sender: Any) {
+    @objc func didTapNextButton() {
         let currentIndex = getCurrentPageIndex()
 
           switch currentIndex {
           case 0, 1, 2:
               // Load ad first, then scroll ONCE
-              loaderView.isHidden = false
-              nextArrowImage.isHidden = true
-              loadNativeAd { [weak self] googleAd in
-                  guard let self = self else { return }
-                  self.nativeAd = googleAd
-                  self.showGoogleNativeAd(nativeAd: googleAd)
+//              loaderView.isHidden = false
+//              nextArrowImage.isHidden = true
+//              loadNativeAd { [weak self] googleAd in
+//                  guard let self = self else { return }
+//                  self.nativeAd = googleAd
+//                  self.showGoogleNativeAd(nativeAd: googleAd)
                   self.scrollToNextItem()
                   
-                  loaderView.isHidden = true
-                  nextArrowImage.isHidden = false
-              }
+//                  loaderView.isHidden = true
+//                  nextArrowImage.isHidden = false
+//              }
 
           case 3:
               if hasShownReviewPrompt {
@@ -232,7 +237,7 @@ class OnboardingViewController: UIViewController,
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - 200)
+        return collectionView.frame.size
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {

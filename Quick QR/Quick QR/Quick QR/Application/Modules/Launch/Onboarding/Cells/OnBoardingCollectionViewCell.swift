@@ -3,7 +3,7 @@ import UIKit
 
 class OnBoardingCollectionViewCell: UICollectionViewCell {
 
-    @IBOutlet weak var topImageView: UIImageView!
+    @IBOutlet weak var contentImageView: UIImageView!
     @IBOutlet weak var headingLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
     
@@ -12,7 +12,7 @@ class OnBoardingCollectionViewCell: UICollectionViewCell {
     }
 
     func setupCell(data: OnBoarding) {
-        topImageView.image = data.topImage
+        contentImageView.image = data.topImage
         headingLabel.text = data.heading
         descriptionLabel.text = data.description
     }
