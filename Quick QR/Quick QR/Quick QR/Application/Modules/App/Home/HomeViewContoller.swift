@@ -422,6 +422,16 @@ extension HomeViewController {
         print("PDF 417 Bar Code selected")
         // Navigate to PDF 417 bar code creation screen
     }
+    
+    @objc private func handleITFBarCode() {
+        print("ITF Bar Code selected")
+        // Navigate to ITF bar code creation screen
+    }
+    
+    @objc private func handleISBNBarCode() {
+        print("ISBN Bar Code selected")
+        // Navigate to ISBN bar code creation screen
+    }
 }
 
 // MARK: - CollectionView DataSource + Delegate
@@ -528,23 +538,26 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
             // Bar Code Types
             let type = BarCodeType.allCases[indexPath.item]
             switch type {
+            case .isbn:
+                handleISBNBarCode()
             case .ean8:
                 handleEAN8BarCode()
+            case .upce:
+                handleUPCEBarCode()
             case .ean13:
                 handleEAN13BarCode()
             case .upca:
                 handleUPCABarCode()
-            case .upce:
-                handleUPCEBarCode()
             case .code39:
                 handleCode39BarCode()
             case .code93:
                 handleCode93BarCode()
             case .code128:
                 handleCode128BarCode()
+            case .itf:
+                handleITFBarCode()
             case .pdf417:
                 handlePDF417BarCode()
-                
             }
         }
     }
