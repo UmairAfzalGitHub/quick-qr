@@ -5,6 +5,7 @@
 //
 
 import UIKit
+import BetterSegmentedControl
 
 // MARK: - QR Code Types Enum
 enum QRCodeType: CaseIterable {
@@ -202,35 +203,29 @@ class HeaderView: UICollectionReusableView {
 // MARK: - HomeViewController
 class HomeViewController: UIViewController {
     
-    private let segment: UISegmentedControl = {
-        let seg = UISegmentedControl(items: ["QR Code", "Bar Code"])
-        seg.selectedSegmentIndex = 0
+    private let betterSegmentedControl: BetterSegmentedControl = {
+        let control = BetterSegmentedControl(
+            frame: CGRect.zero,
+            segments: LabelSegment.segments(withTitles: ["QR Code", "Bar Code"],
+                                          normalFont: UIFont.systemFont(ofSize: 16, weight: .medium),
+                                          normalTextColor: UIColor.systemGray,
+                                          selectedFont: UIFont.systemFont(ofSize: 16, weight: .medium),
+                                          selectedTextColor: UIColor.white),
+            options: [.backgroundColor(UIColor.systemGray6),
+                     .indicatorViewBackgroundColor(UIColor.systemBlue),
+                     .cornerRadius(27),
+                     .animationSpringDamping(1.0),
+                     .animationDuration(0.3)])
         
-        // Style the segmented control to match the reference
-        seg.backgroundColor = UIColor.systemGray6
-        seg.selectedSegmentTintColor = UIColor.systemBlue
-        seg.layer.cornerRadius = 27
-        seg.layer.masksToBounds = true
-        
-        // Text attributes
-        seg.setTitleTextAttributes([
-            .foregroundColor: UIColor.white,
-            .font: UIFont.systemFont(ofSize: 16, weight: .medium)
-        ], for: .selected)
-        
-        seg.setTitleTextAttributes([
-            .foregroundColor: UIColor.systemGray,
-            .font: UIFont.systemFont(ofSize: 16, weight: .medium)
-        ], for: .normal)
-        
-        return seg
+        control.setIndex(0) // Start with "QR Code" selected
+        return control
     }()
     
     private var collectionView: UICollectionView!
     
     // Track current segment state
     private var isQRCodeSelected: Bool {
-        return segment.selectedSegmentIndex == 0
+        return betterSegmentedControl.index == 0
     }
     
     override func viewDidLoad() {
@@ -243,24 +238,26 @@ class HomeViewController: UIViewController {
     private func setupNavigationBar() {
         title = "Choose Type"
         navigationController?.navigationBar.titleTextAttributes = [
-            .foregroundColor: UIColor.black,
+            .foregroundColor: UIColor.textPrimary,
             .font: UIFont.systemFont(ofSize: 18, weight: .semibold)
         ]
     }
     
     private func setupUI() {
-        // Add Segment
-        view.addSubview(segment)
-        segment.translatesAutoresizingMaskIntoConstraints = false
+        // Add Better Segmented Control
+        view.addSubview(betterSegmentedControl)
+        betterSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
         
-        // Add target for segment control
-        segment.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
+        // Add value changed action
+        betterSegmentedControl.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
         
         NSLayoutConstraint.activate([
-            segment.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            segment.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            segment.widthAnchor.constraint(equalToConstant: 200),
-            segment.heightAnchor.constraint(equalToConstant: 54)
+            betterSegmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            betterSegmentedControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            betterSegmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 25),
+            betterSegmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -25),
+//            betterSegmentedControl.widthAnchor.constraint(equalToConstant: 200),
+            betterSegmentedControl.heightAnchor.constraint(equalToConstant: 54)
         ])
         
         // Setup CollectionView
@@ -283,14 +280,14 @@ class HomeViewController: UIViewController {
         view.addSubview(collectionView)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: segment.bottomAnchor, constant: 20),
+            collectionView.topAnchor.constraint(equalTo: betterSegmentedControl.bottomAnchor, constant: 20),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
-    @objc private func segmentChanged(_ sender: UISegmentedControl) {
+    @objc private func segmentChanged(_ sender: BetterSegmentedControl) {
         // Reload collection view when segment changes
         collectionView.reloadData()
     }
