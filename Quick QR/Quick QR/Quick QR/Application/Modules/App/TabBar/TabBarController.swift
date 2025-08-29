@@ -54,10 +54,11 @@ class TabBarController: UITabBarController {
         historyVC.title = "History"
         let historyNavController = UINavigationController(rootViewController: historyVC)
 
-        let settingsVC = UIViewController()
+        let settingsVC = SettingsViewController()
         settingsVC.view.backgroundColor = .systemBackground
         settingsVC.title = "Settings"
-        
+        let settingsNavController = UINavigationController(rootViewController: settingsVC)
+
         // Configure tab bar items with larger images
         let createConfig = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         let favoriteConfig = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
@@ -87,7 +88,7 @@ class TabBarController: UITabBarController {
                                 favoriteNavController,
                                 scanVC,
                                 historyNavController,
-                                settingsVC]
+                                settingsNavController]
         
         // Start with scan tab selected
         self.selectedIndex = 0
