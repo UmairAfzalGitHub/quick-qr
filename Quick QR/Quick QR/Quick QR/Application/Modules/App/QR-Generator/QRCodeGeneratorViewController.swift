@@ -68,6 +68,10 @@ class QRCodeGeneratorViewController: UIViewController {
     var textView: TextView?
     var contactsView: ContactsView?
     var locationView: LocationView?
+    var tiktokView: TiktokView?
+    var instagramView: InstagramView?
+    var facebookView: FacebookView?
+    var xView: XView?
     
     // MARK: - Content View (to be replaced)
     private let replaceableContentView = UIView()
@@ -88,7 +92,7 @@ class QRCodeGeneratorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentQRType = .location
+        currentQRType = .tiktok
         configure(with: currentQRType!)
         setupUI()
         setupConstraints()
@@ -300,19 +304,23 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     private func createTikTokView() -> UIView {
-        return createPlaceholderView(for: "TikTok", description: "TikTok profile/video form will go here")
+        tiktokView = TiktokView()
+        return tiktokView!
     }
     
     private func createInstagramView() -> UIView {
-        return createPlaceholderView(for: "Instagram", description: "Instagram profile form will go here")
+        instagramView = InstagramView()
+        return instagramView!
     }
     
     private func createFacebookView() -> UIView {
-        return createPlaceholderView(for: "Facebook", description: "Facebook profile form will go here")
+        facebookView = FacebookView()
+        return facebookView!
     }
     
     private func createXView() -> UIView {
-        return createPlaceholderView(for: "X (Twitter)", description: "X profile form will go here")
+        xView = XView()
+        return xView!
     }
     
     private func createWhatsAppView() -> UIView {
