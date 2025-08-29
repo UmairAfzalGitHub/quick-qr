@@ -63,6 +63,10 @@ class QRCodeGeneratorViewController: UIViewController {
     private let adContainerView = UIView()
     
     var emailView: EmailView?
+    var websiteView: WebsiteView?
+    var phoneView: PhoneView?
+    var textView: TextView?
+    var contactsView: ContactsView?
     
     // MARK: - Content View (to be replaced)
     private let replaceableContentView = UIView()
@@ -83,7 +87,7 @@ class QRCodeGeneratorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentQRType = .email
+        currentQRType = .contact
         configure(with: currentQRType!)
         setupUI()
         setupConstraints()
@@ -95,7 +99,7 @@ class QRCodeGeneratorViewController: UIViewController {
         view.backgroundColor = .systemBackground
         
         // Configure scroll view
-        scrollView.backgroundColor = .cyan
+        scrollView.backgroundColor = .clear
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsVerticalScrollIndicator = true
         scrollView.alwaysBounceVertical = true
@@ -261,15 +265,18 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     private func createPhoneView() -> UIView {
-        return createPlaceholderView(for: "Phone", description: "Phone number input form will go here")
+        phoneView = PhoneView()
+        return phoneView!
     }
     
     private func createTextView() -> UIView {
-        return createPlaceholderView(for: "Text", description: "Text message input form will go here")
+        textView = TextView()
+        return textView!
     }
     
     private func createContactView() -> UIView {
-        return createPlaceholderView(for: "Contact", description: "Contact information form will go here")
+        contactsView = ContactsView()
+        return contactsView!
     }
     
     private func createEmailView() -> UIView {
@@ -278,7 +285,8 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     private func createWebsiteView() -> UIView {
-        return createPlaceholderView(for: "Website", description: "Website URL input form will go here")
+        websiteView = WebsiteView()
+        return websiteView!
     }
     
     private func createLocationView() -> UIView {
