@@ -26,9 +26,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
                      .animationSpringDamping(1.0),
                      .animationDuration(0.3)])
         control.indicatorViewInset = 6.0
-//        control.indicatorView.addShadow(offset: CGSize(width: 4, height: 4),
-//                                        color: .appPrimary,
-//                                        radius: 2)
+        control.indicatorView.addSoftShadow()
         control.setIndex(0)
         return control
     }()
@@ -43,7 +41,6 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        betterSegmentedControl.indicatorView.addSoftShadow()
         setupUI()
         loadHistory()
     }

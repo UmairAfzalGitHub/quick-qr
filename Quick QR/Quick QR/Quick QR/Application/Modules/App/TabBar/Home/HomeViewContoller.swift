@@ -119,7 +119,7 @@ class HomeViewController: UIViewController {
                      .cornerRadius(27),
                      .animationSpringDamping(1.0),
                      .animationDuration(0.3)])
-
+        control.indicatorViewInset = 6.0
         control.indicatorView.addSoftShadow()
         control.setIndex(0)
         return control
