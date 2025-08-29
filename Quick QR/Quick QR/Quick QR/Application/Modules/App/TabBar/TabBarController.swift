@@ -39,10 +39,11 @@ class TabBarController: UITabBarController {
         createVC.view.backgroundColor = .systemBackground
         createVC.title = "Create"
         
-        let favoriteVC = UIViewController()
+        let favoriteVC = FavouriteViewController()
         favoriteVC.view.backgroundColor = .systemBackground
         favoriteVC.title = "Favorite"
-        
+        let favoriteNavController = UINavigationController(rootViewController: favoriteVC)
+
         let scanVC = UIViewController()
         scanVC.view.backgroundColor = .systemBackground
         scanVC.title = "" // Empty title for center tab
@@ -80,7 +81,7 @@ class TabBarController: UITabBarController {
         settingsVC.tabBarItem = settingsItem
         
         // Set view controllers
-        self.viewControllers = [createVC, favoriteVC, scanVC, historyVC, settingsVC]
+        self.viewControllers = [createVC, favoriteNavController, scanVC, historyVC, settingsVC]
         
         // Start with scan tab selected
         self.selectedIndex = 0
