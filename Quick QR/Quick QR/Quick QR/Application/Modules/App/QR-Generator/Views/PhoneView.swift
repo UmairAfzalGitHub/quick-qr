@@ -28,7 +28,7 @@ final class PhoneView: UIView {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder = "Enter phone number"
-        tf.keyboardType = .emailAddress
+        tf.keyboardType = .phonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
         tf.clearButtonMode = .whileEditing
@@ -57,7 +57,7 @@ final class PhoneView: UIView {
         addSubview(phoneLabel)
         addSubview(phoneTextField)
 
-        let side: CGFloat = 20
+        let side: CGFloat = 0
         let fieldHeight: CGFloat = 50
         let labelFieldSpacing: CGFloat = 8
         

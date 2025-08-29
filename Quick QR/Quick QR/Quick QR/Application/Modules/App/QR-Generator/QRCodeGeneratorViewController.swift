@@ -67,6 +67,7 @@ class QRCodeGeneratorViewController: UIViewController {
     var phoneView: PhoneView?
     var textView: TextView?
     var contactsView: ContactsView?
+    var locationView: LocationView?
     
     // MARK: - Content View (to be replaced)
     private let replaceableContentView = UIView()
@@ -87,7 +88,7 @@ class QRCodeGeneratorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentQRType = .contact
+        currentQRType = .location
         configure(with: currentQRType!)
         setupUI()
         setupConstraints()
@@ -290,7 +291,8 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     private func createLocationView() -> UIView {
-        return createPlaceholderView(for: "Location", description: "Location coordinates form will go here")
+        locationView = LocationView()
+        return locationView!
     }
     
     private func createEventsView() -> UIView {

@@ -145,7 +145,7 @@ final class EmailView: UIView {
         
         contentTextView.delegate = self
         
-        let side: CGFloat = 20
+        let side: CGFloat = 0
         let fieldHeight: CGFloat = 50
         let sectionSpacing: CGFloat = 16
         let labelFieldSpacing: CGFloat = 8

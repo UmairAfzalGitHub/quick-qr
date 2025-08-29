@@ -38,7 +38,7 @@ final class ContactsView: UIView {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder = "Enter name"
-        tf.keyboardType = .emailAddress
+        tf.keyboardType = .namePhonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
         tf.clearButtonMode = .whileEditing
@@ -52,7 +52,7 @@ final class ContactsView: UIView {
     private let numberLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Phone Number"
+        label.text = "Phone number"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -62,7 +62,7 @@ final class ContactsView: UIView {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder = "Enter phone number"
-        tf.keyboardType = .emailAddress
+        tf.keyboardType = .phonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
         tf.clearButtonMode = .whileEditing
@@ -76,7 +76,7 @@ final class ContactsView: UIView {
     private let emailLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "EmailAddress"
+        label.text = "Email address"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -119,43 +119,43 @@ final class ContactsView: UIView {
         addSubview(emailLabel)
         addSubview(emailTextField)
 
-        let side: CGFloat = 20
+        let side: CGFloat = 0
         let fieldHeight: CGFloat = 50
         let sectionSpacing: CGFloat = 16
         let labelFieldSpacing: CGFloat = 8
         
         NSLayoutConstraint.activate([
-            // Phone label
+            // name label
             nameLabel.topAnchor.constraint(equalTo: topAnchor),
             nameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             nameLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
             nameLabel.heightAnchor.constraint(equalToConstant: 24),
             
-            // Phone field
+            // name field
             nameTextField.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: labelFieldSpacing),
             nameTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             nameTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
             nameTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
             
-            // Phone label
+            // number label
             numberLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: sectionSpacing),
             numberLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             numberLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
             numberLabel.heightAnchor.constraint(equalToConstant: 24),
             
-            // Phone field
+            // number field
             numberTextField.topAnchor.constraint(equalTo: numberLabel.bottomAnchor, constant: labelFieldSpacing),
             numberTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             numberTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
             numberTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
             
-            // Phone label
+            // email label
             emailLabel.topAnchor.constraint(equalTo: numberTextField.bottomAnchor, constant: sectionSpacing),
             emailLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             emailLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
             emailLabel.heightAnchor.constraint(equalToConstant: 24),
             
-            // Phone field
+            // email field
             emailTextField.topAnchor.constraint(equalTo: emailLabel.bottomAnchor, constant: labelFieldSpacing),
             emailTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             emailTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),

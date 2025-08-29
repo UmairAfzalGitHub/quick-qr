@@ -81,7 +81,7 @@ final class WebsiteView: UIView {
         addSubview(wwwView)
         addSubview(comView)
 
-        let side: CGFloat = 20
+        let side: CGFloat = 0
         let fieldHeight: CGFloat = 50
         let labelFieldSpacing: CGFloat = 8
         
