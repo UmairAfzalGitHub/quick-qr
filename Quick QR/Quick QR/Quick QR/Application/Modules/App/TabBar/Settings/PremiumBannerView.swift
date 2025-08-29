@@ -62,7 +62,7 @@ class PremiumBannerView: UIView {
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         subtitleLabel.text = "Get 100% Ads-Free experience"
         subtitleLabel.font = UIFont.systemFont(ofSize: 14)
-        subtitleLabel.textColor = .darkGray
+        subtitleLabel.textColor = .customColor(fromHex: "373D50")
         containerView.addSubview(subtitleLabel)
 
         // Upgrade button
@@ -94,20 +94,20 @@ class PremiumBannerView: UIView {
             bgImageView.heightAnchor.constraint(equalToConstant: 60),
             bgImageView.widthAnchor.constraint(equalToConstant: 60),
 
-            diamondImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            diamondImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            diamondImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            diamondImageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
             diamondImageView.widthAnchor.constraint(equalToConstant: 40),
             diamondImageView.heightAnchor.constraint(equalToConstant: 40),
             
-            titleLabel.leadingAnchor.constraint(equalTo: diamondImageView.trailingAnchor, constant: 12),
-            titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
+            titleLabel.leadingAnchor.constraint(equalTo: diamondImageView.leadingAnchor),
+            titleLabel.topAnchor.constraint(equalTo: diamondImageView.bottomAnchor),
             
             subtitleLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
             subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
             subtitleLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16),
             
-            upgradeButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
-            upgradeButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            upgradeButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -4),
+            upgradeButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor, constant: 8),
             upgradeButton.widthAnchor.constraint(equalToConstant: 140),
             upgradeButton.heightAnchor.constraint(equalToConstant: 50),
             

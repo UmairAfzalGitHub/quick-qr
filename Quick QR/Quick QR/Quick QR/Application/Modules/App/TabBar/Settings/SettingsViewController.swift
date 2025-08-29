@@ -161,7 +161,7 @@ class SettingsViewController: UIViewController,
         if section == .premium {
             return 120
         }
-        return UITableView.automaticDimension
+        return 0
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
