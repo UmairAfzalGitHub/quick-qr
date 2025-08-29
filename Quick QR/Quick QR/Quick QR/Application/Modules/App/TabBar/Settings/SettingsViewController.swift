@@ -43,7 +43,7 @@ class SettingsViewController: UIViewController,
         tableView.register(SettingsCell.self, forCellReuseIdentifier: SettingsCell.identifier)
         
         // Set up premium banner as header view for first section
-        premiumBannerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 100)
+        premiumBannerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 120)
         
         view.addSubview(tableView)
         
@@ -159,7 +159,7 @@ class SettingsViewController: UIViewController,
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         let section = SettingsSection(rawValue: section)!
         if section == .premium {
-            return 100
+            return 120
         }
         return UITableView.automaticDimension
     }

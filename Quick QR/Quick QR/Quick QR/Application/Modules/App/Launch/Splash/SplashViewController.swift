@@ -46,6 +46,8 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
     func checkLanguageStatus() {
         let onBoardingStatus = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
         if onBoardingStatus {
+            progressBar.animateIndeterminate(duration: 8.0, speed: 1.5) {[weak self] in
+            }
             AdManager.shared.loadInterstitialAd(id: AdMobConfig.interstitial) { isLoaded, interstitial in
                 let nextController = TabBarController()
                 if AdManager.shared.splashInterstitial {
@@ -69,9 +71,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
             AdManager.shared.preloadNativeAds()
         }
 
-        progressBar.animateIndeterminate(duration: 4.0, speed: 1.5) {[weak self] in
-            self?.checkLanguageStatus()
-        }
+        checkLanguageStatus()
     }
     
     @IBAction func didTapActionButton(_ sender: Any) {
