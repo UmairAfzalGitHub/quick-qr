@@ -119,8 +119,9 @@ class HomeViewController: UIViewController {
                      .cornerRadius(27),
                      .animationSpringDamping(1.0),
                      .animationDuration(0.3)])
-        
-        control.setIndex(0) // Start with "QR Code" selected
+
+        control.indicatorView.addSoftShadow()
+        control.setIndex(0)
         return control
     }()
     

@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import BetterSegmentedControl
+import IOS_Helpers
 
 class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
@@ -24,8 +25,11 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
                      .cornerRadius(27),
                      .animationSpringDamping(1.0),
                      .animationDuration(0.3)])
-        
-        control.setIndex(0) // Start with "QR Code" selected
+        control.indicatorViewInset = 6.0
+//        control.indicatorView.addShadow(offset: CGSize(width: 4, height: 4),
+//                                        color: .appPrimary,
+//                                        radius: 2)
+        control.setIndex(0)
         return control
     }()
     
@@ -39,6 +43,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        betterSegmentedControl.indicatorView.addSoftShadow()
         setupUI()
         loadHistory()
     }
@@ -83,7 +88,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    
+
     private func loadHistory() {
         // Mock data for demonstration
         dataSource = [
