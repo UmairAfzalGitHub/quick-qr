@@ -155,6 +155,7 @@ final class EmailView: UIView {
             emailLabel.topAnchor.constraint(equalTo: topAnchor),
             emailLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             emailLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
+            emailLabel.heightAnchor.constraint(equalToConstant: 24),
             
             // Email field
             emailTextField.topAnchor.constraint(equalTo: emailLabel.bottomAnchor, constant: labelFieldSpacing),
@@ -166,7 +167,9 @@ final class EmailView: UIView {
             subjectLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: sectionSpacing),
             subjectLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             subjectLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
+            subjectLabel.heightAnchor.constraint(equalToConstant: 24),
             
+
             // Subject field
             subjectTextField.topAnchor.constraint(equalTo: subjectLabel.bottomAnchor, constant: labelFieldSpacing),
             subjectTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
@@ -177,6 +180,7 @@ final class EmailView: UIView {
             contentLabel.topAnchor.constraint(equalTo: subjectTextField.bottomAnchor, constant: sectionSpacing),
             contentLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             contentLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
+            contentLabel.heightAnchor.constraint(equalToConstant: 24),
             
             // Content container
             contentContainer.topAnchor.constraint(equalTo: contentLabel.bottomAnchor, constant: labelFieldSpacing),

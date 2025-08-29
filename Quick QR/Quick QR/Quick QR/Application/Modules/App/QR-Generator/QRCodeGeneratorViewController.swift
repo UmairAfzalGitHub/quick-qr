@@ -62,6 +62,8 @@ class QRCodeGeneratorViewController: UIViewController {
     private let actionButton = UIButton(type: .system)
     private let adContainerView = UIView()
     
+    var emailView: EmailView?
+    
     // MARK: - Content View (to be replaced)
     private let replaceableContentView = UIView()
     private var placeholderHeightConstraint: NSLayoutConstraint?
@@ -81,6 +83,8 @@ class QRCodeGeneratorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        currentQRType = .email
+        configure(with: currentQRType!)
         setupUI()
         setupConstraints()
         setupActions()
@@ -101,20 +105,8 @@ class QRCodeGeneratorViewController: UIViewController {
         
         // Configure replaceable content view
         replaceableContentView.translatesAutoresizingMaskIntoConstraints = false
-        replaceableContentView.backgroundColor = .systemGray6
-        replaceableContentView.layer.cornerRadius = 12
-        replaceableContentView.layer.borderWidth = 2
-        replaceableContentView.layer.borderColor = UIColor.systemGray4.cgColor
-        
-        // Add placeholder label for the replaceable content
-        let placeholderLabel = UILabel()
-        placeholderLabel.translatesAutoresizingMaskIntoConstraints = false
-        placeholderLabel.text = "Content will be loaded here\nfrom previous screen"
-        placeholderLabel.textAlignment = .center
-        placeholderLabel.textColor = .systemGray2
-        placeholderLabel.font = .systemFont(ofSize: 16, weight: .medium)
-        placeholderLabel.numberOfLines = 0
-        
+        replaceableContentView.backgroundColor = .clear
+
         // Configure action button
         actionButton.translatesAutoresizingMaskIntoConstraints = false
         actionButton.setTitle(buttonTitle, for: .normal)
@@ -130,14 +122,6 @@ class QRCodeGeneratorViewController: UIViewController {
         adContainerView.layer.borderWidth = 1
         adContainerView.layer.borderColor = UIColor.systemGray4.cgColor
         
-        // Add placeholder label for ad
-        let adLabel = UILabel()
-        adLabel.translatesAutoresizingMaskIntoConstraints = false
-        adLabel.text = "Advertisement Space"
-        adLabel.textAlignment = .center
-        adLabel.textColor = .systemGray
-        adLabel.font = .systemFont(ofSize: 14)
-        
         // Add subviews
         view.addSubview(scrollView)
         view.addSubview(actionButton)
@@ -145,22 +129,6 @@ class QRCodeGeneratorViewController: UIViewController {
         
         scrollView.addSubview(contentView)
         contentView.addSubview(replaceableContentView)
-        replaceableContentView.addSubview(placeholderLabel)
-        adContainerView.addSubview(adLabel)
-        
-        // Center placeholder label in replaceable content view
-        NSLayoutConstraint.activate([
-            placeholderLabel.centerXAnchor.constraint(equalTo: replaceableContentView.centerXAnchor),
-            placeholderLabel.centerYAnchor.constraint(equalTo: replaceableContentView.centerYAnchor),
-            placeholderLabel.leadingAnchor.constraint(greaterThanOrEqualTo: replaceableContentView.leadingAnchor, constant: 16),
-            placeholderLabel.trailingAnchor.constraint(lessThanOrEqualTo: replaceableContentView.trailingAnchor, constant: -16)
-        ])
-        
-        // Center ad label
-        NSLayoutConstraint.activate([
-            adLabel.centerXAnchor.constraint(equalTo: adContainerView.centerXAnchor),
-            adLabel.centerYAnchor.constraint(equalTo: adContainerView.centerYAnchor)
-        ])
     }
     
     private func setupConstraints() {
@@ -305,7 +273,8 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     private func createEmailView() -> UIView {
-        return createPlaceholderView(for: "Email", description: "Email composition form will go here")
+        emailView = EmailView()
+        return emailView!
     }
     
     private func createWebsiteView() -> UIView {
