@@ -10,6 +10,7 @@ import Foundation
 // MARK: - QR Code Type Enum
 enum CodeType: String, CaseIterable {
     case wifi = "wifi"
+    case calendar = "calendar"
     case phone = "phone"
     case text = "text"
     case contact = "contact"
@@ -30,6 +31,7 @@ enum CodeType: String, CaseIterable {
     var displayName: String {
         switch self {
         case .wifi: return "WiFi"
+        case .calendar: return "Calendar"
         case .phone: return "Phone"
         case .text: return "Text"
         case .contact: return "Contact"

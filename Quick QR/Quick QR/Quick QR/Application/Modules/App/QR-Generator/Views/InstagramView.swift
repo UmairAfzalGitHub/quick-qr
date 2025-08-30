@@ -57,7 +57,7 @@ final class InstagramView: UIView {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder = "Enter URL"
-        tf.keyboardType = .phonePad
+        tf.keyboardType = .namePhonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
         tf.clearButtonMode = .whileEditing

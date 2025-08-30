@@ -10,13 +10,13 @@ import UIKit
 final class CalendarView: UIView {
     // MARK: - Public API
     var titleText: String? {
-        get { emailTextField.text }
-        set { emailTextField.text = newValue }
+        get { titleTextField.text }
+        set { titleTextField.text = newValue }
     }
     
     var locationText: String? {
-        get { subjectTextField.text }
-        set { subjectTextField.text = newValue }
+        get { locationTextField.text }
+        set { locationTextField.text = newValue }
     }
     
     var dayStartText: String? {
@@ -36,20 +36,20 @@ final class CalendarView: UIView {
     }
     
     // MARK: - UI Elements
-    private let emailLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Email address"
+        label.text = "Title"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
     }()
     
-    private let emailTextField: UITextField = {
+    private let titleTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter name"
-        tf.keyboardType = .emailAddress
+        tf.placeholder = "Enter a title"
+        tf.keyboardType = .namePhonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
         tf.clearButtonMode = .whileEditing
@@ -60,21 +60,21 @@ final class CalendarView: UIView {
         return tf
     }()
     
-    private let subjectLabel: UILabel = {
+    private let locationLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Subject"
+        label.text = "Location"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
     }()
     
-    private let subjectTextField: UITextField = {
+    private let locationTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder = "Please enter something"
         tf.autocapitalizationType = .sentences
-        tf.autocorrectionType = .yes
+        tf.autocorrectionType = .no
         tf.backgroundColor = .systemBackground
         tf.layer.cornerRadius = 10
         tf.layer.borderWidth = 1
@@ -82,10 +82,53 @@ final class CalendarView: UIView {
         return tf
     }()
     
-    private let contentLabel: UILabel = {
+    private let allDayLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Content"
+        label.text = "All day"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.textColor = .textPrimary
+        return label
+    }()
+    
+    private let allDaySwitch: UISwitch = {
+        let switchToogle = UISwitch()
+        switchToogle.translatesAutoresizingMaskIntoConstraints = false
+        switchToogle.backgroundColor = .clear
+        switchToogle.onTintColor = .appPrimary
+        return switchToogle
+    }()
+    
+    private let startTextField: UITextField = {
+        let tf = PaddedTextField()
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        tf.placeholder = "Start time"
+        tf.autocapitalizationType = .sentences
+        tf.autocorrectionType = .no
+        tf.backgroundColor = .systemBackground
+        tf.layer.cornerRadius = 10
+        tf.layer.borderWidth = 1
+        tf.layer.borderColor = UIColor.appBorderDark.cgColor
+        return tf
+    }()
+    
+    private let endTextField: UITextField = {
+        let tf = PaddedTextField()
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        tf.placeholder = "End time"
+        tf.autocapitalizationType = .sentences
+        tf.autocorrectionType = .no
+        tf.backgroundColor = .systemBackground
+        tf.layer.cornerRadius = 10
+        tf.layer.borderWidth = 1
+        tf.layer.borderColor = UIColor.appBorderDark.cgColor
+        return tf
+    }()
+    
+    private let descriptionLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Description"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -108,7 +151,7 @@ final class CalendarView: UIView {
         tv.font = UIFont.systemFont(ofSize: 16)
         tv.textColor = .label
         tv.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-        tv.isScrollEnabled = true // internal scrolling for long content, while no UIScrollView is added externally
+        tv.isScrollEnabled = true
         return tv
     }()
     
@@ -136,11 +179,15 @@ final class CalendarView: UIView {
     private func setup() {
         backgroundColor = .clear
         
-        addSubview(emailLabel)
-        addSubview(emailTextField)
-        addSubview(subjectLabel)
-        addSubview(subjectTextField)
-        addSubview(contentLabel)
+        addSubview(titleLabel)
+        addSubview(titleTextField)
+        addSubview(locationLabel)
+        addSubview(locationTextField)
+        addSubview(allDayLabel)
+        addSubview(allDaySwitch)
+        addSubview(startTextField)
+        addSubview(endTextField)
+        addSubview(descriptionLabel)
         addSubview(contentContainer)
         contentContainer.addSubview(contentTextView)
         contentContainer.addSubview(contentPlaceholderLabel)
@@ -153,39 +200,58 @@ final class CalendarView: UIView {
         let labelFieldSpacing: CGFloat = 8
         
         NSLayoutConstraint.activate([
-            // Email label
-            emailLabel.topAnchor.constraint(equalTo: topAnchor),
-            emailLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
-            emailLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
-            emailLabel.heightAnchor.constraint(equalToConstant: 24),
+            // title label
+            titleLabel.topAnchor.constraint(equalTo: topAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
+            titleLabel.heightAnchor.constraint(equalToConstant: 24),
             
-            // Email field
-            emailTextField.topAnchor.constraint(equalTo: emailLabel.bottomAnchor, constant: labelFieldSpacing),
-            emailTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
-            emailTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
-            emailTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
+            // title field
+            titleTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: labelFieldSpacing),
+            titleTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
+            titleTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
+            titleTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
             
-            // Subject label
-            subjectLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: sectionSpacing),
-            subjectLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
-            subjectLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
-            subjectLabel.heightAnchor.constraint(equalToConstant: 24),
+            // location label
+            locationLabel.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: sectionSpacing),
+            locationLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
+            locationLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
+            locationLabel.heightAnchor.constraint(equalToConstant: 24),
             
 
-            // Subject field
-            subjectTextField.topAnchor.constraint(equalTo: subjectLabel.bottomAnchor, constant: labelFieldSpacing),
-            subjectTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
-            subjectTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
-            subjectTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
+            // location field
+            locationTextField.topAnchor.constraint(equalTo: locationLabel.bottomAnchor, constant: labelFieldSpacing),
+            locationTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
+            locationTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
+            locationTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
+            
+            // all Day label
+            allDayLabel.topAnchor.constraint(equalTo: locationTextField.bottomAnchor, constant: sectionSpacing),
+            allDayLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
+            allDayLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
+            allDayLabel.heightAnchor.constraint(equalToConstant: 24),
+            
+            allDaySwitch.centerYAnchor.constraint(equalTo: allDayLabel.centerYAnchor),
+            allDaySwitch.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2),
+            
+            startTextField.topAnchor.constraint(equalTo: allDayLabel.bottomAnchor, constant: labelFieldSpacing),
+            startTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
+            startTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
+            startTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
+            
+            endTextField.topAnchor.constraint(equalTo: startTextField.bottomAnchor, constant: labelFieldSpacing),
+            endTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
+            endTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
+            endTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
             
             // Content label
-            contentLabel.topAnchor.constraint(equalTo: subjectTextField.bottomAnchor, constant: sectionSpacing),
-            contentLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
-            contentLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
-            contentLabel.heightAnchor.constraint(equalToConstant: 24),
+            descriptionLabel.topAnchor.constraint(equalTo: endTextField.bottomAnchor, constant: sectionSpacing),
+            descriptionLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
+            descriptionLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
+            descriptionLabel.heightAnchor.constraint(equalToConstant: 24),
             
             // Content container
-            contentContainer.topAnchor.constraint(equalTo: contentLabel.bottomAnchor, constant: labelFieldSpacing),
+            contentContainer.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: labelFieldSpacing),
             contentContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             contentContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
             contentContainer.heightAnchor.constraint(greaterThanOrEqualToConstant: 140),
