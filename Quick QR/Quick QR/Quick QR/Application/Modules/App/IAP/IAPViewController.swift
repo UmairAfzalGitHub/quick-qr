@@ -93,7 +93,7 @@ class IAPViewController: UIViewController {
     private var yearlyPlanView = UIView()
     
     private let disclaimerLabel = UILabel()
-    private let continueButton = UIButton(type: .system)
+    private let continueButton = GradientButton(type: .system)
     private let termsStackView = UIStackView()
     
     // MARK: - Lifecycle
@@ -146,6 +146,8 @@ class IAPViewController: UIViewController {
     }
     
     private func setupScrollView() {
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -200,7 +202,7 @@ class IAPViewController: UIViewController {
         contentView.addSubview(topImageView)
         
         NSLayoutConstraint.activate([
-            topImageView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
+            topImageView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
             topImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             topImageView.widthAnchor.constraint(equalToConstant: 200),
             topImageView.heightAnchor.constraint(equalToConstant: 200)
@@ -217,7 +219,7 @@ class IAPViewController: UIViewController {
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         subtitleLabel.text = "Scan all type of QR Codes & bar Codes"
         subtitleLabel.font = UIFont.systemFont(ofSize: 16)
-        subtitleLabel.textColor = .secondaryLabel
+        subtitleLabel.textColor = .customColor(fromHex: "585B67")
         subtitleLabel.textAlignment = .center
         
         contentView.addSubview(mainTitleLabel)
@@ -237,12 +239,12 @@ class IAPViewController: UIViewController {
     private func setupFeatures() {
         featureStackView.translatesAutoresizingMaskIntoConstraints = false
         featureStackView.axis = .vertical
-        featureStackView.spacing = 16
+        featureStackView.spacing = 8
         featureStackView.distribution = .fillEqually
         
         let featureContainer = UIView()
         featureContainer.translatesAutoresizingMaskIntoConstraints = false
-        featureContainer.backgroundColor = UIColor.systemGray6
+        featureContainer.backgroundColor = UIColor.customColor(fromHex: "EFF6FF")
         featureContainer.layer.cornerRadius = 12
         
         contentView.addSubview(featureContainer)
@@ -322,6 +324,23 @@ class IAPViewController: UIViewController {
             plansStackView.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -24)
         ])
         
+        // Add subscription info label
+        let subscriptionInfoLabel = UILabel()
+        subscriptionInfoLabel.translatesAutoresizingMaskIntoConstraints = false
+        subscriptionInfoLabel.text = "Once you subscribe, your plan will automatically renew unless you choose to cancel."
+        subscriptionInfoLabel.font = UIFont.systemFont(ofSize: 12)
+        subscriptionInfoLabel.textColor = .gray
+        subscriptionInfoLabel.textAlignment = .center
+        subscriptionInfoLabel.numberOfLines = 0
+        scrollView.addSubview(subscriptionInfoLabel)
+        
+        NSLayoutConstraint.activate([
+            subscriptionInfoLabel.topAnchor.constraint(equalTo: plansStackView.bottomAnchor, constant: 16),
+            subscriptionInfoLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20),
+            subscriptionInfoLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -20),
+            subscriptionInfoLabel.bottomAnchor.constraint(lessThanOrEqualTo: scrollView.bottomAnchor, constant: -24)
+        ])
+        
         // Set initial selection
         selectedPlan = .yearly
         updatePlanSelection()
@@ -338,14 +357,14 @@ class IAPViewController: UIViewController {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = plan.title
-        titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
         titleLabel.textColor = .black
         
         // Create price label
         let priceLabel = UILabel()
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
         priceLabel.text = plan.price
-        priceLabel.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        priceLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         priceLabel.textColor = .black
         priceLabel.textAlignment = .right
         
@@ -373,7 +392,7 @@ class IAPViewController: UIViewController {
             constraints.append(contentsOf: [
                 tagLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: -10),
                 tagLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-                tagLabel.widthAnchor.constraint(equalToConstant: 80),
+                tagLabel.widthAnchor.constraint(equalToConstant: plan == .monthly ? 140 : 80),
                 tagLabel.heightAnchor.constraint(equalToConstant: 24)
             ])
         }
@@ -455,21 +474,9 @@ class IAPViewController: UIViewController {
         bottomContainer.backgroundColor = .systemBackground
         view.addSubview(bottomContainer)
         
-        // Disclaimer label
-        disclaimerLabel.translatesAutoresizingMaskIntoConstraints = false
-        disclaimerLabel.text = "Once you subscribe, your plan will automatically renew unless you choose to cancel."
-        disclaimerLabel.font = UIFont.systemFont(ofSize: 12)
-        disclaimerLabel.textColor = .secondaryLabel
-        disclaimerLabel.textAlignment = .center
-        disclaimerLabel.numberOfLines = 0
-        
         // Continue button
         continueButton.translatesAutoresizingMaskIntoConstraints = false
-        continueButton.setTitle("Continue", for: .normal)
-        continueButton.setTitleColor(.white, for: .normal)
-        continueButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
-        continueButton.backgroundColor = .systemOrange
-        continueButton.layer.cornerRadius = 25
+        continueButton.setBoldTitle("Continue")
         continueButton.addTarget(self, action: #selector(continueButtonTapped), for: .touchUpInside)
         
         // Terms and privacy
@@ -501,7 +508,6 @@ class IAPViewController: UIViewController {
         termsStackView.addArrangedSubview(separatorLabel)
         termsStackView.addArrangedSubview(privacyButton)
         
-        bottomContainer.addSubview(disclaimerLabel)
         bottomContainer.addSubview(continueButton)
         bottomContainer.addSubview(termsStackView)
         
@@ -511,14 +517,10 @@ class IAPViewController: UIViewController {
             bottomContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             scrollView.bottomAnchor.constraint(equalTo: bottomContainer.topAnchor),
             
-            disclaimerLabel.topAnchor.constraint(equalTo: bottomContainer.topAnchor, constant: 8),
-            disclaimerLabel.leadingAnchor.constraint(equalTo: bottomContainer.leadingAnchor, constant: 20),
-            disclaimerLabel.trailingAnchor.constraint(equalTo: bottomContainer.trailingAnchor, constant: -20),
-            
-            continueButton.topAnchor.constraint(equalTo: disclaimerLabel.bottomAnchor, constant: 16),
-            continueButton.leadingAnchor.constraint(equalTo: bottomContainer.leadingAnchor, constant: 20),
-            continueButton.trailingAnchor.constraint(equalTo: bottomContainer.trailingAnchor, constant: -20),
-            continueButton.heightAnchor.constraint(equalToConstant: 50),
+            continueButton.topAnchor.constraint(equalTo: bottomContainer.topAnchor, constant: 16),
+            continueButton.leadingAnchor.constraint(equalTo: bottomContainer.leadingAnchor, constant: 50),
+            continueButton.trailingAnchor.constraint(equalTo: bottomContainer.trailingAnchor, constant: -50),
+            continueButton.heightAnchor.constraint(equalToConstant: 54),
             
             termsStackView.topAnchor.constraint(equalTo: continueButton.bottomAnchor, constant: 16),
             termsStackView.centerXAnchor.constraint(equalTo: bottomContainer.centerXAnchor),
