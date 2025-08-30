@@ -12,6 +12,7 @@ class TabBarController: UITabBarController {
     
     // MARK: - Properties
     private let centerButton = UIButton(type: .custom)
+    private var shouldHideCenterButton = false
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -19,17 +20,29 @@ class TabBarController: UITabBarController {
         setupViewControllers()
         setupTabBarAppearance()
         setupCenterButton()
+        setupNavigationControllerDelegates()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         positionCenterButton()
+        
+        // Ensure button stays on top after layout changes
+        if !centerButton.isHidden && !shouldHideCenterButton {
+            view.bringSubviewToFront(centerButton)
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // Ensure tab bar is visible
         tabBar.isHidden = false
+        updateCenterButtonVisibility()
+        
+        // Always ensure center button is on top when view appears
+        if !centerButton.isHidden {
+            view.bringSubviewToFront(centerButton)
+        }
     }
     
     // MARK: - Setup
@@ -131,28 +144,21 @@ class TabBarController: UITabBarController {
     }
     
     private func setupCenterButton() {
-        // Use the 'scan' image from assets catalog
         let scanImage = UIImage(named: "scan")
         centerButton.setImage(scanImage, for: .normal)
-//        centerButton.tintColor = .white
         centerButton.backgroundColor = .white
-        
-        // Make button perfectly circular
         centerButton.layer.cornerRadius = 30
-        
-        // Add white border to create outer circle effect
         centerButton.layer.borderWidth = 2.0
         centerButton.layer.borderColor = UIColor.appPrimary.cgColor
-        
         centerButton.addTarget(self, action: #selector(centerButtonTapped), for: .touchUpInside)
         
-        // Add shadow for better visual effect
+        // Add shadow
         centerButton.layer.shadowColor = UIColor.appPrimary.cgColor
         centerButton.layer.shadowOffset = CGSize(width: 0, height: 3)
         centerButton.layer.shadowRadius = 8
         centerButton.layer.shadowOpacity = 0.4
         
-        // Add to view
+        // Add button to view and ensure it's always on top
         view.addSubview(centerButton)
         view.bringSubviewToFront(centerButton)
     }
@@ -181,11 +187,80 @@ class TabBarController: UITabBarController {
     static func createTabBarController() -> TabBarController {
         return TabBarController()
     }
+    
+    // MARK: - Center Button Visibility
+    private func updateCenterButtonVisibility() {
+        // Hide center button when tab bar is hidden
+        centerButton.isHidden = tabBar.isHidden || shouldHideCenterButton
+        
+        // Always ensure button is on top when visible
+        if !centerButton.isHidden {
+            view.bringSubviewToFront(centerButton)
+            
+            // Schedule another check to ensure it stays on top after any animations
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                guard let self = self, !self.centerButton.isHidden else { return }
+                self.view.bringSubviewToFront(self.centerButton)
+            }
+            
+            // And another slightly later to catch any delayed layout changes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                guard let self = self, !self.centerButton.isHidden else { return }
+                self.view.bringSubviewToFront(self.centerButton)
+            }
+        }
+    }
+    
+    private func setupNavigationControllerDelegates() {
+        // Set up delegates for each navigation controller
+        viewControllers?.forEach { viewController in
+            if let navController = viewController as? UINavigationController {
+                navController.delegate = self
+            }
+        }
+    }
 }
 
 // MARK: - UITabBarControllerDelegate
 extension TabBarController: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         return true
+    }
+}
+
+// MARK: - UINavigationControllerDelegate
+extension TabBarController: UINavigationControllerDelegate {
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        // Check if the view controller being pushed has hidesBottomBarWhenPushed set to true
+        shouldHideCenterButton = viewController.hidesBottomBarWhenPushed
+        updateCenterButtonVisibility()
+        
+        // Ensure button is in front when transitioning
+        if !shouldHideCenterButton {
+            DispatchQueue.main.async { [weak self] in
+                self?.view.bringSubviewToFront(self?.centerButton ?? UIView())
+            }
+        }
+    }
+    
+    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
+        // Update after the transition is complete
+        shouldHideCenterButton = viewController.hidesBottomBarWhenPushed
+        updateCenterButtonVisibility()
+        
+        // Ensure button is in front after transition completes
+        if !shouldHideCenterButton {
+            view.bringSubviewToFront(centerButton)
+            
+            // Add multiple delayed checks to ensure button stays on top
+            // This handles cases where the tab bar's z-index might be updated after our initial check
+            let checkTimes = [0.1, 0.2, 0.3, 0.5]
+            for delay in checkTimes {
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                    guard let self = self, !self.centerButton.isHidden, !self.shouldHideCenterButton else { return }
+                    self.view.bringSubviewToFront(self.centerButton)
+                }
+            }
+        }
     }
 }

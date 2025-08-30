@@ -170,6 +170,7 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
             controller.currentCodeType = type
         }
         
+        controller.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(controller, animated: true)
     }
     
