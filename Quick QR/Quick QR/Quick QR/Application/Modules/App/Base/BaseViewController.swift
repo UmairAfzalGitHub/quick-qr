@@ -9,7 +9,7 @@ enum CellCorner {
     case all
 }
 
-class BaseViewController: UIViewController, IAPViewControllerDelegate {
+class BaseViewController: UIViewController {
 
     private var loaderVC: LoaderViewController?
     private var bannerAdId: AdMobId?
@@ -88,7 +88,7 @@ class BaseViewController: UIViewController, IAPViewControllerDelegate {
     
     func showIAP() {
         let iapVarientA = IAPViewController()
-        iapVarientA.delegate = self
+//        iapVarientA.delegate = self
         iapVC = iapVarientA
 
         iapVC?.modalPresentationStyle = .fullScreen
@@ -366,10 +366,5 @@ class BaseViewController: UIViewController, IAPViewControllerDelegate {
                 toastLabel.removeFromSuperview()
             }
         }
-    }
-    
-    //MARK: - IAPViewControllerDelegate
-    func performAction() {
-        print("Perform IAP Action")
     }
 }
