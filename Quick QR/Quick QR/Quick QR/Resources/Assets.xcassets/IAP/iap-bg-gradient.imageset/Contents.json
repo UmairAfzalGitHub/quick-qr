@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "iap-bg-gradient.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
