@@ -15,32 +15,32 @@ class CodeGeneratorViewController: UIViewController {
     private let contentView = UIView()
     private let actionButton = UIButton(type: .system)
     private let adContainerView = UIView()
-    
-    var wifiView: WifiView?
-    var emailView: EmailView?
-    var websiteView: WebsiteView?
-    var phoneView: PhoneView?
-    var textView: TextView?
-    var contactsView: ContactsView?
-    var locationView: LocationView?
-    var tiktokView: TiktokView?
-    var instagramView: InstagramView?
-    var facebookView: FacebookView?
-    var xView: XView?
-    var spotifyView: SpotifyView?
-    var youtubeView: YoutubeView?
-    var whatsappView: WhatsappView?
-    var viberView: ViberView?
-    var barCodeView: BarCodeView?
-    var calendarView: CalendarView?
-    
+
+    private var wifiView: WifiView?
+    private var emailView: EmailView?
+    private var websiteView: WebsiteView?
+    private var phoneView: PhoneView?
+    private var textView: TextView?
+    private var contactsView: ContactsView?
+    private var locationView: LocationView?
+    private var tiktokView: TiktokView?
+    private var instagramView: InstagramView?
+    private var facebookView: FacebookView?
+    private var xView: XView?
+    private var spotifyView: SpotifyView?
+    private var youtubeView: YoutubeView?
+    private var whatsappView: WhatsappView?
+    private var viberView: ViberView?
+    private var barCodeView: BarCodeView?
+    private var calendarView: CalendarView?
+
     // MARK: - Content View (to be replaced)
     private let replaceableContentView = UIView()
     private var placeholderHeightConstraint: NSLayoutConstraint?
-    
+
     // MARK: - Code Type
-    private var currentCodeType: CodeType?
-    
+    var currentCodeType: CodeTypeProtocol?
+
     // MARK: - Properties
     var buttonTitle: String = "Action" {
         didSet {
@@ -53,7 +53,6 @@ class CodeGeneratorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentCodeType = .calendar
         configure(with: currentCodeType!)
         setupUI()
         setupConstraints()
@@ -161,68 +160,75 @@ class CodeGeneratorViewController: UIViewController {
     }
     
     /// Default Code generation handler
-    private func handleCodeGeneration(for codeType: CodeType) {
-        print("Generating Code for: \(codeType.displayName)")
+    private func handleCodeGeneration(for codeType: CodeTypeProtocol) {
+        print("Generating Code for: \(codeType.title)")
         // This will be implemented when creating specific view content extraction
     }
     
     // MARK: - Public Methods
     
     /// Configure the view controller with a specific Code type
-    func configure(with codeType: CodeType) {
+    func configure(with codeType: CodeTypeProtocol) {
         currentCodeType = codeType
-        title = codeType.displayName
-        buttonTitle = codeType.buttonTitle
-        
+        title = codeType.title
         // Load the appropriate content view for the Code type
         loadContentView(for: codeType)
     }
     
     /// Load the appropriate content view based on Code type
-    private func loadContentView(for codeType: CodeType) {
+    private func loadContentView(for codeType: CodeTypeProtocol) {
         let contentView = createContentView(for: codeType)
         replaceContentView(with: contentView)
     }
     
     /// Factory method to create content view for each Code type
-    private func createContentView(for codeType: CodeType) -> UIView {
-        switch codeType {
-        case .wifi:
-            return createWiFiView()
-        case .calendar:
-            return createCalendarView()
-        case .phone:
-            return createPhoneView()
-        case .text:
-            return createTextView()
-        case .contact:
-            return createContactView()
-        case .email:
-            return createEmailView()
-        case .website:
-            return createWebsiteView()
-        case .location:
-            return createLocationView()
-        case .events:
-            return createEventsView()
-        case .tiktok:
-            return createTikTokView()
-        case .instagram:
-            return createInstagramView()
-        case .facebook:
-            return createFacebookView()
-        case .x:
-            return createXView()
-        case .whatsapp:
-            return createWhatsAppView()
-        case .youtube:
-            return createYouTubeView()
-        case .spotify:
-            return createSpotifyView()
-        case .viber:
-            return createViberView()
-        case .barcode:
-            return createBarcodeView()
+    private func createContentView(for codeType: CodeTypeProtocol) -> UIView {
+        if let qrCode = codeType as? QRCodeType {
+            switch qrCode {
+            case .text:
+                return createTextView()
+            case .wifi:
+                return createWiFiView()
+            case .phone:
+                return createPhoneView()
+            case .contact:
+                return createContactView()
+            case .email:
+                return createEmailView()
+            case .website:
+                return createWebsiteView()
+            case .location:
+                return createLocationView()
+            case .events:
+                return createEventsView()
+            }
+        }
+        
+        if let socialCode = codeType as? SocialQRCodeType {
+            switch socialCode {
+            case .facebook:
+                return createFacebookView()
+            case .tiktok:
+                return createTikTokView()
+            case .instagram:
+                return createInstagramView()
+            case .x:
+                return createXView()
+            case .whatsapp:
+                return createWhatsAppView()
+            case .youtube:
+                return createYouTubeView()
+            case .spotify:
+                return createSpotifyView()
+            case .viber:
+                return createViberView()
+            }
+        }
+        
+        if let barCodeType = codeType as? BarCodeType {
+            return createBarcodeView(type: barCodeType)
+        } else {
+            return UIView()
         }
     }
     
@@ -312,8 +318,9 @@ class CodeGeneratorViewController: UIViewController {
         return viberView!
     }
     
-    private func createBarcodeView() -> UIView {
+    private func createBarcodeView(type: BarCodeType) -> UIView {
         barCodeView = BarCodeView()
+        barCodeView?.type = type
         return barCodeView!
     }
     
@@ -355,7 +362,7 @@ class CodeGeneratorViewController: UIViewController {
     }
     
     /// Get the current Code type
-    func getCurrentCodeType() -> CodeType? {
+    func getCurrentCodeType() -> CodeTypeProtocol? {
         return currentCodeType
     }
     

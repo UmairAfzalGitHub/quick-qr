@@ -39,6 +39,13 @@ final class BarCodeView: UIView {
         return tf
     }()
     
+    var type: BarCodeType = .isbn {
+        didSet {
+            barCodeNameLabel.text = type.title + " BarCode"
+            barCodeTextField.placeholder = type.placeholder
+        }
+    }
+    
     // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)

@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum SocialQRCodeType: CaseIterable {
+enum SocialQRCodeType: CaseIterable, CodeTypeProtocol {
     case tiktok, instagram, facebook, x, whatsapp, youtube, spotify, viber
     
     var title: String {

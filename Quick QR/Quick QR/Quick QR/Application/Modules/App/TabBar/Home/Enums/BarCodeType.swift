@@ -7,7 +7,12 @@
 
 import UIKit
 
-enum BarCodeType: CaseIterable {
+protocol CodeTypeProtocol {
+    var title: String {get}
+    var icon: UIImage? {get}
+}
+
+enum BarCodeType: CaseIterable, CodeTypeProtocol {
     case isbn, ean8, upce, ean13, upca, code39, code93, code128, itf, pdf417
     
     var title: String {
@@ -37,6 +42,21 @@ enum BarCodeType: CaseIterable {
         case .code128: return UIImage(named: "code128-icon")
         case .itf: return UIImage(named: "itf-icon")
         case .pdf417: return UIImage(named: "pdf417-icon")
+        }
+    }
+    
+    var placeholder: String {
+        switch self {
+        case .isbn: return "Enter your ISBN-10 or ISBN-13 number"
+        case .ean8: return "Enter 7 or 8 digits"
+        case .upce: return "Enter 7 or 8 digits"
+        case .ean13: return "Enter 12 or 13 digits"
+        case .upca: return "Enter 11 or 12 digits"
+        case .code39: return "Encodes [0..9 A..Z -.$/+% Space]"
+        case .code93: return "Encodes [0..9 A..Z -.$/+% Space]"
+        case .code128: return "Encodes the full ASCII set [0..127]"
+        case .itf: return "Enter plain text"
+        case .pdf417: return "Enter plain text"
         }
     }
 }

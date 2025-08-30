@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum QRCodeType: CaseIterable {
+enum QRCodeType: CaseIterable, CodeTypeProtocol {
     case wifi, phone, text, contact, email, website, location, events
     
     var title: String {
