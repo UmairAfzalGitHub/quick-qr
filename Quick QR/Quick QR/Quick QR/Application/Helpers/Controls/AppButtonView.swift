@@ -201,7 +201,7 @@ final class AppButtonView: UIView {
             }
 
         case let .secondary(title, image):
-            containerView.backgroundColor = UIColor.clear
+            containerView.backgroundColor = UIColor.white
             containerView.layer.borderWidth = 1
             containerView.layer.borderColor = UIColor.systemBlue.cgColor
             
