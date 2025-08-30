@@ -32,6 +32,7 @@ class CodeGeneratorViewController: UIViewController {
     var whatsappView: WhatsappView?
     var viberView: ViberView?
     var barCodeView: BarCodeView?
+    var calendarView: CalendarView?
     
     // MARK: - Content View (to be replaced)
     private let replaceableContentView = UIView()
@@ -52,7 +53,7 @@ class CodeGeneratorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentCodeType = .barcode
+        currentCodeType = .calendar
         configure(with: currentCodeType!)
         setupUI()
         setupConstraints()
@@ -66,7 +67,7 @@ class CodeGeneratorViewController: UIViewController {
         // Configure scroll view
         scrollView.backgroundColor = .clear
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.showsVerticalScrollIndicator = true
+        scrollView.showsVerticalScrollIndicator = false
         scrollView.alwaysBounceVertical = true
         
         // Configure content view
@@ -188,6 +189,8 @@ class CodeGeneratorViewController: UIViewController {
         switch codeType {
         case .wifi:
             return createWiFiView()
+        case .calendar:
+            return createCalendarView()
         case .phone:
             return createPhoneView()
         case .text:
@@ -228,6 +231,11 @@ class CodeGeneratorViewController: UIViewController {
     private func createWiFiView() -> UIView {
         wifiView = WifiView()
         return wifiView!
+    }
+    
+    private func createCalendarView() -> UIView {
+        calendarView = CalendarView()
+        return calendarView!
     }
     
     private func createPhoneView() -> UIView {

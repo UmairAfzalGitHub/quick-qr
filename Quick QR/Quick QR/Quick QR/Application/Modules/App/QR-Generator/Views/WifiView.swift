@@ -28,7 +28,7 @@ final class WifiView: UIView {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder = "Enter SSID"
-        tf.keyboardType = .emailAddress
+        tf.keyboardType = .namePhonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
         tf.clearButtonMode = .whileEditing
@@ -52,7 +52,7 @@ final class WifiView: UIView {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder = "Enter Password"
-        tf.keyboardType = .emailAddress
+        tf.keyboardType = .namePhonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
         tf.clearButtonMode = .whileEditing
