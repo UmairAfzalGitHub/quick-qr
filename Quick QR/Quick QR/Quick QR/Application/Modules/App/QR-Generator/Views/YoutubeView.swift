@@ -58,8 +58,7 @@ final class YoutubeView: UIView {
         addSubview(urlTextField)
 
         let side: CGFloat = 0
-        let fieldHeight: CGFloat = 50
-        let sectionSpacing: CGFloat = 16
+        let fieldHeight: CGFloat = 54
         let labelFieldSpacing: CGFloat = 8
         
         NSLayoutConstraint.activate([

@@ -74,6 +74,8 @@ class QRCodeGeneratorViewController: UIViewController {
     var xView: XView?
     var spotifyView: SpotifyView?
     var youtubeView: YoutubeView?
+    var whatsappView: WhatsappView?
+    var viberView: ViberView?
     
     // MARK: - Content View (to be replaced)
     private let replaceableContentView = UIView()
@@ -94,7 +96,7 @@ class QRCodeGeneratorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentQRType = .youtube
+        currentQRType = .viber
         configure(with: currentQRType!)
         setupUI()
         setupConstraints()
@@ -326,7 +328,8 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     private func createWhatsAppView() -> UIView {
-        return createPlaceholderView(for: "WhatsApp", description: "WhatsApp message form will go here")
+        whatsappView = WhatsappView()
+        return whatsappView!
     }
     
     private func createYouTubeView() -> UIView {
@@ -340,7 +343,8 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     private func createViberView() -> UIView {
-        return createPlaceholderView(for: "Viber", description: "Viber message form will go here")
+        viberView = ViberView()
+        return viberView!
     }
     
     private func createBarcodeView() -> UIView {

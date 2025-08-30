@@ -89,7 +89,7 @@ final class XView: UIView {
         addSubview(urlTextField)
 
         let side: CGFloat = 0
-        let fieldHeight: CGFloat = 50
+        let fieldHeight: CGFloat = 54
         let sectionSpacing: CGFloat = 16
         let labelFieldSpacing: CGFloat = 8
         

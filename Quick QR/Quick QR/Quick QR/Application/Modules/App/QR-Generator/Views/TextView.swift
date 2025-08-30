@@ -111,7 +111,7 @@ final class TextView: UIView {
         contentTextView.delegate = self
         
         let side: CGFloat = 0
-        let fieldHeight: CGFloat = 50
+        let fieldHeight: CGFloat = 54
         let sectionSpacing: CGFloat = 16
         let labelFieldSpacing: CGFloat = 8
         
