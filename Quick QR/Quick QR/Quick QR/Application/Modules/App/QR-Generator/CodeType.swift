@@ -42,7 +42,7 @@ enum CodeType: String, CaseIterable {
         case .tiktok: return "TikTok"
         case .instagram: return "Instagram"
         case .facebook: return "Facebook"
-        case .x: return "X (Twitter)"
+        case .x: return "X"
         case .whatsapp: return "WhatsApp"
         case .youtube: return "YouTube"
         case .spotify: return "Spotify"

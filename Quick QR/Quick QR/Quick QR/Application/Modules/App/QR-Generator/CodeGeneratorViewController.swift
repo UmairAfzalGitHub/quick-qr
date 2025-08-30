@@ -13,7 +13,7 @@ class CodeGeneratorViewController: UIViewController {
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
-    private let actionButton = UIButton(type: .system)
+    private let actionButton = AppButtonView()
     private let adContainerView = UIView()
     
     var wifiView: WifiView?
@@ -40,13 +40,6 @@ class CodeGeneratorViewController: UIViewController {
     
     // MARK: - Code Type
     private var currentCodeType: CodeType?
-    
-    // MARK: - Properties
-    var buttonTitle: String = "Action" {
-        didSet {
-            actionButton.setTitle(buttonTitle, for: .normal)
-        }
-    }
     
     var buttonAction: (() -> Void)?
     
@@ -79,11 +72,7 @@ class CodeGeneratorViewController: UIViewController {
 
         // Configure action button
         actionButton.translatesAutoresizingMaskIntoConstraints = false
-        actionButton.setTitle(buttonTitle, for: .normal)
-        actionButton.backgroundColor = .systemBlue
-        actionButton.setTitleColor(.white, for: .normal)
-        actionButton.layer.cornerRadius = 8
-        actionButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        actionButton.configure(with: .primary(title: "Create", image: nil))
         
         // Configure ad container
         adContainerView.translatesAutoresizingMaskIntoConstraints = false
@@ -115,10 +104,10 @@ class CodeGeneratorViewController: UIViewController {
             adContainerView.heightAnchor.constraint(equalToConstant: 240),
             
             // Action Button - Above ad with 20pt padding
-            actionButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 18),
-            actionButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -18),
+            actionButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 70),
+            actionButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -70),
             actionButton.bottomAnchor.constraint(equalTo: adContainerView.topAnchor, constant: -20),
-            actionButton.heightAnchor.constraint(equalToConstant: 50),
+            actionButton.heightAnchor.constraint(equalToConstant: 60),
             
             // Scroll View - Above button with 18pt padding from top and sides
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 18),
@@ -142,7 +131,7 @@ class CodeGeneratorViewController: UIViewController {
     }
     
     private func setupActions() {
-        actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+//        actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     
     @objc private func buttonTapped() {
@@ -172,7 +161,6 @@ class CodeGeneratorViewController: UIViewController {
     func configure(with codeType: CodeType) {
         currentCodeType = codeType
         title = codeType.displayName
-        buttonTitle = codeType.buttonTitle
         
         // Load the appropriate content view for the Code type
         loadContentView(for: codeType)
