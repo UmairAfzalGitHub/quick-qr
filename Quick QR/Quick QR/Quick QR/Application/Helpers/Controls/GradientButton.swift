@@ -23,9 +23,15 @@ class GradientButton: UIButton {
     }
     
     private func setupButton() {
-        // Title style
+        // Use legacy UIButton styling (so titleLabel?.font works)
+        if #available(iOS 15.0, *) { self.configuration = nil }
+
+        // If any attributed titles were set (IB or code), clear them so .font takes effect
+        [UIControl.State.normal, .highlighted, .selected, .disabled].forEach {
+            self.setAttributedTitle(nil, for: $0)
+        }
+        titleLabel?.font = .boldSystemFont(ofSize: 22)
         setTitleColor(.white, for: .normal)
-        titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         
         // Rounded corners
         layer.cornerRadius = 25
@@ -33,12 +39,12 @@ class GradientButton: UIButton {
         
         // Border
         layer.borderColor = UIColor.white.cgColor
-        layer.borderWidth = 1
+        layer.borderWidth = 2
         
         // Shadow
         layer.shadowColor = UIColor(red: 1.0, green: 0.6, blue: 0.0, alpha: 0.7).cgColor
         layer.shadowOpacity = 0.6
-        layer.shadowOffset = CGSize(width: 0, height: 4)
+        layer.shadowOffset = .zero
         layer.shadowRadius = 10
     }
     
@@ -48,15 +54,26 @@ class GradientButton: UIButton {
         // Gradient
         gradientLayer.frame = bounds
         gradientLayer.colors = [
-            UIColor(red: 1.0, green: 0.75, blue: 0.2, alpha: 1).cgColor, // light yellowish
-            UIColor(red: 1.0, green: 0.5, blue: 0.0, alpha: 1).cgColor   // deep orange
+            UIColor.customColor(fromHex: "FFCA0F").cgColor, // light yellowish
+            UIColor.customColor(fromHex: "FF8001").cgColor   // deep orange
         ]
-        gradientLayer.startPoint = CGPoint(x: 0.0, y: 0.5)
-        gradientLayer.endPoint = CGPoint(x: 1.0, y: 0.5)
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0) // top-center
+        gradientLayer.endPoint   = CGPoint(x: 0.5, y: 1.0) // bottom-center
         gradientLayer.cornerRadius = layer.cornerRadius
         
         if gradientLayer.superlayer == nil {
             layer.insertSublayer(gradientLayer, at: 0)
         }
+    }
+    
+    func setBoldTitle(_ text: String, fontSize: CGFloat = 22, color: UIColor = .white) {
+        let attr = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: UIFont.boldSystemFont(ofSize: fontSize),
+                .foregroundColor: color
+            ]
+        )
+        setAttributedTitle(attr, for: .normal)
     }
 }
