@@ -1,28 +1,17 @@
 //
-//  EmailView.swift
+//  TextView.swift
 //  Quick QR
 //
-//  Created by Haider Rathore on 28/08/2025.
+//  Created by Haider Rathore on 29/08/2025.
 //
 
 import UIKit
 
-/// A UIKit-based view that replicates the provided design for composing an email.
-/// It contains three sections:
-/// 1. "Email address" with a single-line text field
-/// 2. "Subject" with a single-line text field
-/// 3. "Content" with a multi-line text view and placeholder
-/// No scroll view is used; layout is done with Auto Layout constraints.
-final class EmailView: UIView {
+final class TextView: UIView {
     // MARK: - Public API
-    var emailText: String? {
-        get { emailTextField.text }
-        set { emailTextField.text = newValue }
-    }
-    
-    var subjectText: String? {
-        get { subjectTextField.text }
-        set { subjectTextField.text = newValue }
+    var phoneNumberText: String? {
+        get { phoneNumberTextField.text }
+        set { phoneNumberTextField.text = newValue }
     }
     
     var contentText: String? {
@@ -34,20 +23,20 @@ final class EmailView: UIView {
     }
     
     // MARK: - UI Elements
-    private let emailLabel: UILabel = {
+    private let phoneNumberLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Email address"
+        label.text = "Phone number"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
     }()
     
-    private let emailTextField: UITextField = {
+    private let phoneNumberTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter name"
-        tf.keyboardType = .emailAddress
+        tf.placeholder = "Enter phone number"
+        tf.keyboardType = .phonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
         tf.clearButtonMode = .whileEditing
@@ -58,32 +47,10 @@ final class EmailView: UIView {
         return tf
     }()
     
-    private let subjectLabel: UILabel = {
-        let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Subject"
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .textPrimary
-        return label
-    }()
-    
-    private let subjectTextField: UITextField = {
-        let tf = PaddedTextField()
-        tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Please enter something"
-        tf.autocapitalizationType = .sentences
-        tf.autocorrectionType = .yes
-        tf.backgroundColor = .systemBackground
-        tf.layer.cornerRadius = 10
-        tf.layer.borderWidth = 1
-        tf.layer.borderColor = UIColor.appBorderDark.cgColor
-        return tf
-    }()
-    
     private let contentLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Content"
+        label.text = "Text message"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -134,10 +101,8 @@ final class EmailView: UIView {
     private func setup() {
         backgroundColor = .clear
         
-        addSubview(emailLabel)
-        addSubview(emailTextField)
-        addSubview(subjectLabel)
-        addSubview(subjectTextField)
+        addSubview(phoneNumberLabel)
+        addSubview(phoneNumberTextField)
         addSubview(contentLabel)
         addSubview(contentContainer)
         contentContainer.addSubview(contentTextView)
@@ -152,32 +117,19 @@ final class EmailView: UIView {
         
         NSLayoutConstraint.activate([
             // Email label
-            emailLabel.topAnchor.constraint(equalTo: topAnchor),
-            emailLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
-            emailLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
-            emailLabel.heightAnchor.constraint(equalToConstant: 24),
+            phoneNumberLabel.topAnchor.constraint(equalTo: topAnchor),
+            phoneNumberLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
+            phoneNumberLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
+            phoneNumberLabel.heightAnchor.constraint(equalToConstant: 24),
             
             // Email field
-            emailTextField.topAnchor.constraint(equalTo: emailLabel.bottomAnchor, constant: labelFieldSpacing),
-            emailTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
-            emailTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
-            emailTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
-            
-            // Subject label
-            subjectLabel.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: sectionSpacing),
-            subjectLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
-            subjectLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
-            subjectLabel.heightAnchor.constraint(equalToConstant: 24),
-            
-
-            // Subject field
-            subjectTextField.topAnchor.constraint(equalTo: subjectLabel.bottomAnchor, constant: labelFieldSpacing),
-            subjectTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
-            subjectTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
-            subjectTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
+            phoneNumberTextField.topAnchor.constraint(equalTo: phoneNumberLabel.bottomAnchor, constant: labelFieldSpacing),
+            phoneNumberTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
+            phoneNumberTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
+            phoneNumberTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
             
             // Content label
-            contentLabel.topAnchor.constraint(equalTo: subjectTextField.bottomAnchor, constant: sectionSpacing),
+            contentLabel.topAnchor.constraint(equalTo: phoneNumberTextField.bottomAnchor, constant: sectionSpacing),
             contentLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             contentLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -side),
             contentLabel.heightAnchor.constraint(equalToConstant: 24),
@@ -210,7 +162,7 @@ final class EmailView: UIView {
 }
 
 // MARK: - UITextViewDelegate
-extension EmailView: UITextViewDelegate {
+extension TextView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         updateContentPlaceholder()
     }

@@ -7,25 +7,27 @@
 
 import UIKit
 
-/// A UIKit-based view that replicates the provided design for composing an email.
-/// It contains three sections:
-/// 1. "Email address" with a single-line text field
-/// 2. "Subject" with a single-line text field
-/// 3. "Content" with a multi-line text view and placeholder
-/// No scroll view is used; layout is done with Auto Layout constraints.
-final class EmailView: UIView {
+final class CalendarView: UIView {
     // MARK: - Public API
-    var emailText: String? {
+    var titleText: String? {
         get { emailTextField.text }
         set { emailTextField.text = newValue }
     }
     
-    var subjectText: String? {
+    var locationText: String? {
         get { subjectTextField.text }
         set { subjectTextField.text = newValue }
     }
     
-    var contentText: String? {
+    var dayStartText: String? {
+        get { contentTextView.text.isEmpty ? nil : contentTextView.text }
+        set {
+            contentTextView.text = newValue
+            updateContentPlaceholder()
+        }
+    }
+    
+    var dayEndText: String? {
         get { contentTextView.text.isEmpty ? nil : contentTextView.text }
         set {
             contentTextView.text = newValue
@@ -210,7 +212,7 @@ final class EmailView: UIView {
 }
 
 // MARK: - UITextViewDelegate
-extension EmailView: UITextViewDelegate {
+extension CalendarView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         updateContentPlaceholder()
     }
