@@ -1,5 +1,5 @@
 //
-//  QRCodeGeneratorViewController.swift
+//  CodeGeneratorViewController.swift
 //  Quick QR
 //
 //  Created by Haider Rathore on 28/08/2025.
@@ -7,54 +7,8 @@
 
 import UIKit
 
-// MARK: - QR Code Type Enum
-enum CodeType: String, CaseIterable {
-    case wifi = "wifi"
-    case phone = "phone"
-    case text = "text"
-    case contact = "contact"
-    case email = "email"
-    case website = "website"
-    case location = "location"
-    case events = "events"
-    case tiktok = "tiktok"
-    case instagram = "instagram"
-    case facebook = "facebook"
-    case x = "x"
-    case whatsapp = "whatsapp"
-    case youtube = "youtube"
-    case spotify = "spotify"
-    case viber = "viber"
-    case barcode = "barcode"
-    
-    var displayName: String {
-        switch self {
-        case .wifi: return "WiFi"
-        case .phone: return "Phone"
-        case .text: return "Text"
-        case .contact: return "Contact"
-        case .email: return "Email"
-        case .website: return "Website"
-        case .location: return "Location"
-        case .events: return "Events"
-        case .tiktok: return "TikTok"
-        case .instagram: return "Instagram"
-        case .facebook: return "Facebook"
-        case .x: return "X (Twitter)"
-        case .whatsapp: return "WhatsApp"
-        case .youtube: return "YouTube"
-        case .spotify: return "Spotify"
-        case .viber: return "Viber"
-        case .barcode: return "Barcode"
-        }
-    }
-    
-    var buttonTitle: String {
-        return "Generate \(displayName) QR"
-    }
-}
 
-class QRCodeGeneratorViewController: UIViewController {
+class CodeGeneratorViewController: UIViewController {
     
     // MARK: - UI Components
     private let scrollView = UIScrollView()
@@ -62,6 +16,7 @@ class QRCodeGeneratorViewController: UIViewController {
     private let actionButton = UIButton(type: .system)
     private let adContainerView = UIView()
     
+    var wifiView: WifiView?
     var emailView: EmailView?
     var websiteView: WebsiteView?
     var phoneView: PhoneView?
@@ -76,13 +31,14 @@ class QRCodeGeneratorViewController: UIViewController {
     var youtubeView: YoutubeView?
     var whatsappView: WhatsappView?
     var viberView: ViberView?
+    var barCodeView: BarCodeView?
     
     // MARK: - Content View (to be replaced)
     private let replaceableContentView = UIView()
     private var placeholderHeightConstraint: NSLayoutConstraint?
     
-    // MARK: - QR Code Type
-    private var currentQRType: CodeType?
+    // MARK: - Code Type
+    private var currentCodeType: CodeType?
     
     // MARK: - Properties
     var buttonTitle: String = "Action" {
@@ -96,8 +52,8 @@ class QRCodeGeneratorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentQRType = .viber
-        configure(with: currentQRType!)
+        currentCodeType = .barcode
+        configure(with: currentCodeType!)
         setupUI()
         setupConstraints()
         setupActions()
@@ -189,9 +145,9 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     @objc private func buttonTapped() {
-        // Handle QR code generation based on current type
-        guard let qrType = currentQRType else {
-            print("No QR type configured")
+        // Handle code generation based on current type
+        guard let codeType = currentCodeType else {
+            print("No Code type configured")
             return
         }
         
@@ -199,37 +155,37 @@ class QRCodeGeneratorViewController: UIViewController {
         if let customAction = buttonAction {
             customAction()
         } else {
-            handleQRGeneration(for: qrType)
+            handleCodeGeneration(for: codeType)
         }
     }
     
-    /// Default QR generation handler
-    private func handleQRGeneration(for qrType: CodeType) {
-        print("Generating QR code for: \(qrType.displayName)")
+    /// Default Code generation handler
+    private func handleCodeGeneration(for codeType: CodeType) {
+        print("Generating Code for: \(codeType.displayName)")
         // This will be implemented when creating specific view content extraction
     }
     
     // MARK: - Public Methods
     
-    /// Configure the view controller with a specific QR code type
-    func configure(with qrType: CodeType) {
-        currentQRType = qrType
-        title = qrType.displayName
-        buttonTitle = qrType.buttonTitle
+    /// Configure the view controller with a specific Code type
+    func configure(with codeType: CodeType) {
+        currentCodeType = codeType
+        title = codeType.displayName
+        buttonTitle = codeType.buttonTitle
         
-        // Load the appropriate content view for the QR type
-        loadContentView(for: qrType)
+        // Load the appropriate content view for the Code type
+        loadContentView(for: codeType)
     }
     
-    /// Load the appropriate content view based on QR code type
-    private func loadContentView(for qrType: CodeType) {
-        let contentView = createContentView(for: qrType)
+    /// Load the appropriate content view based on Code type
+    private func loadContentView(for codeType: CodeType) {
+        let contentView = createContentView(for: codeType)
         replaceContentView(with: contentView)
     }
     
-    /// Factory method to create content view for each QR code type
-    private func createContentView(for qrType: CodeType) -> UIView {
-        switch qrType {
+    /// Factory method to create content view for each Code type
+    private func createContentView(for codeType: CodeType) -> UIView {
+        switch codeType {
         case .wifi:
             return createWiFiView()
         case .phone:
@@ -270,7 +226,8 @@ class QRCodeGeneratorViewController: UIViewController {
     // MARK: - Content View Creation Methods (Placeholder implementations)
     
     private func createWiFiView() -> UIView {
-        return createPlaceholderView(for: "WiFi", description: "WiFi network configuration form will go here")
+        wifiView = WifiView()
+        return wifiView!
     }
     
     private func createPhoneView() -> UIView {
@@ -348,7 +305,8 @@ class QRCodeGeneratorViewController: UIViewController {
     }
     
     private func createBarcodeView() -> UIView {
-        return createPlaceholderView(for: "Barcode", description: "Barcode data input form will go here")
+        barCodeView = BarCodeView()
+        return barCodeView!
     }
     
     /// Helper method to create placeholder views for each type
@@ -388,9 +346,9 @@ class QRCodeGeneratorViewController: UIViewController {
         return containerView
     }
     
-    /// Get the current QR code type
-    func getCurrentQRType() -> CodeType? {
-        return currentQRType
+    /// Get the current Code type
+    func getCurrentCodeType() -> CodeType? {
+        return currentCodeType
     }
     
     /// Replace the content view with a custom view from the previous screen
@@ -489,37 +447,3 @@ class QRCodeGeneratorViewController: UIViewController {
         return replaceableContentView
     }
 }
-
-// MARK: - Usage Example
-/*
- // From the previous screen (QR type selection screen):
- 
- let qrGeneratorVC = QRCodeGeneratorViewController()
- 
- // Configure with the selected QR type
- qrGeneratorVC.configure(with: .email) // or any other QRCodeType
- 
- // Optional: Override button action
- qrGeneratorVC.buttonAction = { [weak qrGeneratorVC] in
-     // Custom handling for QR generation
-     print("Custom QR generation logic")
- }
- 
- navigationController?.pushViewController(qrGeneratorVC, animated: true)
- 
- // Alternative initialization patterns:
- 
- class EmailQRViewController: QRCodeGeneratorViewController {
-     override func viewDidLoad() {
-         super.viewDidLoad()
-         configure(with: .email)
-     }
- }
- 
- class WiFiQRViewController: QRCodeGeneratorViewController {
-     override func viewDidLoad() {
-         super.viewDidLoad()
-         configure(with: .wifi)
-     }
- }
- */
