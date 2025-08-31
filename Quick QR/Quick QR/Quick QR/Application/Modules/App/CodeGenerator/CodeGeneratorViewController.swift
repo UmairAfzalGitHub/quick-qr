@@ -263,7 +263,8 @@ class CodeGeneratorViewController: UIViewController {
     }
     
     private func createEventsView() -> UIView {
-        return createPlaceholderView(for: "Events", description: "Calendar event form will go here")
+        calendarView = CalendarView()
+        return calendarView!
     }
     
     private func createTikTokView() -> UIView {
