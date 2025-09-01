@@ -85,6 +85,10 @@ final class WebsiteView: UIView {
         addSubview(websiteTextField)
         addSubview(wwwView)
         addSubview(comView)
+        
+        // Add tap actions
+        wwwView.addTarget(self, action: #selector(wwwButtonTapped), for: .touchUpInside)
+        comView.addTarget(self, action: #selector(comButtonTapped), for: .touchUpInside)
 
         let side: CGFloat = 0
         let fieldHeight: CGFloat = 54
@@ -109,10 +113,71 @@ final class WebsiteView: UIView {
             wwwView.widthAnchor.constraint(equalToConstant: 116),
             
             comView.topAnchor.constraint(equalTo: websiteTextField.bottomAnchor, constant: 24),
-            comView.leadingAnchor.constraint(equalTo: wwwView.trailingAnchor, constant: side),
+            comView.leadingAnchor.constraint(equalTo: wwwView.trailingAnchor, constant: 24),
             comView.heightAnchor.constraint(equalToConstant: 46),
             comView.widthAnchor.constraint(equalToConstant: 116),
+            
+            // Add bottom constraint to ensure view includes all content
+            comView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
+    }
+    
+    // MARK: - Button Actions
+    
+    @objc private func wwwButtonTapped() {
+        guard var text = websiteTextField.text else { return }
+        
+        // Remove any existing protocol prefixes
+        if text.hasPrefix("http://") {
+            text = String(text.dropFirst(7))
+        } else if text.hasPrefix("https://") {
+            text = String(text.dropFirst(8))
+        }
+        
+        // Remove any existing www. prefix to avoid duplication
+        if text.hasPrefix("www.") {
+            // Already has www prefix, do nothing
+            return
+        }
+        
+        // Add www. prefix
+        websiteTextField.text = "www." + text
+        
+        // Give visual feedback
+        UIView.animate(withDuration: 0.1, animations: {
+            self.wwwView.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+        }) { _ in
+            UIView.animate(withDuration: 0.1) {
+                self.wwwView.transform = .identity
+            }
+        }
+    }
+    
+    @objc private func comButtonTapped() {
+        guard var text = websiteTextField.text else { return }
+        
+        // Check if text already ends with .com
+        if text.hasSuffix(".com") {
+            // Already has .com suffix, do nothing
+            return
+        }
+        
+        // Remove any trailing dots to avoid double dots
+        while text.hasSuffix(".") {
+            text.removeLast()
+        }
+        
+        // Add .com suffix
+        websiteTextField.text = text + ".com"
+        
+        // Give visual feedback
+        UIView.animate(withDuration: 0.1, animations: {
+            self.comView.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+        }) { _ in
+            UIView.animate(withDuration: 0.1) {
+                self.comView.transform = .identity
+            }
+        }
     }
 }
 

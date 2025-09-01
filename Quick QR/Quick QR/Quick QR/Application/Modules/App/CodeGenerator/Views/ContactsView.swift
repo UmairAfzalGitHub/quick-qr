@@ -173,6 +173,9 @@ final class ContactsView: UIView {
             emailTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             emailTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
             emailTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
+            
+            // Add bottom constraint to ensure view includes all fields
+            emailTextField.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
 }

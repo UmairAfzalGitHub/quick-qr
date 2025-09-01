@@ -183,35 +183,76 @@ class CodeGeneratorManager {
         print("[CodeGeneratorManager] Location: \(location)")
         print("[CodeGeneratorManager] Description: \(description)")
         
+        // Check if this is an all-day event by seeing if the dates are at midnight
+        let calendar = Calendar.current
+        let isAllDay = calendar.component(.hour, from: startDate) == 0 && 
+                       calendar.component(.minute, from: startDate) == 0 &&
+                       calendar.component(.second, from: startDate) == 0 &&
+                       calendar.component(.hour, from: endDate) == 0 && 
+                       calendar.component(.minute, from: endDate) == 0 &&
+                       calendar.component(.second, from: endDate) == 0
+        
+        // Use different date formats for all-day vs timed events
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss"
         
-        let startDateString = dateFormatter.string(from: startDate)
-        let endDateString = dateFormatter.string(from: endDate)
+        var startDateString: String
+        var endDateString: String
         
-        print("[CodeGeneratorManager] Formatted Start Date: \(startDateString)")
-        print("[CodeGeneratorManager] Formatted End Date: \(endDateString)")
-        
-        let eventString = """
-        BEGIN:VEVENT
-        SUMMARY:\(title)
-        DTSTART:\(startDateString)
-        DTEND:\(endDateString)
-        LOCATION:\(location)
-        DESCRIPTION:\(description)
-        END:VEVENT
-        """
-        
-        print("[CodeGeneratorManager] Event String: \(eventString)")
-        
-        let result = generateQRCode(from: eventString, size: size)
-        if result == nil {
-            print("[CodeGeneratorManager] Failed to generate calendar event QR code")
+        if isAllDay {
+            // For all-day events, use date format without time component
+            dateFormatter.dateFormat = "yyyyMMdd"
+            startDateString = dateFormatter.string(from: startDate)
+            endDateString = dateFormatter.string(from: endDate)
+            
+            print("[CodeGeneratorManager] All-day event detected")
+            print("[CodeGeneratorManager] Formatted Start Date: \(startDateString)")
+            print("[CodeGeneratorManager] Formatted End Date: \(endDateString)")
+            
+            // For all-day events in iCalendar format
+            let eventString = """
+            BEGIN:VEVENT
+            SUMMARY:\(title)
+            DTSTART;VALUE=DATE:\(startDateString)
+            DTEND;VALUE=DATE:\(endDateString)
+            LOCATION:\(location)
+            DESCRIPTION:\(description)
+            END:VEVENT
+            """
+            
+            print("[CodeGeneratorManager] All-day Event String: \(eventString)")
+            return generateQRCode(from: eventString, size: size)
+            
         } else {
-            print("[CodeGeneratorManager] Successfully generated calendar event QR code")
+            // For timed events, include time component
+            dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss"
+            startDateString = dateFormatter.string(from: startDate)
+            endDateString = dateFormatter.string(from: endDate)
+            
+            print("[CodeGeneratorManager] Timed event")
+            print("[CodeGeneratorManager] Formatted Start Date: \(startDateString)")
+            print("[CodeGeneratorManager] Formatted End Date: \(endDateString)")
+            
+            let eventString = """
+            BEGIN:VEVENT
+            SUMMARY:\(title)
+            DTSTART:\(startDateString)
+            DTEND:\(endDateString)
+            LOCATION:\(location)
+            DESCRIPTION:\(description)
+            END:VEVENT
+            """
+            
+            print("[CodeGeneratorManager] Event String: \(eventString)")
+            
+            let result = generateQRCode(from: eventString, size: size)
+            if result == nil {
+                print("[CodeGeneratorManager] Failed to generate calendar event QR code")
+            } else {
+                print("[CodeGeneratorManager] Successfully generated calendar event QR code")
+            }
+            
+            return result
         }
-        
-        return result
     }
     
     func generateSocialQRCode(type: SocialQRCodeType, username: String, size: CGSize = CGSize(width: 300, height: 300)) -> UIImage? {

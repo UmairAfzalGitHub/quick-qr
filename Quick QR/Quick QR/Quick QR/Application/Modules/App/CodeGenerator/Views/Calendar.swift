@@ -1,13 +1,14 @@
-//
-//  EmailView.swift
-//  Quick QR
-//
-//  Created by Haider Rathore on 28/08/2025.
-//
 
 import UIKit
 
 final class CalendarView: UIView {
+    // MARK: - Date Formatters
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }()
     // MARK: - Public API
     var titleText: String? {
         get { titleTextField.text }
@@ -48,11 +49,19 @@ final class CalendarView: UIView {
         return allDaySwitch.isOn
     }
     
-    func getStartDate() -> String? {
+    func getStartDate() -> Date? {
+        return startDatePicker.date
+    }
+    
+    func getStartDateString() -> String? {
         return startTextField.text
     }
     
-    func getEndDate() -> String? {
+    func getEndDate() -> Date? {
+        return endDatePicker.date
+    }
+    
+    func getEndDateString() -> String? {
         return endTextField.text
     }
     
@@ -134,6 +143,7 @@ final class CalendarView: UIView {
         tf.layer.cornerRadius = 10
         tf.layer.borderWidth = 1
         tf.layer.borderColor = UIColor.appBorderDark.cgColor
+        tf.inputView = UIDatePicker() // Will be configured in setup
         return tf
     }()
     
@@ -147,7 +157,26 @@ final class CalendarView: UIView {
         tf.layer.cornerRadius = 10
         tf.layer.borderWidth = 1
         tf.layer.borderColor = UIColor.appBorderDark.cgColor
+        tf.inputView = UIDatePicker() // Will be configured in setup
         return tf
+    }()
+    
+    private lazy var startDatePicker: UIDatePicker = {
+        let picker = UIDatePicker()
+        picker.datePickerMode = .dateAndTime
+        picker.preferredDatePickerStyle = .wheels
+        picker.minimumDate = Date()
+        picker.addTarget(self, action: #selector(startDateChanged(_:)), for: .valueChanged)
+        return picker
+    }()
+    
+    private lazy var endDatePicker: UIDatePicker = {
+        let picker = UIDatePicker()
+        picker.datePickerMode = .dateAndTime
+        picker.preferredDatePickerStyle = .wheels
+        picker.minimumDate = Date()
+        picker.addTarget(self, action: #selector(endDateChanged(_:)), for: .valueChanged)
+        return picker
     }()
     
     private let descriptionLabel: UILabel = {
@@ -219,6 +248,29 @@ final class CalendarView: UIView {
         
         contentTextView.delegate = self
         
+        // Configure date pickers
+        startTextField.inputView = startDatePicker
+        endTextField.inputView = endDatePicker
+        
+        // Set initial dates
+        let now = Date()
+        startDatePicker.date = now
+        endDatePicker.date = Calendar.current.date(byAdding: .hour, value: 1, to: now) ?? now
+        updateDateFields()
+        
+        // Add toolbar with Done button
+        let toolBar = UIToolbar()
+        toolBar.sizeToFit()
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneButtonTapped))
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        toolBar.setItems([flexSpace, doneButton], animated: false)
+        
+        startTextField.inputAccessoryView = toolBar
+        endTextField.inputAccessoryView = toolBar
+        
+        // Add all-day switch action
+        allDaySwitch.addTarget(self, action: #selector(allDaySwitchChanged), for: .valueChanged)
+        
         let side: CGFloat = 0
         let fieldHeight: CGFloat = 54
         let sectionSpacing: CGFloat = 16
@@ -280,7 +332,7 @@ final class CalendarView: UIView {
             contentContainer.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             contentContainer.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
             contentContainer.heightAnchor.constraint(greaterThanOrEqualToConstant: 140),
-            contentContainer.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor),
+            contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor),
             
             // Text view inside container
             contentTextView.topAnchor.constraint(equalTo: contentContainer.topAnchor),
@@ -299,6 +351,56 @@ final class CalendarView: UIView {
     
     private func updateContentPlaceholder() {
         contentPlaceholderLabel.isHidden = !(contentTextView.text?.isEmpty ?? true)
+    }
+    
+    private func updateDateFields() {
+        if allDaySwitch.isOn {
+            // Format as date only for all-day events
+            let dateOnlyFormatter = DateFormatter()
+            dateOnlyFormatter.dateStyle = .medium
+            dateOnlyFormatter.timeStyle = .none
+            startTextField.text = dateOnlyFormatter.string(from: startDatePicker.date)
+            endTextField.text = dateOnlyFormatter.string(from: endDatePicker.date)
+        } else {
+            // Format with date and time
+            startTextField.text = dateFormatter.string(from: startDatePicker.date)
+            endTextField.text = dateFormatter.string(from: endDatePicker.date)
+        }
+    }
+    
+    // MARK: - Actions
+    
+    @objc private func startDateChanged(_ sender: UIDatePicker) {
+        // If start date is after end date, update end date
+        if sender.date > endDatePicker.date {
+            endDatePicker.date = Calendar.current.date(byAdding: .hour, value: 1, to: sender.date) ?? sender.date
+        }
+        updateDateFields()
+    }
+    
+    @objc private func endDateChanged(_ sender: UIDatePicker) {
+        // If end date is before start date, update start date
+        if sender.date < startDatePicker.date {
+            startDatePicker.date = sender.date
+        }
+        updateDateFields()
+    }
+    
+    @objc private func doneButtonTapped() {
+        // Dismiss keyboard
+        endEditing(true)
+    }
+    
+    @objc private func allDaySwitchChanged(_ sender: UISwitch) {
+        // Update date picker mode based on all-day switch
+        if sender.isOn {
+            startDatePicker.datePickerMode = .date
+            endDatePicker.datePickerMode = .date
+        } else {
+            startDatePicker.datePickerMode = .dateAndTime
+            endDatePicker.datePickerMode = .dateAndTime
+        }
+        updateDateFields()
     }
 }
 

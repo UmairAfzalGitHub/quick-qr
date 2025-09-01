@@ -196,7 +196,15 @@ class CodeGeneratorViewController: UIViewController {
                   !text.isEmpty else {
                 return nil
             }
-            return CodeGeneratorManager.shared.generateQRCode(from: text)
+            
+            // Check if we have a phone number for SMS
+            if let phoneNumber = textView.phoneNumberText, !phoneNumber.isEmpty {
+                // Format as SMS with phone number and text
+                return CodeGeneratorManager.shared.generateQRCode(from: "SMSTO:\(phoneNumber):\(text)")
+            } else {
+                // Regular text QR code
+                return CodeGeneratorManager.shared.generateQRCode(from: text)
+            }
             
         case .contact:
             guard let contactsView = contactsView,
@@ -238,27 +246,33 @@ class CodeGeneratorViewController: UIViewController {
         case .events:
             guard let calendarView = calendarView,
                   let title = calendarView.getTitle(),
-                  let startDateStr = calendarView.getStartDate(),
-                  let endDateStr = calendarView.getEndDate(),
+                  let startDate = calendarView.getStartDate(),
+                  let endDate = calendarView.getEndDate(),
                   let location = calendarView.getLocation() else {
                 return nil
             }
             
-            // Convert string dates to Date objects
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-            
-            guard let startDate = dateFormatter.date(from: startDateStr),
-                  let endDate = dateFormatter.date(from: endDateStr) else {
-                return nil
-            }
-            
             let description = calendarView.getDescription() ?? ""
+            let isAllDay = calendarView.isAllDay()
+            
+            // For all-day events, adjust the dates to remove time component
+            var adjustedStartDate = startDate
+            var adjustedEndDate = endDate
+            
+            if isAllDay {
+                // Set start date to beginning of day
+                let calendar = Calendar.current
+                adjustedStartDate = calendar.startOfDay(for: startDate)
+                
+                // For all-day events, the end date should be the next day's start
+                // This is the standard for calendar events
+                adjustedEndDate = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate)) ?? endDate
+            }
             
             return CodeGeneratorManager.shared.generateCalendarEventQRCode(
                 title: title,
-                startDate: startDate,
-                endDate: endDate,
+                startDate: adjustedStartDate,
+                endDate: adjustedEndDate,
                 location: location,
                 description: description
             )
@@ -393,8 +407,13 @@ class CodeGeneratorViewController: UIViewController {
                 }
             case .text:
                 if let textView = textView {
-                    title = "Text"
-                    description = String(textView.getText()?.prefix(20) ?? "") + (textView.getText()?.count ?? 0 > 20 ? "..." : "")
+                    if let phoneNumber = textView.phoneNumberText, !phoneNumber.isEmpty {
+                        title = "SMS"
+                        description = "To: \(phoneNumber)"
+                    } else {
+                        title = "Text"
+                        description = String(textView.getText()?.prefix(20) ?? "") + (textView.getText()?.count ?? 0 > 20 ? "..." : "")
+                    }
                 }
             case .contact:
                 if let contactsView = contactsView {
