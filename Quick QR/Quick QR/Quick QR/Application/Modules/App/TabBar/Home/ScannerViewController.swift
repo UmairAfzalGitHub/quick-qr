@@ -6,9 +6,10 @@
 //
 
 import UIKit
+import AVFoundation
 
 class ScannerViewController: UIViewController {
-
+    
     private let iapImage: UIImageView = {
         let image = UIImageView()
         image.image = UIImage(named: "iap-icon")
@@ -30,21 +31,26 @@ class ScannerViewController: UIViewController {
         return imageView
     }()
     
+    private var captureSession: AVCaptureSession?
+    private var previewLayer: AVCaptureVideoPreviewLayer?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .clear
+        view.backgroundColor = .black
         setupUI()
         setupConstraints()
+        openCamera()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        hideCenterQRImageView()
     }
     
     func setupUI() {
-        do {
-            view.addSubview(iapImage)
-            view.addSubview(scannerFrameImageView)
-            do {
-                scannerFrameImageView.addSubview(qrTempImageView)
-            }
-        }
+        view.addSubview(iapImage)
+        view.addSubview(scannerFrameImageView)
+        scannerFrameImageView.addSubview(qrTempImageView)
     }
     
     func setupConstraints() {
@@ -66,8 +72,71 @@ class ScannerViewController: UIViewController {
         ])
     }
     
-    //MARK: - Button Action
-    @objc private func handleIAPButtonTapped() {
+    func hideCenterQRImageView() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self = self else { return }
+            UIView.animate(withDuration: 0.5, animations: {
+                self.qrTempImageView.alpha = 0
+            }) { _ in
+                self.qrTempImageView.isHidden = true
+            }
+        }
+    }
+    
+    func openCamera() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            setupCamera()
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        self?.setupCamera()
+                    } else {
+                        self?.showPermissionAlert()
+                    }
+                }
+            }
+        case .denied, .restricted:
+            showPermissionAlert()
+        @unknown default:
+            break
+        }
+    }
+    
+    private func setupCamera() {
+        captureSession = AVCaptureSession()
+        guard let captureSession = captureSession else { return }
         
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else { return }
+        guard let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice) else { return }
+        
+        if captureSession.canAddInput(videoInput) {
+            captureSession.addInput(videoInput)
+        }
+        
+        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer?.videoGravity = .resizeAspectFill
+        previewLayer?.frame = view.layer.bounds
+        if let previewLayer = previewLayer {
+            view.layer.insertSublayer(previewLayer, at: 0) // show behind UI
+        }
+        
+        captureSession.startRunning()
+    }
+    
+    private func showPermissionAlert() {
+        let alert = UIAlertController(
+            title: "Camera Access Needed",
+            message: "Please enable camera access in Settings to scan QR codes.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Settings", style: .default, handler: { _ in
+            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(settingsURL)
+            }
+        }))
+        present(alert, animated: true, completion: nil)
     }
 }

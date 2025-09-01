@@ -58,7 +58,7 @@ class TabBarController: UITabBarController {
         favoriteVC.title = "Favorite"
         let favoriteNavController = UINavigationController(rootViewController: favoriteVC)
 
-        let scanVC = UIViewController()
+        let scanVC = ScannerViewController()
         scanVC.view.backgroundColor = .systemBackground
         scanVC.title = "" // Empty title for center tab
         
@@ -180,6 +180,7 @@ class TabBarController: UITabBarController {
     // MARK: - Actions
     @objc private func centerButtonTapped() {
         // Select the middle tab (index 2)
+        
         selectedIndex = 2
     }
     
