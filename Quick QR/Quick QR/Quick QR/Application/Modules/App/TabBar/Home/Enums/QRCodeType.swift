@@ -35,4 +35,47 @@ enum QRCodeType: CaseIterable, CodeTypeProtocol {
         case .events: return UIImage(named: "events-icon")
         }
     }
+    
+    // Matching helpers
+    var prefixes: [String] {
+        switch self {
+        case .wifi: return ["wifi:"]
+        case .phone: return ["tel:", "telprompt:"]
+        case .text: return ["sms:"]
+        case .contact: return ["mecard:"]
+        case .email: return ["mailto:", "matmsg:"]
+        case .location: return ["geo:"]
+        case .website: return []
+        case .events: return []
+        }
+    }
+
+    var schemes: [String] {
+        switch self {
+        case .website: return ["http", "https"]
+        default: return []
+        }
+    }
+
+    var contains: [String] {
+        switch self {
+        case .contact: return ["begin:vcard"]
+        case .location: return ["maps.google.", "maps.apple."]
+        case .events: return ["begin:vevent", "begin:vcalendar"]
+        default: return []
+        }
+    }
+
+    var suffex: [String] {
+        switch self {
+        case .wifi: return ["wifi:"]
+        case .phone: return ["tel:","telprompt:"]
+        case .text: return ["sms:"]
+        case .contact: return ["BEGIN:VCARD","mecard:"]
+        case .email: return ["mailto","matmsg:"]
+        case .website: return ["http","https"]
+        case .location: return ["maps.google.","maps.apple.","geo:"]
+        case .events: return ["BEGIN:VCALENDAR","BEGIN:VEVENT"]
+        }
+    }
 }

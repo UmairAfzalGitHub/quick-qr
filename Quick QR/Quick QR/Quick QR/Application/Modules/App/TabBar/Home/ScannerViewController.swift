@@ -6,9 +6,10 @@
 //
 
 import UIKit
+import AVFoundation
 
-class ScannerViewController: UIViewController {
-
+class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+    
     private let iapImage: UIImageView = {
         let image = UIImageView()
         image.image = UIImage(named: "iap-icon")
@@ -30,21 +31,22 @@ class ScannerViewController: UIViewController {
         return imageView
     }()
     
+    private var captureSession: AVCaptureSession?
+    private var previewLayer: AVCaptureVideoPreviewLayer?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .clear
+        view.backgroundColor = .black
         setupUI()
         setupConstraints()
+        openCamera()
+        hideCenterQRImageView()
     }
     
     func setupUI() {
-        do {
-            view.addSubview(iapImage)
-            view.addSubview(scannerFrameImageView)
-            do {
-                scannerFrameImageView.addSubview(qrTempImageView)
-            }
-        }
+        view.addSubview(iapImage)
+        view.addSubview(scannerFrameImageView)
+        scannerFrameImageView.addSubview(qrTempImageView)
     }
     
     func setupConstraints() {
@@ -66,8 +68,137 @@ class ScannerViewController: UIViewController {
         ])
     }
     
-    //MARK: - Button Action
-    @objc private func handleIAPButtonTapped() {
+    func hideCenterQRImageView() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self = self else { return }
+            UIView.animate(withDuration: 0.5, animations: {
+                self.qrTempImageView.alpha = 0
+            }) { _ in
+                self.qrTempImageView.isHidden = true
+            }
+        }
+    }
+    
+    func openCamera() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            setupCamera()
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        self?.setupCamera()
+                    } else {
+                        self?.showPermissionAlert()
+                    }
+                }
+            }
+        case .denied, .restricted:
+            showPermissionAlert()
+        @unknown default:
+            break
+        }
+    }
+    
+    private func setupCamera() {
+        captureSession = AVCaptureSession()
+        guard let captureSession = captureSession else { return }
         
+        // Input
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video),
+              let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
+              captureSession.canAddInput(videoInput) else { return }
+        captureSession.addInput(videoInput)
+        
+        // Output
+        let metadataOutput = AVCaptureMetadataOutput()
+        if captureSession.canAddOutput(metadataOutput) {
+            captureSession.addOutput(metadataOutput)
+            metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+            metadataOutput.metadataObjectTypes = [.qr] // only QR codes
+        }
+        
+        // Preview
+        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer?.videoGravity = .resizeAspectFill
+        previewLayer?.frame = view.layer.bounds
+        if let previewLayer = previewLayer {
+            view.layer.insertSublayer(previewLayer, at: 0)
+        }
+        
+        captureSession.startRunning()
+    }
+    
+    private func showPermissionAlert() {
+        let alert = UIAlertController(
+            title: "Camera Access Needed",
+            message: "Please enable camera access in Settings to scan QR codes.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Settings", style: .default, handler: { _ in
+            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(settingsURL)
+            }
+        }))
+        present(alert, animated: true, completion: nil)
+    }
+    
+    // MARK: - QR Type Detection
+    private func matches(_ type: CodeTypeProtocol, raw: String, lower: String, url: URL?) -> Bool {
+        // prefix match
+        if !type.prefixes.isEmpty && type.prefixes.contains(where: { lower.hasPrefix($0) }) { return true }
+        // substring match
+        if !type.contains.isEmpty && type.contains.contains(where: { lower.contains($0) }) { return true }
+        // url-based matches
+        if let url = url {
+            let scheme = url.scheme?.lowercased() ?? ""
+            let host = (url.host ?? "").lowercased()
+            if !type.schemes.isEmpty && type.schemes.contains(scheme) { return true }
+            if !type.suffex.isEmpty && type.suffex.contains(where: { host.hasSuffix($0) }) { return true }
+        }
+        return false
+    }
+
+    private func detectQRCodeType(from value: String) -> CodeTypeProtocol? {
+        let raw = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lower = raw.lowercased()
+        let url = URL(string: raw)
+
+        // 1) Social first
+        for social in SocialQRCodeType.allCases {
+            if matches(social, raw: raw, lower: lower, url: url) { return social }
+        }
+
+        // 2)  QR types
+        for type in QRCodeType.allCases {
+            if matches(type, raw: raw, lower: lower, url: url) { return type }
+        }
+
+        // 3) Fallback
+        return QRCodeType.website
+    }
+    
+    // MARK: - QR Detection Delegate
+    func metadataOutput(_ output: AVCaptureMetadataOutput,
+                        didOutput metadataObjects: [AVMetadataObject],
+                        from connection: AVCaptureConnection) {
+        guard let object = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
+              object.type == .qr,
+              let qrValue = object.stringValue else { return }
+        
+        // Stop scanning once found
+        captureSession?.stopRunning()
+        
+        // Handle the QR value
+        let detected = detectQRCodeType(from: qrValue)
+        let detectedTitle = (detected?.title ?? "QR Code")
+        print("QR Code Detected [\(detectedTitle)]: \(qrValue)")
+        
+        let alert = UIAlertController(title: detectedTitle, message: qrValue, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            self.captureSession?.startRunning() // restart if needed
+        })
+        present(alert, animated: true)
     }
 }

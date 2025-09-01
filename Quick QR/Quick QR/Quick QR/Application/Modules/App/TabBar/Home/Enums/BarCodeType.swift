@@ -8,8 +8,13 @@
 import UIKit
 
 protocol CodeTypeProtocol {
-    var title: String {get}
-    var icon: UIImage? {get}
+    var title: String { get }
+    var icon: UIImage? { get }
+    // URL or text matching helpers
+    var prefixes: [String] { get }   // lowercase prefixes to match with hasPrefix
+    var schemes: [String] { get }    // lowercase URL schemes to match
+    var contains: [String] { get }   // lowercase substrings to match with contains
+    var suffex: [String] { get }     // lowercase host suffixes to match (keeping project spelling)
 }
 
 enum BarCodeType: CaseIterable, CodeTypeProtocol {
@@ -47,6 +52,12 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .aztec: return UIImage(named: "pdf417-icon") // Reusing PDF417 icon until a specific one is available
         }
     }
+    
+    // Not used for 1D barcodes in scanning flow; provide empty defaults
+    var prefixes: [String] { [] }
+    var schemes: [String] { [] }
+    var contains: [String] { [] }
+    var suffex: [String] { [] }
     
     var placeholder: String {
         switch self {
