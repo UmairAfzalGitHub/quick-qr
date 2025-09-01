@@ -36,16 +36,27 @@ enum SocialQRCodeType: CaseIterable, CodeTypeProtocol {
         }
     }
     
-    var suffex: [String]? {
+    // Matching helpers
+    var prefixes: [String] { [] }
+    var contains: [String] { [] }
+    var schemes: [String] {
+        switch self {
+        case .viber: return ["viber"]
+        case .whatsapp: return ["whatsapp"]
+        default: return []
+        }
+    }
+    
+    var suffex: [String] {
         switch self {
         case .tiktok: return ["tiktok.com"]
         case .instagram: return ["instagram.com"]
         case .facebook: return ["facebook.com", "fb.com"]
-        case .x: return ["twitter.com","twitter"]
-        case .whatsapp: return ["whatsapp.com","wa.me"]
-        case .youtube: return ["youtube.com","youtube.be"]
+        case .x: return ["x.com", "twitter.com", "twitter"]
+        case .whatsapp: return ["whatsapp.com", "wa.me"]
+        case .youtube: return ["youtube.com", "youtu.be"]
         case .spotify: return ["spotify.com"]
-        case .viber: return ["viber","vb.me"]
+        case .viber: return ["vb.me"]
         }
     }
 }

@@ -145,49 +145,37 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
     }
     
     // MARK: - QR Type Detection
+    private func matches(_ type: CodeTypeProtocol, raw: String, lower: String, url: URL?) -> Bool {
+        // prefix match
+        if !type.prefixes.isEmpty && type.prefixes.contains(where: { lower.hasPrefix($0) }) { return true }
+        // substring match
+        if !type.contains.isEmpty && type.contains.contains(where: { lower.contains($0) }) { return true }
+        // url-based matches
+        if let url = url {
+            let scheme = url.scheme?.lowercased() ?? ""
+            let host = (url.host ?? "").lowercased()
+            if !type.schemes.isEmpty && type.schemes.contains(scheme) { return true }
+            if !type.suffex.isEmpty && type.suffex.contains(where: { host.hasSuffix($0) }) { return true }
+        }
+        return false
+    }
+
     private func detectQRCodeType(from value: String) -> CodeTypeProtocol? {
         let raw = value.trimmingCharacters(in: .whitespacesAndNewlines)
         let lower = raw.lowercased()
-        
-        // Explicit formats
-        if lower.hasPrefix("wifi:") { return QRCodeType.wifi }
-        if lower.hasPrefix("tel:") || lower.hasPrefix("telprompt:") {
-            return QRCodeType.phone
+        let url = URL(string: raw)
+
+        // 1) Social first
+        for social in SocialQRCodeType.allCases {
+            if matches(social, raw: raw, lower: lower, url: url) { return social }
         }
-        if lower.hasPrefix("sms:") { return QRCodeType.text }
-        if raw.contains("BEGIN:VCARD") || lower.contains("mecard:") { return QRCodeType.contact }
-        if lower.hasPrefix("mailto:") || lower.hasPrefix("matmsg:") { return QRCodeType.email }
-        if lower.hasPrefix("geo:") || lower.contains("maps.google.") || lower.contains("maps.apple.") { return QRCodeType.location }
-        if raw.contains("BEGIN:VEVENT") || raw.contains("BEGIN:VCALENDAR") { return QRCodeType.events }
-        
-        // URL-based detection
-        if let url = URL(string: raw), let scheme = url.scheme?.lowercased() {
-            let host = (url.host ?? "").lowercased()
-            
-            for social in SocialQRCodeType.allCases {
-                if let suffixes = social.suffex {
-                    for suffix in suffixes {
-                        if host.hasSuffix(suffix) || scheme == suffix {
-                            return social
-                        }
-                    }
-                }
-            }
-            // Social apps
-            if scheme == "viber" ||  host.hasSuffix("vb.me") { return SocialQRCodeType.viber }
-            if host.hasSuffix("tiktok.com") { return SocialQRCodeType.tiktok }
-            if host.hasSuffix("instagram.com") { return SocialQRCodeType.instagram }
-            if host.hasSuffix("facebook.com") || host == "fb.com" { return SocialQRCodeType.facebook }
-            if host.hasSuffix("twitter.com") || host.hasSuffix("twitter") || host.hasSuffix("x.com") { return SocialQRCodeType.x }
-            if host.hasSuffix("whatsapp.com") || host == "wa.me" { return SocialQRCodeType.whatsapp }
-            if host.hasSuffix("youtube.com") || host == "youtu.be" { return SocialQRCodeType.youtube }
-            if host.hasSuffix("spotify.com") { return SocialQRCodeType.spotify }
-            
-            // Any other valid URL treated as website
-            if scheme == "http" || scheme == "https" { return QRCodeType.website }
+
+        // 2)  QR types
+        for type in QRCodeType.allCases {
+            if matches(type, raw: raw, lower: lower, url: url) { return type }
         }
-        
-        // Fallback
+
+        // 3) Fallback
         return QRCodeType.website
     }
     
