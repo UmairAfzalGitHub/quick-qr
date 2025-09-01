@@ -144,6 +144,51 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         present(alert, animated: true, completion: nil)
     }
     
+    // MARK: - QR Type Detection
+    private func detectQRCodeType(from value: String) -> CodeTypeProtocol? {
+        let raw = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lower = raw.lowercased()
+        
+        // Explicit formats
+        if lower.hasPrefix("wifi:") { return QRCodeType.wifi }
+        if lower.hasPrefix("tel:") || lower.hasPrefix("sms:") || lower.hasPrefix("telprompt:") {
+            return QRCodeType.phone
+        }
+        if lower.hasPrefix("sms:") { return QRCodeType.text }
+        if raw.contains("BEGIN:VCARD") || lower.contains("mecard:") { return QRCodeType.contact }
+        if lower.hasPrefix("mailto:") || lower.hasPrefix("matmsg:") { return QRCodeType.email }
+        if lower.hasPrefix("geo:") || lower.contains("maps.google.") || lower.contains("maps.apple.") { return QRCodeType.location }
+        if raw.contains("BEGIN:VEVENT") || raw.contains("BEGIN:VCALENDAR") { return QRCodeType.events }
+        
+        // URL-based detection
+        if let url = URL(string: raw), let scheme = url.scheme?.lowercased() {
+            let host = (url.host ?? "").lowercased()
+            
+//            SocialQRCodeType.allCases.forEach { social in
+//                for suffix in social.suffex ?? [] {
+//                    if host.hasSuffix(suffix) {
+//                        return social
+//                    }
+//                }
+//            }
+            // Social apps
+            if scheme == "viber" ||  host.hasSuffix("vb.me") { return SocialQRCodeType.viber }
+            if host.hasSuffix("tiktok.com") { return SocialQRCodeType.tiktok }
+            if host.hasSuffix("instagram.com") { return SocialQRCodeType.instagram }
+            if host.hasSuffix("facebook.com") || host == "fb.com" { return SocialQRCodeType.facebook }
+            if host.hasSuffix("twitter.com") || host.hasSuffix("twitter") || host.hasSuffix("x.com") { return SocialQRCodeType.x }
+            if host.hasSuffix("whatsapp.com") || host == "wa.me" { return SocialQRCodeType.whatsapp }
+            if host.hasSuffix("youtube.com") || host == "youtu.be" { return SocialQRCodeType.youtube }
+            if host.hasSuffix("spotify.com") { return SocialQRCodeType.spotify }
+            
+            // Any other valid URL treated as website
+            if scheme == "http" || scheme == "https" { return QRCodeType.website }
+        }
+        
+        // Fallback
+        return QRCodeType.website
+    }
+    
     // MARK: - QR Detection Delegate
     func metadataOutput(_ output: AVCaptureMetadataOutput,
                         didOutput metadataObjects: [AVMetadataObject],
@@ -156,9 +201,11 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         captureSession?.stopRunning()
         
         // Handle the QR value
-        print("QR Code Detected: \(qrValue)")
+        let detected = detectQRCodeType(from: qrValue)
+        let detectedTitle = (detected?.title ?? "QR Code")
+        print("QR Code Detected [\(detectedTitle)]: \(qrValue)")
         
-        let alert = UIAlertController(title: "QR Code", message: qrValue, preferredStyle: .alert)
+        let alert = UIAlertController(title: detectedTitle, message: qrValue, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
             self.captureSession?.startRunning() // restart if needed
         })

@@ -10,6 +10,7 @@ import UIKit
 protocol CodeTypeProtocol {
     var title: String {get}
     var icon: UIImage? {get}
+    var suffex: [String]? {get}
 }
 
 enum BarCodeType: CaseIterable, CodeTypeProtocol {
@@ -43,6 +44,10 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .itf: return UIImage(named: "itf-icon")
         case .pdf417: return UIImage(named: "pdf417-icon")
         }
+    }
+    
+    var suffex: [String]? {
+        return nil
     }
     
     var placeholder: String {

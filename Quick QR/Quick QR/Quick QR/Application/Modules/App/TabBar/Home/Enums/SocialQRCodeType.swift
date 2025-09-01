@@ -35,4 +35,17 @@ enum SocialQRCodeType: CaseIterable, CodeTypeProtocol {
         case .viber: return UIImage(named: "viber-icon")
         }
     }
+    
+    var suffex: [String]? {
+        switch self {
+        case .tiktok: return ["tiktok.com"]
+        case .instagram: return ["instagram.com"]
+        case .facebook: return ["facebook.com", "fb.com"]
+        case .x: return ["twitter.com","twitter"]
+        case .whatsapp: return ["whatsapp.com","wa.me"]
+        case .youtube: return ["youtube.com","youtube.be"]
+        case .spotify: return ["spotify.com"]
+        case .viber: return ["viber","vb.me"]
+        }
+    }
 }
