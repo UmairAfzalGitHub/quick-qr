@@ -8,7 +8,7 @@
 import UIKit
 import AVFoundation
 
-class ScannerViewController: UIViewController {
+class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     
     private let iapImage: UIImageView = {
         let image = UIImageView()
@@ -40,10 +40,6 @@ class ScannerViewController: UIViewController {
         setupUI()
         setupConstraints()
         openCamera()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
         hideCenterQRImageView()
     }
     
@@ -108,18 +104,26 @@ class ScannerViewController: UIViewController {
         captureSession = AVCaptureSession()
         guard let captureSession = captureSession else { return }
         
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else { return }
-        guard let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice) else { return }
+        // Input
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video),
+              let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
+              captureSession.canAddInput(videoInput) else { return }
+        captureSession.addInput(videoInput)
         
-        if captureSession.canAddInput(videoInput) {
-            captureSession.addInput(videoInput)
+        // Output
+        let metadataOutput = AVCaptureMetadataOutput()
+        if captureSession.canAddOutput(metadataOutput) {
+            captureSession.addOutput(metadataOutput)
+            metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+            metadataOutput.metadataObjectTypes = [.qr] // only QR codes
         }
         
+        // Preview
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer?.videoGravity = .resizeAspectFill
         previewLayer?.frame = view.layer.bounds
         if let previewLayer = previewLayer {
-            view.layer.insertSublayer(previewLayer, at: 0) // show behind UI
+            view.layer.insertSublayer(previewLayer, at: 0)
         }
         
         captureSession.startRunning()
@@ -138,5 +142,26 @@ class ScannerViewController: UIViewController {
             }
         }))
         present(alert, animated: true, completion: nil)
+    }
+    
+    // MARK: - QR Detection Delegate
+    func metadataOutput(_ output: AVCaptureMetadataOutput,
+                        didOutput metadataObjects: [AVMetadataObject],
+                        from connection: AVCaptureConnection) {
+        guard let object = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
+              object.type == .qr,
+              let qrValue = object.stringValue else { return }
+        
+        // Stop scanning once found
+        captureSession?.stopRunning()
+        
+        // Handle the QR value
+        print("QR Code Detected: \(qrValue)")
+        
+        let alert = UIAlertController(title: "QR Code", message: qrValue, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            self.captureSession?.startRunning() // restart if needed
+        })
+        present(alert, animated: true)
     }
 }
