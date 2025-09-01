@@ -351,17 +351,35 @@ class CodeGeneratorViewController: UIViewController {
             username = user
             
         case .youtube:
-            guard let youtubeView = youtubeView,
-                  let user = youtubeView.getUsername(),
-                  !user.isEmpty else {
+            guard let youtubeView = youtubeView else {
+                return nil
+            }
+            
+            // Check if a custom URL is provided
+            if let customUrl = youtubeView.getUrl(), !customUrl.isEmpty {
+                // Use the custom URL directly
+                return CodeGeneratorManager.shared.generateQRCode(from: customUrl)
+            }
+            
+            // Fall back to username-based URL if no custom URL is provided
+            guard let user = youtubeView.getUsername(), !user.isEmpty else {
                 return nil
             }
             username = user
             
         case .spotify:
-            guard let spotifyView = spotifyView,
-                  let user = spotifyView.getUsername(),
-                  !user.isEmpty else {
+            guard let spotifyView = spotifyView else {
+                return nil
+            }
+            
+            // Check if a custom URL is provided
+            if let customUrl = spotifyView.getUrl(), !customUrl.isEmpty {
+                // Use the custom URL directly
+                return CodeGeneratorManager.shared.generateQRCode(from: customUrl)
+            }
+            
+            // Fall back to username-based URL if no custom URL is provided
+            guard let user = spotifyView.getUsername(), !user.isEmpty else {
                 return nil
             }
             username = user
