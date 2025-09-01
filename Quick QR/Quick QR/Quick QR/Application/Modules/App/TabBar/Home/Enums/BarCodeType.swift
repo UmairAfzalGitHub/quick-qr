@@ -13,7 +13,7 @@ protocol CodeTypeProtocol {
 }
 
 enum BarCodeType: CaseIterable, CodeTypeProtocol {
-    case isbn, ean8, upce, ean13, upca, code39, code93, code128, itf, pdf417
+    case isbn, ean8, upce, ean13, upca, code39, code93, code128, itf, pdf417, aztec, dataMatrix
     
     var title: String {
         switch self {
@@ -27,6 +27,8 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .code128: return "Code 128"
         case .itf: return "ITF"
         case .pdf417: return "PDF 417"
+        case .aztec: return "Aztec"
+        case .dataMatrix: return "Data Matrix"
         }
     }
     
@@ -42,6 +44,7 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .code128: return UIImage(named: "code128-icon")
         case .itf: return UIImage(named: "itf-icon")
         case .pdf417: return UIImage(named: "pdf417-icon")
+        case .aztec: return UIImage(named: "pdf417-icon") // Reusing PDF417 icon until a specific one is available
         }
     }
     
@@ -57,6 +60,7 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .code128: return "Encodes the full ASCII set [0..127]"
         case .itf: return "Enter plain text"
         case .pdf417: return "Enter plain text"
+        case .aztec: return "Enter text or data for Aztec code"
         }
     }
 }

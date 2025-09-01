@@ -68,7 +68,7 @@ class CodeGeneratorManager {
         
         // Configure filter based on type
         switch type {
-        case .code128, .code39, .code93, .pdf417:
+        case .code128, .code39, .code93, .pdf417, .aztec:
             barcodeFilter.setValue(data, forKey: "inputMessage")
         case .ean13, .ean8, .upca, .upce, .isbn, .itf:
             // These formats require specific digit formats
@@ -114,6 +114,7 @@ class CodeGeneratorManager {
         case .code39: return "CICode128BarcodeGenerator" // Fallback to Code128
         case .code93: return "CICode128BarcodeGenerator" // Fallback to Code128
         case .itf: return "CICode128BarcodeGenerator" // Fallback to Code128
+        case .aztec: return "CIAztecCodeGenerator" // Aztec code generator
         }
     }
     
