@@ -24,6 +24,19 @@ final class ContactsView: UIView {
         set { emailTextField.text = newValue }
     }
     
+    // MARK: - Getter Methods
+    func getName() -> String? {
+        return nameTextField.text
+    }
+    
+    func getPhone() -> String? {
+        return numberTextField.text
+    }
+    
+    func getEmail() -> String? {
+        return emailTextField.text
+    }
+    
     // MARK: - UI Elements
     private let nameLabel: UILabel = {
         let label = UILabel()

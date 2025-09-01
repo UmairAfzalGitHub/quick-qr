@@ -33,6 +33,19 @@ final class EmailView: UIView {
         }
     }
     
+    // MARK: - Getter Methods
+    func getEmail() -> String? {
+        return emailTextField.text
+    }
+    
+    func getSubject() -> String? {
+        return subjectTextField.text
+    }
+    
+    func getBody() -> String? {
+        return contentTextView.text.isEmpty ? nil : contentTextView.text
+    }
+    
     // MARK: - UI Elements
     private let emailLabel: UILabel = {
         let label = UILabel()

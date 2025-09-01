@@ -18,6 +18,11 @@ final class XView: UIView {
         get { urlTextField.text }
         set { urlTextField.text = newValue }
     }
+    
+    // MARK: - Getter Methods
+    func getUsername() -> String? {
+        return userNameTextField.text
+    }
 
     // MARK: - UI Elements
     private let userNameLabel: UILabel = {

@@ -129,7 +129,8 @@ class CodeGeneratorViewController: UIViewController {
     }
     
     private func setupActions() {
-//        actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(buttonTapped))
+        actionButton.addGestureRecognizer(tapGesture)
     }
     
     @objc private func buttonTapped() {
@@ -150,7 +151,348 @@ class CodeGeneratorViewController: UIViewController {
     /// Default Code generation handler
     private func handleCodeGeneration(for codeType: CodeTypeProtocol) {
         print("Generating Code for: \(codeType.title)")
-        // This will be implemented when creating specific view content extraction
+        
+        var generatedImage: UIImage?
+        
+        if let qrCodeType = codeType as? QRCodeType {
+            generatedImage = generateQRCode(for: qrCodeType)
+        } else if let socialQRCodeType = codeType as? SocialQRCodeType {
+            generatedImage = generateSocialQRCode(for: socialQRCodeType)
+        } else if let barCodeType = codeType as? BarCodeType {
+            generatedImage = generateBarCode(for: barCodeType)
+        }
+        
+        if let image = generatedImage {
+            // Show the generated code in a result screen
+            presentResultScreen(with: image)
+        } else {
+            // Show error alert
+            showErrorAlert(message: "Failed to generate code. Please check your input.")
+        }
+    }
+    
+    private func generateQRCode(for type: QRCodeType) -> UIImage? {
+        switch type {
+        case .wifi:
+            guard let wifiView = wifiView,
+                  let ssid = wifiView.getSSID(),
+                  let password = wifiView.getPassword(),
+                  !ssid.isEmpty else {
+                return nil
+            }
+            return CodeGeneratorManager.shared.generateWifiQRCode(ssid: ssid, password: password, isWEP: wifiView.isWEP())
+            
+        case .phone:
+            guard let phoneView = phoneView,
+                  let phoneNumber = phoneView.getPhoneNumber(),
+                  !phoneNumber.isEmpty else {
+                return nil
+            }
+            return CodeGeneratorManager.shared.generateQRCode(from: "tel:\(phoneNumber)")
+            
+        case .text:
+            guard let textView = textView,
+                  let text = textView.getText(),
+                  !text.isEmpty else {
+                return nil
+            }
+            return CodeGeneratorManager.shared.generateQRCode(from: text)
+            
+        case .contact:
+            guard let contactsView = contactsView,
+                  let name = contactsView.getName(),
+                  let phone = contactsView.getPhone(),
+                  let email = contactsView.getEmail() else {
+                return nil
+            }
+            return CodeGeneratorManager.shared.generateContactQRCode(name: name, phone: phone, email: email, address: "")
+            
+        case .email:
+            guard let emailView = emailView,
+                  let email = emailView.getEmail(),
+                  let subject = emailView.getSubject(),
+                  let body = emailView.getBody(),
+                  !email.isEmpty else {
+                return nil
+            }
+            return CodeGeneratorManager.shared.generateEmailQRCode(email: email, subject: subject, body: body)
+            
+        case .website:
+            guard let websiteView = websiteView,
+                  let url = websiteView.getURL(),
+                  !url.isEmpty else {
+                return nil
+            }
+            return CodeGeneratorManager.shared.generateQRCode(from: url)
+            
+        case .location:
+            guard let locationView = locationView,
+                  let latitudeStr = locationView.getLatitude(),
+                  let longitudeStr = locationView.getLongitude(),
+                  let latitude = Double(latitudeStr),
+                  let longitude = Double(longitudeStr) else {
+                return nil
+            }
+            return CodeGeneratorManager.shared.generateLocationQRCode(latitude: latitude, longitude: longitude)
+            
+        case .events:
+            guard let calendarView = calendarView,
+                  let title = calendarView.getTitle(),
+                  let startDateStr = calendarView.getStartDate(),
+                  let endDateStr = calendarView.getEndDate(),
+                  let location = calendarView.getLocation() else {
+                return nil
+            }
+            
+            // Convert string dates to Date objects
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+            
+            guard let startDate = dateFormatter.date(from: startDateStr),
+                  let endDate = dateFormatter.date(from: endDateStr) else {
+                return nil
+            }
+            
+            let description = calendarView.getDescription() ?? ""
+            
+            return CodeGeneratorManager.shared.generateCalendarEventQRCode(
+                title: title,
+                startDate: startDate,
+                endDate: endDate,
+                location: location,
+                description: description
+            )
+        }
+    }
+    
+    private func generateSocialQRCode(for type: SocialQRCodeType) -> UIImage? {
+        var username = ""
+        
+        switch type {
+        case .facebook:
+            guard let facebookView = facebookView,
+                  let user = facebookView.getUsername(),
+                  !user.isEmpty else {
+                return nil
+            }
+            username = user
+            
+        case .instagram:
+            guard let instagramView = instagramView,
+                  let user = instagramView.getUsername(),
+                  !user.isEmpty else {
+                return nil
+            }
+            username = user
+            
+        case .tiktok:
+            guard let tiktokView = tiktokView,
+                  let user = tiktokView.getUsername(),
+                  !user.isEmpty else {
+                return nil
+            }
+            username = user
+            
+        case .x:
+            guard let xView = xView,
+                  let user = xView.getUsername(),
+                  !user.isEmpty else {
+                return nil
+            }
+            username = user
+            
+        case .whatsapp:
+            guard let whatsappView = whatsappView,
+                  let user = whatsappView.getPhoneNumber(),
+                  !user.isEmpty else {
+                return nil
+            }
+            username = user
+            
+        case .youtube:
+            guard let youtubeView = youtubeView,
+                  let user = youtubeView.getUsername(),
+                  !user.isEmpty else {
+                return nil
+            }
+            username = user
+            
+        case .spotify:
+            guard let spotifyView = spotifyView,
+                  let user = spotifyView.getUsername(),
+                  !user.isEmpty else {
+                return nil
+            }
+            username = user
+            
+        case .viber:
+            guard let viberView = viberView,
+                  let user = viberView.getPhoneNumber(),
+                  !user.isEmpty else {
+                return nil
+            }
+            username = user
+        }
+        
+        return CodeGeneratorManager.shared.generateSocialQRCode(type: type, username: username)
+    }
+    
+    private func generateBarCode(for type: BarCodeType) -> UIImage? {
+        guard let barCodeView = barCodeView,
+              let content = barCodeView.getContent(),
+              !content.isEmpty else {
+            return nil
+        }
+        
+        return CodeGeneratorManager.shared.generateBarcode(content: content, type: type)
+    }
+    
+    private func presentResultScreen(with image: UIImage) {
+        print("[CodeGeneratorViewController] Presenting result screen with image: \(image)")
+        let resultVC = CodeGenerationResultViewController()
+        configureResultVC(resultVC, with: image)
+        navigationController?.pushViewController(resultVC, animated: true)
+    }
+    
+    private func configureResultVC(_ resultVC: CodeGenerationResultViewController, with image: UIImage) {
+        guard let codeType = currentCodeType else { 
+            print("[CodeGeneratorViewController] Error: No code type available")
+            return 
+        }
+        
+        print("[CodeGeneratorViewController] Configuring result VC for code type: \(codeType)")
+        
+        // Set the generated image based on code type
+        if codeType is BarCodeType {
+            print("[CodeGeneratorViewController] Setting barcode image")
+            resultVC.setBarCodeImage(image)
+            if let barCodeType = codeType as? BarCodeType {
+                resultVC.setBarCodeType(icon: barCodeType.icon, title: barCodeType.title)
+            }
+        } else {
+            print("[CodeGeneratorViewController] Setting QR code image")
+            resultVC.setQRCodeImage(image)
+        }
+        
+        // Set title and description based on code type
+        var title = ""
+        var description = ""
+        
+        if let qrType = codeType as? QRCodeType {
+            title = qrType.title
+            switch qrType {
+            case .wifi:
+                if let wifiView = wifiView {
+                    title = "Wi-Fi Name"
+                    description = wifiView.getSSID() ?? ""
+                }
+            case .phone:
+                if let phoneView = phoneView {
+                    title = "Phone Number"
+                    description = phoneView.getPhoneNumber() ?? ""
+                }
+            case .text:
+                if let textView = textView {
+                    title = "Text"
+                    description = String(textView.getText()?.prefix(20) ?? "") + (textView.getText()?.count ?? 0 > 20 ? "..." : "")
+                }
+            case .contact:
+                if let contactsView = contactsView {
+                    title = "Contact"
+                    description = contactsView.getName() ?? ""
+                }
+            case .email:
+                if let emailView = emailView {
+                    title = "Email"
+                    description = emailView.getEmail() ?? ""
+                }
+            case .website:
+                if let websiteView = websiteView {
+                    title = "Website"
+                    description = websiteView.getURL() ?? ""
+                }
+            case .location:
+                title = "Location"
+                description = "Geo Coordinates"
+            case .events:
+                if let calendarView = calendarView {
+                    title = "Calendar Event"
+                    description = calendarView.getTitle() ?? ""
+                }
+            }
+        } else if let socialType = codeType as? SocialQRCodeType {
+            title = socialType.title
+            switch socialType {
+            case .facebook:
+                description = facebookView?.getUsername() ?? ""
+            case .instagram:
+                description = instagramView?.getUsername() ?? ""
+            case .tiktok:
+                description = tiktokView?.getUsername() ?? ""
+            case .x:
+                description = xView?.getUsername() ?? ""
+            case .youtube:
+                description = youtubeView?.getUsername() ?? ""
+            case .spotify:
+                description = spotifyView?.getUsername() ?? ""
+            case .whatsapp:
+                description = whatsappView?.getPhoneNumber() ?? ""
+            case .viber:
+                description = viberView?.getPhoneNumber() ?? ""
+            }
+        } else if let barType = codeType as? BarCodeType {
+            title = barType.title
+            if let barCodeView = barCodeView {
+                description = barCodeView.getContent() ?? ""
+            }
+        }
+        
+        resultVC.setTitleAndDescription(title: title, description: description)
+        
+        // Set up action handlers
+        resultVC.setSaveAction { [weak self] in
+            self?.saveImageToGallery(image)
+        }
+        
+        resultVC.setShareAction { [weak self] in
+            self?.shareImage(image)
+        }
+    }
+    
+    private func saveImageToGallery(_ image: UIImage) {
+        UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+    }
+    
+    @objc private func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        if let error = error {
+            showErrorAlert(message: "Failed to save image: \(error.localizedDescription)")
+        } else {
+            let alert = UIAlertController(
+                title: "Success",
+                message: "Image saved to your photo library",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+        }
+    }
+    
+    private func shareImage(_ image: UIImage) {
+        let activityViewController = UIActivityViewController(
+            activityItems: [image],
+            applicationActivities: nil
+        )
+        present(activityViewController, animated: true)
+    }
+    
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "Error",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
     
     // MARK: - Public Methods

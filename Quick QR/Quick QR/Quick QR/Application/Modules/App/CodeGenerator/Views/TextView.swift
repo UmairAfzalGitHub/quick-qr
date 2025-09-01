@@ -22,6 +22,11 @@ final class TextView: UIView {
         }
     }
     
+    // MARK: - Getter Methods
+    func getText() -> String? {
+        return contentTextView.text.isEmpty ? nil : contentTextView.text
+    }
+    
     // MARK: - UI Elements
     private let phoneNumberLabel: UILabel = {
         let label = UILabel()

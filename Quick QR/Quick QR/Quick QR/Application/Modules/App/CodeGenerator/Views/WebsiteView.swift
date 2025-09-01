@@ -14,6 +14,11 @@ final class WebsiteView: UIView {
         set { websiteTextField.text = newValue }
     }
     
+    // MARK: - Getter Methods
+    func getURL() -> String? {
+        return websiteTextField.text
+    }
+    
     // MARK: - UI Elements
     private let websiteLabel: UILabel = {
         let label = UILabel()

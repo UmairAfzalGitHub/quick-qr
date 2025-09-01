@@ -14,6 +14,11 @@ final class PhoneView: UIView {
         set { phoneTextField.text = newValue }
     }
     
+    // MARK: - Getter Methods
+    func getPhoneNumber() -> String? {
+        return phoneTextField.text
+    }
+    
     // MARK: - UI Elements
     private let phoneLabel: UILabel = {
         let label = UILabel()

@@ -35,6 +35,31 @@ final class CalendarView: UIView {
         }
     }
     
+    // MARK: - Getter Methods
+    func getTitle() -> String? {
+        return titleTextField.text
+    }
+    
+    func getLocation() -> String? {
+        return locationTextField.text
+    }
+    
+    func isAllDay() -> Bool {
+        return allDaySwitch.isOn
+    }
+    
+    func getStartDate() -> String? {
+        return startTextField.text
+    }
+    
+    func getEndDate() -> String? {
+        return endTextField.text
+    }
+    
+    func getDescription() -> String? {
+        return contentTextView.text.isEmpty ? nil : contentTextView.text
+    }
+    
     // MARK: - UI Elements
     private let titleLabel: UILabel = {
         let label = UILabel()
