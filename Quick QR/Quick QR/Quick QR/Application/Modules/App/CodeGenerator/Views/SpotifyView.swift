@@ -13,6 +13,11 @@ final class SpotifyView: UIView {
         get { urlTextField.text }
         set { urlTextField.text = newValue }
     }
+    
+    // MARK: - Getter Methods
+    func getUsername() -> String? {
+        return urlTextField.text
+    }
 
     // MARK: - UI Elements
     private let urlLabel: UILabel = {

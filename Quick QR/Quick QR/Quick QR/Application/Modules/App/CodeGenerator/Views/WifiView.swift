@@ -14,6 +14,20 @@ final class WifiView: UIView {
         set { ssIDTextField.text = newValue }
     }
     
+    // MARK: - Getter Methods
+    func getSSID() -> String? {
+        return ssIDTextField.text
+    }
+    
+    func getPassword() -> String? {
+        return passwordTextField.text
+    }
+    
+    func isWEP() -> Bool {
+        // Check if WEP button is selected
+        return wepButton.backgroundColor == .appPrimary
+    }
+    
     // MARK: - UI Elements
     private let ssIDLabel: UILabel = {
         let label = UILabel()
@@ -138,6 +152,9 @@ final class WifiView: UIView {
         buttonsStackView.addArrangedSubview(wpaButton)
         buttonsStackView.addArrangedSubview(wepButton)
         buttonsStackView.addArrangedSubview(noneButton)
+        
+        // Set default security mode
+        selectSecurityMode(.wpa)
 
         let side: CGFloat = 0
         let fieldHeight: CGFloat = 54
@@ -177,6 +194,52 @@ final class WifiView: UIView {
             buttonsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
             buttonsStackView.heightAnchor.constraint(equalToConstant: 46),
         ])
+        
+        // Add button actions
+        wpaButton.addTarget(self, action: #selector(wpaButtonTapped), for: .touchUpInside)
+        wepButton.addTarget(self, action: #selector(wepButtonTapped), for: .touchUpInside)
+        noneButton.addTarget(self, action: #selector(noneButtonTapped), for: .touchUpInside)
+    }
+    
+    // MARK: - Button Actions
+    @objc private func wpaButtonTapped() {
+        selectSecurityMode(.wpa)
+    }
+    
+    @objc private func wepButtonTapped() {
+        selectSecurityMode(.wep)
+    }
+    
+    @objc private func noneButtonTapped() {
+        selectSecurityMode(.none)
+    }
+    
+    // MARK: - Helper Methods
+    private enum SecurityMode {
+        case wpa, wep, none
+    }
+    
+    private func selectSecurityMode(_ mode: SecurityMode) {
+        // Reset all buttons
+        wpaButton.backgroundColor = .appSecondaryBackground
+        wpaButton.setTitleColor(.textPrimary, for: .normal)
+        wepButton.backgroundColor = .appSecondaryBackground
+        wepButton.setTitleColor(.textPrimary, for: .normal)
+        noneButton.backgroundColor = .appSecondaryBackground
+        noneButton.setTitleColor(.textPrimary, for: .normal)
+        
+        // Highlight selected button
+        switch mode {
+        case .wpa:
+            wpaButton.backgroundColor = .appPrimary
+            wpaButton.setTitleColor(.white, for: .normal)
+        case .wep:
+            wepButton.backgroundColor = .appPrimary
+            wepButton.setTitleColor(.white, for: .normal)
+        case .none:
+            noneButton.backgroundColor = .appPrimary
+            noneButton.setTitleColor(.white, for: .normal)
+        }
     }
 }
 

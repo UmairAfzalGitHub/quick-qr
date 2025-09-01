@@ -24,6 +24,19 @@ final class ContactsView: UIView {
         set { emailTextField.text = newValue }
     }
     
+    // MARK: - Getter Methods
+    func getName() -> String? {
+        return nameTextField.text
+    }
+    
+    func getPhone() -> String? {
+        return numberTextField.text
+    }
+    
+    func getEmail() -> String? {
+        return emailTextField.text
+    }
+    
     // MARK: - UI Elements
     private let nameLabel: UILabel = {
         let label = UILabel()
@@ -160,6 +173,9 @@ final class ContactsView: UIView {
             emailTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             emailTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
             emailTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
+            
+            // Add bottom constraint to ensure view includes all fields
+            emailTextField.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
 }

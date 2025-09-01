@@ -13,6 +13,11 @@ final class BarCodeView: UIView {
         get { barCodeTextField.text }
         set { barCodeTextField.text = newValue }
     }
+    
+    // MARK: - Getter Methods
+    func getContent() -> String? {
+        return barCodeTextField.text
+    }
 
     // MARK: - UI Elements
     private let barCodeNameLabel: UILabel = {

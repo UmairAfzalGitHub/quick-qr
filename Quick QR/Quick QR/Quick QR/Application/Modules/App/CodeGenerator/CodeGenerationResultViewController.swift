@@ -6,13 +6,13 @@
 //
 
 import UIKit
+import Photos
 
 class CodeGenerationResultViewController: UIViewController {
     
     // MARK: - UI Components
     
     private let codeContentView = UIView()
-    
     private let qrCodeImageView = UIImageView()
     
     private let barcodeView = UIView()
@@ -30,25 +30,35 @@ class CodeGenerationResultViewController: UIViewController {
     
     private let adView = UIView()
     
+    // MARK: - Properties
+    
+    private var saveAction: (() -> Void)?
+    private var shareAction: (() -> Void)?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupUI()
         setupConstraints()
-        qrCodeImageView.isHidden = true
+        setupActions()
     }
     
     private func setupUI() {
+        // Configure main container view
         codeContentView.translatesAutoresizingMaskIntoConstraints = false
-        codeContentView.backgroundColor = .orange
-
-        qrCodeImageView.backgroundColor = .green
+        codeContentView.backgroundColor = .white
+        codeContentView.layer.cornerRadius = 12
+        codeContentView.layer.borderWidth = 1
+        codeContentView.layer.borderColor = UIColor.systemGray4.cgColor
+        
+        // Configure QR code image view
+        qrCodeImageView.contentMode = .scaleAspectFit
         qrCodeImageView.translatesAutoresizingMaskIntoConstraints = false
+        qrCodeImageView.backgroundColor = .white
 
-        barcodeView.backgroundColor = .red
+        barcodeView.backgroundColor = .white
         barcodeView.translatesAutoresizingMaskIntoConstraints = false
         
-        barcodeContentStackView.backgroundColor = .yellow
         barcodeContentStackView.axis = .horizontal
         barcodeContentStackView.distribution = .fill
         barcodeContentStackView.alignment = .center
@@ -56,14 +66,12 @@ class CodeGenerationResultViewController: UIViewController {
         barcodeContentStackView.translatesAutoresizingMaskIntoConstraints = false
 
         barCodeTypeImageView.contentMode = .scaleAspectFit
-        barCodeTypeImageView.backgroundColor = .blue
         barCodeTypeImageView.translatesAutoresizingMaskIntoConstraints = false
 
-        barCodeTypeTitleLabel.backgroundColor = .magenta
         barCodeTypeTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        barCodeTypeTitleLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         
         barCodeImageView.contentMode = .scaleAspectFit
-        barCodeImageView.backgroundColor = .green
         barCodeImageView.translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -83,15 +91,19 @@ class CodeGenerationResultViewController: UIViewController {
         buttonsStackView.spacing = 8
         buttonsStackView.translatesAutoresizingMaskIntoConstraints = false
         
-        shareButton.configure(with: .primary(title: "Share", image: UIImage(named: "share-icon")))
+        shareButton.configure(with: .primary(title: "Share", image: UIImage(systemName: "square.and.arrow.up")))
         shareButton.translatesAutoresizingMaskIntoConstraints = false
         
-        saveButton.configure(with: .secondary(title: "Save", image: UIImage(named: "save-icon")))
+        saveButton.configure(with: .secondary(title: "Save", image: UIImage(systemName: "square.and.arrow.down")))
         saveButton.translatesAutoresizingMaskIntoConstraints = false
         
         adView.backgroundColor = .gray
         adView.translatesAutoresizingMaskIntoConstraints = false
-        
+    }
+    
+    
+    private func setupConstraints() {
+        // Add all views to the hierarchy first
         view.addSubview(codeContentView)
         codeContentView.addSubview(qrCodeImageView)
         codeContentView.addSubview(barcodeView)
@@ -105,20 +117,33 @@ class CodeGenerationResultViewController: UIViewController {
         buttonsStackView.addArrangedSubview(shareButton)
         buttonsStackView.addArrangedSubview(saveButton)
         view.addSubview(adView)
-    }
-    
-    private func setupConstraints() {
+        
+        // Main container constraints
         NSLayoutConstraint.activate([
             codeContentView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             codeContentView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.6),
             codeContentView.heightAnchor.constraint(equalTo: codeContentView.widthAnchor),
-            codeContentView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
+            codeContentView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+        
+        // QR code image view constraints
+        NSLayoutConstraint.activate([
+            qrCodeImageView.topAnchor.constraint(equalTo: codeContentView.topAnchor, constant: 8),
+            qrCodeImageView.leadingAnchor.constraint(equalTo: codeContentView.leadingAnchor, constant: 8),
+            qrCodeImageView.trailingAnchor.constraint(equalTo: codeContentView.trailingAnchor, constant: -8),
+            qrCodeImageView.bottomAnchor.constraint(equalTo: codeContentView.bottomAnchor, constant: -8)
+        ])
+        
+        // Barcode view constraints
+        NSLayoutConstraint.activate([
             barcodeView.topAnchor.constraint(equalTo: codeContentView.topAnchor, constant: 16),
             barcodeView.leadingAnchor.constraint(equalTo: codeContentView.leadingAnchor, constant: 16),
             barcodeView.trailingAnchor.constraint(equalTo: codeContentView.trailingAnchor, constant: -16),
-            barcodeView.bottomAnchor.constraint(equalTo: codeContentView.bottomAnchor, constant: -16),
-
+            barcodeView.bottomAnchor.constraint(equalTo: codeContentView.bottomAnchor, constant: -16)
+        ])
+        
+        // Barcode content stack view constraints
+        NSLayoutConstraint.activate([
             barcodeContentStackView.centerXAnchor.constraint(equalTo: barcodeView.centerXAnchor),
             barcodeContentStackView.heightAnchor.constraint(equalToConstant: 40),
             barcodeContentStackView.topAnchor.constraint(equalTo: barcodeView.topAnchor, constant: 8),
@@ -126,18 +151,19 @@ class CodeGenerationResultViewController: UIViewController {
             
             barCodeTypeImageView.heightAnchor.constraint(equalToConstant: 36),
             barCodeTypeImageView.widthAnchor.constraint(equalToConstant: 36),
-            barCodeTypeTitleLabel.heightAnchor.constraint(equalToConstant: 36),
-            
+            barCodeTypeTitleLabel.heightAnchor.constraint(equalToConstant: 36)
+        ])
+        
+        // Barcode image view constraints
+        NSLayoutConstraint.activate([
             barCodeImageView.topAnchor.constraint(equalTo: barcodeContentStackView.bottomAnchor, constant: 16),
             barCodeImageView.leadingAnchor.constraint(equalTo: barcodeView.leadingAnchor, constant: 8),
             barCodeImageView.trailingAnchor.constraint(equalTo: barcodeView.trailingAnchor, constant: -8),
-            barCodeImageView.bottomAnchor.constraint(equalTo: barcodeView.bottomAnchor, constant: -8),
-
-            qrCodeImageView.topAnchor.constraint(equalTo: codeContentView.topAnchor, constant: 8),
-            qrCodeImageView.leadingAnchor.constraint(equalTo: codeContentView.leadingAnchor, constant: 8),
-            qrCodeImageView.trailingAnchor.constraint(equalTo: codeContentView.trailingAnchor, constant: -8),
-            qrCodeImageView.bottomAnchor.constraint(equalTo: codeContentView.bottomAnchor, constant: -8),
-            
+            barCodeImageView.bottomAnchor.constraint(equalTo: barcodeView.bottomAnchor, constant: -8)
+        ])
+        
+        // Other UI elements constraints
+        NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: codeContentView.bottomAnchor, constant: 16),
             titleLabel.centerXAnchor.constraint(equalTo: codeContentView.centerXAnchor),
             titleLabel.heightAnchor.constraint(equalToConstant: 22),
@@ -159,5 +185,71 @@ class CodeGenerationResultViewController: UIViewController {
             adView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             adView.heightAnchor.constraint(equalToConstant: 240)
         ])
+    }
+    
+    private func setupActions() {
+        let shareTapGesture = UITapGestureRecognizer(target: self, action: #selector(shareButtonTapped))
+        let saveTapGesture = UITapGestureRecognizer(target: self, action: #selector(saveButtonTapped))
+
+        shareButton.addGestureRecognizer(shareTapGesture)
+        saveButton.addGestureRecognizer(saveTapGesture)
+        
+        print("[CodeGenerationResultViewController] Set up button actions")
+    }
+    
+    // MARK: - Public Methods
+    
+    /// Set the QR code image and show QR code view
+    func setQRCodeImage(_ image: UIImage) {
+        // Set image and show QR code view
+        qrCodeImageView.image = image
+        qrCodeImageView.isHidden = false
+        barcodeView.isHidden = true
+        
+        // Bring QR code image view to front
+        codeContentView.bringSubviewToFront(qrCodeImageView)
+    }
+    
+    /// Set the barcode image and show barcode view
+    func setBarCodeImage(_ image: UIImage) {
+        // Set image and show barcode view
+        barCodeImageView.image = image
+        barcodeView.isHidden = false
+        qrCodeImageView.isHidden = true
+        
+        // Bring barcode view to front
+        codeContentView.bringSubviewToFront(barcodeView)
+    }
+    
+    /// Set the barcode type icon and title
+    func setBarCodeType(icon: UIImage?, title: String) {
+        barCodeTypeImageView.image = icon
+        barCodeTypeTitleLabel.text = title
+    }
+    
+    /// Set the title and description labels
+    func setTitleAndDescription(title: String, description: String) {
+        titleLabel.text = title
+        descLabel.text = description
+    }
+    
+    /// Set the save button action
+    func setSaveAction(_ action: @escaping () -> Void) {
+        saveAction = action
+    }
+    
+    /// Set the share button action
+    func setShareAction(_ action: @escaping () -> Void) {
+        shareAction = action
+    }
+    
+    // MARK: - Actions
+    
+    @objc private func shareButtonTapped() {
+        shareAction?()
+    }
+    
+    @objc private func saveButtonTapped() {
+        saveAction?()
     }
 }

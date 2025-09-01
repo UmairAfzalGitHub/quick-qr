@@ -18,6 +18,15 @@ final class LocationView: UIView {
         get { longitudeTextField.text }
         set { longitudeTextField.text = newValue }
     }
+    
+    // MARK: - Getter Methods
+    func getLatitude() -> String? {
+        return latitudeTextField.text
+    }
+    
+    func getLongitude() -> String? {
+        return longitudeTextField.text
+    }
 
     // MARK: - UI Elements
     private let latitudeLabel: UILabel = {

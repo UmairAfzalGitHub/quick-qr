@@ -13,6 +13,12 @@ final class ViberView: UIView {
         get { phoneNumberTextField.text }
         set { phoneNumberTextField.text = newValue }
     }
+    
+    // MARK: - Getter Methods
+    func getPhoneNumber() -> String? {
+        guard let phoneNumber = phoneNumberTextField.text else { return nil }
+        return codeLabel.text?.trimmingCharacters(in: .whitespaces) ?? "+1" + phoneNumber
+    }
 
     // MARK: - UI Elements
     private let urlLabel: UILabel = {
