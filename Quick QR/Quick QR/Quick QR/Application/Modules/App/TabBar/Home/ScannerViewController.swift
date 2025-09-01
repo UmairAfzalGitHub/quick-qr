@@ -151,7 +151,7 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         
         // Explicit formats
         if lower.hasPrefix("wifi:") { return QRCodeType.wifi }
-        if lower.hasPrefix("tel:") || lower.hasPrefix("sms:") || lower.hasPrefix("telprompt:") {
+        if lower.hasPrefix("tel:") || lower.hasPrefix("telprompt:") {
             return QRCodeType.phone
         }
         if lower.hasPrefix("sms:") { return QRCodeType.text }
@@ -164,13 +164,15 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         if let url = URL(string: raw), let scheme = url.scheme?.lowercased() {
             let host = (url.host ?? "").lowercased()
             
-//            SocialQRCodeType.allCases.forEach { social in
-//                for suffix in social.suffex ?? [] {
-//                    if host.hasSuffix(suffix) {
-//                        return social
-//                    }
-//                }
-//            }
+            for social in SocialQRCodeType.allCases {
+                if let suffixes = social.suffex {
+                    for suffix in suffixes {
+                        if host.hasSuffix(suffix) || scheme == suffix {
+                            return social
+                        }
+                    }
+                }
+            }
             // Social apps
             if scheme == "viber" ||  host.hasSuffix("vb.me") { return SocialQRCodeType.viber }
             if host.hasSuffix("tiktok.com") { return SocialQRCodeType.tiktok }
