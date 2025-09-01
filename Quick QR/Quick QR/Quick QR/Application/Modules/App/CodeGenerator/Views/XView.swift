@@ -23,6 +23,10 @@ final class XView: UIView {
     func getUsername() -> String? {
         return userNameTextField.text
     }
+    
+    func getUrl() -> String? {
+        return urlTextField.text
+    }
 
     // MARK: - UI Elements
     private let userNameLabel: UILabel = {
@@ -52,7 +56,7 @@ final class XView: UIView {
     private let urlLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "URL"
+        label.text = "Custom URL (optional)"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -61,8 +65,8 @@ final class XView: UIView {
     private let urlTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter URL"
-        tf.keyboardType = .namePhonePad
+        tf.placeholder = "Enter custom URL (optional)"
+        tf.keyboardType = .URL
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
         tf.clearButtonMode = .whileEditing

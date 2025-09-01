@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class WhatsappView: UIView {
+final class WhatsappView: UIView, CountriesViewControllerDelegate {
     // MARK: - Public API
     var urlText: String? {
         get { phoneNumberTextField.text }
@@ -16,8 +16,9 @@ final class WhatsappView: UIView {
     
     // MARK: - Getter Methods
     func getPhoneNumber() -> String? {
-        guard let phoneNumber = phoneNumberTextField.text else { return nil }
-        return codeLabel.text?.trimmingCharacters(in: .whitespaces) ?? "+1" + phoneNumber
+        guard let phoneNumber = phoneNumberTextField.text, !phoneNumber.isEmpty else { return nil }
+        let countryCode = codeLabel.text?.trimmingCharacters(in: .whitespaces) ?? "+1"
+        return countryCode + phoneNumber
     }
 
     // MARK: - UI Elements
@@ -55,14 +56,14 @@ final class WhatsappView: UIView {
         label.text = "+1"
         label.textAlignment = .center
         label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        label.textColor = UIColor.placeholderText
+        label.textColor = .black
         return label
     }()
     
     private let arrowImageView: UIImageView = {
         let image = UIImageView(image: UIImage(named: "arrow-down"))
         image.translatesAutoresizingMaskIntoConstraints = false
-        image.tintColor = .placeholderText
+        image.tintColor = .black
         image.contentMode = .scaleAspectFit
         return image
     }()
@@ -103,6 +104,11 @@ final class WhatsappView: UIView {
         codeSelectorView.addSubview(codeSelectorStackView)
         codeSelectorStackView.addArrangedSubview(codeLabel)
         codeSelectorStackView.addArrangedSubview(arrowImageView)
+        
+        // Add tap gesture to country code selector
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(countryCodeTapped))
+        codeSelectorView.addGestureRecognizer(tapGesture)
+        codeSelectorView.isUserInteractionEnabled = true
 
         let side: CGFloat = 0
         let fieldHeight: CGFloat = 54
@@ -131,6 +137,46 @@ final class WhatsappView: UIView {
             
             
         ])
+    }
+}
+
+// MARK: - Country Code Selection
+extension WhatsappView {
+    @objc private func countryCodeTapped() {
+        let countries = CountryRepository().getCountries()
+        let countryViewController = CountriesViewController(dataType: .countries(countries))
+        countryViewController.delegate = self
+        
+        // Find the view controller to present from
+        if let viewController = findViewController() {
+            viewController.present(countryViewController, animated: true)
+        }
+    }
+    
+    private func findViewController() -> UIViewController? {
+        var responder: UIResponder? = self
+        while let nextResponder = responder?.next {
+            if let viewController = nextResponder as? UIViewController {
+                return viewController
+            }
+            responder = nextResponder
+        }
+        return nil
+    }
+    
+    // MARK: - CountriesViewControllerDelegate
+    func didSelectCountry(country: Country) {
+        if let phoneCode = country.phoneCode {
+            codeLabel.text = phoneCode
+        }
+    }
+    
+    func didSelectCity(city: City) {
+        // Not used for this implementation
+    }
+    
+    func didSelectTimeZone(timeZone: String) {
+        // Not used for this implementation
     }
 }
 

@@ -284,17 +284,35 @@ class CodeGeneratorViewController: UIViewController {
         
         switch type {
         case .facebook:
-            guard let facebookView = facebookView,
-                  let user = facebookView.getUsername(),
-                  !user.isEmpty else {
+            guard let facebookView = facebookView else {
+                return nil
+            }
+            
+            // Check if a custom URL is provided
+            if let customUrl = facebookView.getUrl(), !customUrl.isEmpty {
+                // Use the custom URL directly
+                return CodeGeneratorManager.shared.generateQRCode(from: customUrl)
+            }
+            
+            // Fall back to username-based URL if no custom URL is provided
+            guard let user = facebookView.getUsername(), !user.isEmpty else {
                 return nil
             }
             username = user
             
         case .instagram:
-            guard let instagramView = instagramView,
-                  let user = instagramView.getUsername(),
-                  !user.isEmpty else {
+            guard let instagramView = instagramView else {
+                return nil
+            }
+            
+            // Check if a custom URL is provided
+            if let customUrl = instagramView.getUrl(), !customUrl.isEmpty {
+                // Use the custom URL directly
+                return CodeGeneratorManager.shared.generateQRCode(from: customUrl)
+            }
+            
+            // Fall back to username-based URL if no custom URL is provided
+            guard let user = instagramView.getUsername(), !user.isEmpty else {
                 return nil
             }
             username = user
@@ -308,9 +326,18 @@ class CodeGeneratorViewController: UIViewController {
             username = user
             
         case .x:
-            guard let xView = xView,
-                  let user = xView.getUsername(),
-                  !user.isEmpty else {
+            guard let xView = xView else {
+                return nil
+            }
+            
+            // Check if a custom URL is provided
+            if let customUrl = xView.getUrl(), !customUrl.isEmpty {
+                // Use the custom URL directly
+                return CodeGeneratorManager.shared.generateQRCode(from: customUrl)
+            }
+            
+            // Fall back to username-based URL if no custom URL is provided
+            guard let user = xView.getUsername(), !user.isEmpty else {
                 return nil
             }
             username = user
@@ -324,17 +351,35 @@ class CodeGeneratorViewController: UIViewController {
             username = user
             
         case .youtube:
-            guard let youtubeView = youtubeView,
-                  let user = youtubeView.getUsername(),
-                  !user.isEmpty else {
+            guard let youtubeView = youtubeView else {
+                return nil
+            }
+            
+            // Check if a custom URL is provided
+            if let customUrl = youtubeView.getUrl(), !customUrl.isEmpty {
+                // Use the custom URL directly
+                return CodeGeneratorManager.shared.generateQRCode(from: customUrl)
+            }
+            
+            // Fall back to username-based URL if no custom URL is provided
+            guard let user = youtubeView.getUsername(), !user.isEmpty else {
                 return nil
             }
             username = user
             
         case .spotify:
-            guard let spotifyView = spotifyView,
-                  let user = spotifyView.getUsername(),
-                  !user.isEmpty else {
+            guard let spotifyView = spotifyView else {
+                return nil
+            }
+            
+            // Check if a custom URL is provided
+            if let customUrl = spotifyView.getUrl(), !customUrl.isEmpty {
+                // Use the custom URL directly
+                return CodeGeneratorManager.shared.generateQRCode(from: customUrl)
+            }
+            
+            // Fall back to username-based URL if no custom URL is provided
+            guard let user = spotifyView.getUsername(), !user.isEmpty else {
                 return nil
             }
             username = user

@@ -18,6 +18,10 @@ final class YoutubeView: UIView {
     func getUsername() -> String? {
         return urlTextField.text
     }
+    
+    func getUrl() -> String? {
+        return urlTextField.text
+    }
 
     // MARK: - UI Elements
     private let urlLabel: UILabel = {
@@ -33,7 +37,7 @@ final class YoutubeView: UIView {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder = "Enter URL"
-        tf.keyboardType = .namePhonePad
+        tf.keyboardType = .URL
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
         tf.clearButtonMode = .whileEditing
