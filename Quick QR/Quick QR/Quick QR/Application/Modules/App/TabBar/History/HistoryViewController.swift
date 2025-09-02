@@ -32,6 +32,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }()
     
     private let tableView = UITableView()
+    private let emptyStateView = UIView()
     private var isScanSelected: Bool {
         return betterSegmentedControl.index == 0
     }
@@ -45,7 +46,18 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         loadHistory()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Refresh history data when view appears
+        loadHistory()
+        
+        // Update clear button visibility based on data
+        navigationItem.rightBarButtonItem?.isEnabled = !dataSource.isEmpty
+    }
+    
     private func setupUI() {
+        view.backgroundColor = .white
+        
         // Add Better Segmented Control
         view.addSubview(betterSegmentedControl)
         betterSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
@@ -84,21 +96,90 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        
+        // Setup empty state view
+        setupEmptyStateView()
     }
 
     private func loadHistory() {
-        // Mock data for demonstration
-        dataSource = [
-            FavoriteItem(type: .qrCode(.website), title: "Website", url: "https://www.google.com"),
-            FavoriteItem(type: .qrCode(.email), title: "Email", url: "mailto:example@example.com"),
-            FavoriteItem(type: .socialQRCode(.whatsapp), title: "WhatsApp", url: "https://wa.me/1234567890")
-        ]
+        // Get history based on selected segment
+        let historyItems = isScanSelected ? 
+            HistoryManager.shared.getScanHistory() : 
+            HistoryManager.shared.getCreatedHistory()
+        
+        // Convert history items to favorite items for display
+        dataSource = historyItems.map { $0.toFavoriteItem() }
+        
+        // If no history, show empty state
+        if dataSource.isEmpty {
+            showEmptyState()
+        } else {
+            hideEmptyState()
+        }
+        
         tableView.reloadData()
     }
     
     @objc private func segmentChanged(_ sender: BetterSegmentedControl) {
-        // Reload collection view when segment changes
-        tableView.reloadData()
+        // Reload history when segment changes
+        loadHistory()
+    }
+
+    // MARK: - Empty State Handling
+    
+    private func setupEmptyStateView() {
+        emptyStateView.isHidden = true
+        view.addSubview(emptyStateView)
+        emptyStateView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            emptyStateView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            emptyStateView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
+        ])
+        
+        let imageView = UIImageView(image: UIImage(systemName: "clock.arrow.circlepath"))
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .appPrimary
+        
+        let titleLabel = UILabel()
+        titleLabel.text = "No History Yet"
+        titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
+        titleLabel.textAlignment = .center
+        
+        let subtitleLabel = UILabel()
+        subtitleLabel.text = "Your generated codes will appear here"
+        subtitleLabel.font = UIFont.systemFont(ofSize: 14)
+        subtitleLabel.textColor = .systemGray
+        subtitleLabel.textAlignment = .center
+        subtitleLabel.numberOfLines = 0
+        
+        let stackView = UIStackView(arrangedSubviews: [imageView, titleLabel, subtitleLabel])
+        stackView.axis = .vertical
+        stackView.spacing = 12
+        stackView.alignment = .center
+        
+        emptyStateView.addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            imageView.heightAnchor.constraint(equalToConstant: 80),
+            imageView.widthAnchor.constraint(equalToConstant: 80),
+            stackView.topAnchor.constraint(equalTo: emptyStateView.topAnchor),
+            stackView.leadingAnchor.constraint(equalTo: emptyStateView.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: emptyStateView.trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: emptyStateView.bottomAnchor)
+        ])
+    }
+    
+    private func showEmptyState() {
+        tableView.isHidden = true
+        emptyStateView.isHidden = false
+    }
+    
+    private func hideEmptyState() {
+        tableView.isHidden = false
+        emptyStateView.isHidden = true
     }
     
     // MARK: - UITableViewDelegate & UITableViewDataSource
@@ -119,6 +200,34 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        // Handle selection
+        // Handle selection - could regenerate the code or show details
+    }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            // Get the history items
+            let historyItems = isScanSelected ? 
+                HistoryManager.shared.getScanHistory() : 
+                HistoryManager.shared.getCreatedHistory()
+            
+            // Delete the item from history manager
+            if indexPath.row < historyItems.count {
+                let itemToDelete = historyItems[indexPath.row]
+                HistoryManager.shared.deleteHistoryItem(withId: itemToDelete.id)
+                
+                // Remove from data source
+                dataSource.remove(at: indexPath.row)
+                tableView.deleteRows(at: [indexPath], with: .fade)
+                
+                // Show empty state if needed
+                if dataSource.isEmpty {
+                    showEmptyState()
+                }
+            }
+        }
     }
 }

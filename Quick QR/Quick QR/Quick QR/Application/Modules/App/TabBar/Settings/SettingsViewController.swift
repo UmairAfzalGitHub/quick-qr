@@ -8,6 +8,11 @@
 import UIKit
 import IOS_Helpers
 
+// Import the enums for settings
+@_exported import Foundation
+// Enums are defined in SettingsViewController+Enums.swift
+// No explicit import needed as they're in the same module
+
 class SettingsViewController: UIViewController,
                               SettingsCellDelegate,
                               UITableViewDelegate,
@@ -74,7 +79,12 @@ class SettingsViewController: UIViewController,
     // MARK: - UITableViewDelegate & UITableViewDataSource
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return SettingsSection.allCases.count
+        // Show developer section only in debug mode
+        #if DEBUG
+            return SettingsSection.allCases.count
+        #else
+            return SettingsSection.allCases.count - 1 // Hide developer section in release builds
+        #endif
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -86,6 +96,8 @@ class SettingsViewController: UIViewController,
             return PreferenceItem.allCases.count
         case .other:
             return OtherItem.allCases.count
+        case .developer:
+            return DeveloperItem.allCases.count
         }
     }
     
@@ -111,6 +123,10 @@ class SettingsViewController: UIViewController,
         case .other:
             let item = OtherItem(rawValue: indexPath.row)!
             cell.configure(with: item.title, icon: item.icon, accessoryType: .navigation)
+            
+        case .developer:
+            let item = DeveloperItem(rawValue: indexPath.row)!
+            cell.configure(with: item.title, icon: item.icon, accessoryType: .navigation)
         }
         
         return cell
@@ -126,7 +142,7 @@ class SettingsViewController: UIViewController,
         
         if section == .premium {
             return premiumBannerView
-        } else if section == .other {
+        } else if section == .other || section == .developer {
             // Create a custom header view with bold black text
             let headerView = UIView()
             headerView.backgroundColor = .systemBackground
