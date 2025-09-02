@@ -15,32 +15,23 @@ final class ScanResultViewController: UIViewController {
     private let topCardView: UIView = {
         let v = UIView()
         v.backgroundColor = .white
-        v.layer.cornerRadius = 16
+        v.layer.cornerRadius = 12
         v.layer.masksToBounds = true
         return v
     }()
-    
-    // Background image view placeholder (set to orange color as requested)
-//    private let backgroundImageView: UIView = {
-//        let v = UIView()
-//        v.backgroundColor = .orange
-//        v.layer.cornerRadius = 20
-//        v.translatesAutoresizingMaskIntoConstraints = false
-//        return v
-//    }()
     
     private let titleStack = UIStackView()
     private let iconContainer: UIView = {
         let v = UIView()
         v.backgroundColor = UIColor.appPrimary
-        v.layer.cornerRadius = 20
+        v.layer.cornerRadius = 18
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
     private let typeIconView: UIImageView = {
-        let iv = UIImageView(image: UIImage(named: "wifi")?.withRenderingMode(.alwaysTemplate).withTintColor(.white))
+        let iv = UIImageView(image: UIImage(named: "wifi-icon")?.withRenderingMode(.alwaysTemplate).withTintColor(.white))
         iv.contentMode = .scaleAspectFit
-        iv.tintColor = .appPrimary
+        iv.tintColor = .white
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
     }()
@@ -48,7 +39,7 @@ final class ScanResultViewController: UIViewController {
         let lb = UILabel()
         lb.text = "Wi‑Fi"
         lb.font = .systemFont(ofSize: 16, weight: .semibold)
-        lb.textColor = .label
+        lb.textColor = .textPrimary
         return lb
     }()
     
@@ -65,7 +56,7 @@ final class ScanResultViewController: UIViewController {
     private let infoCardView: UIView = {
         let v = UIView()
         v.backgroundColor = .white
-        v.layer.cornerRadius = 16
+        v.layer.cornerRadius = 12
         v.layer.masksToBounds = true
         return v
     }()
@@ -141,15 +132,6 @@ final class ScanResultViewController: UIViewController {
             adContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
             adContainer.heightAnchor.constraint(equalToConstant: 240)
         ])
-        
-        // Add a background image view inside the top card (orange color only)
-//        topCardView.addSubview(backgroundImageView)
-//        NSLayoutConstraint.activate([
-//            backgroundImageView.topAnchor.constraint(equalTo: topCardView.topAnchor, constant: 16),
-//            backgroundImageView.centerXAnchor.constraint(equalTo: topCardView.centerXAnchor),
-//            backgroundImageView.widthAnchor.constraint(equalToConstant: 40),
-//            backgroundImageView.heightAnchor.constraint(equalToConstant: 40)
-//        ])
     }
     
     private func setupTopCard() {
@@ -175,32 +157,33 @@ final class ScanResultViewController: UIViewController {
         actionsStack.axis = .horizontal
         actionsStack.alignment = .fill
         actionsStack.distribution = .fillEqually
-        actionsStack.spacing = 24
+        actionsStack.spacing = 46
         actionsStack.translatesAutoresizingMaskIntoConstraints = false
         
         // Layout inside top card
         let inner = UIStackView(arrangedSubviews: [titleStack, qrImageView, actionsStack])
         inner.axis = .vertical
         inner.alignment = .center
-        inner.spacing = 16
+        inner.spacing = 8
         inner.translatesAutoresizingMaskIntoConstraints = false
         
         topCardView.addSubview(inner)
         NSLayoutConstraint.activate([
-            inner.leadingAnchor.constraint(equalTo: topCardView.leadingAnchor, constant: 16),
-            inner.trailingAnchor.constraint(equalTo: topCardView.trailingAnchor, constant: -16),
-            inner.topAnchor.constraint(equalTo: topCardView.topAnchor, constant: 16),
+            inner.leadingAnchor.constraint(equalTo: topCardView.leadingAnchor, constant: 8),
+            inner.trailingAnchor.constraint(equalTo: topCardView.trailingAnchor, constant: -8),
+            inner.topAnchor.constraint(equalTo: topCardView.topAnchor, constant: 22),
             inner.bottomAnchor.constraint(equalTo: topCardView.bottomAnchor, constant: -16),
-            qrImageView.widthAnchor.constraint(equalTo: inner.widthAnchor, multiplier: 0.6),
+            qrImageView.widthAnchor.constraint(equalTo: inner.widthAnchor, multiplier: 0.4),
             qrImageView.heightAnchor.constraint(equalTo: qrImageView.widthAnchor)
         ])
     }
     
     private func setupActions() {
         // Create 3 action items (Connect, Download, Share)
-        let connect = makeAction(icon: UIImage(systemName: "wifi"), title: "Connect")
-        let download = makeAction(icon: UIImage(systemName: "arrow.down.circle"), title: "Download")
-        let share = makeAction(icon: UIImage(systemName: "square.and.arrow.up"), title: "Share")
+        let connect = makeAction(icon: UIImage(named: "wifi-icon")?.withRenderingMode(.alwaysTemplate), title: "Connect")
+        let download = makeAction(icon: UIImage(named: "download-result-icon"), title: "Download")
+        let share = makeAction(icon: UIImage(named: "share-result-icon"), title: "Share")
+        
         actionsStack.addArrangedSubview(connect)
         actionsStack.addArrangedSubview(download)
         actionsStack.addArrangedSubview(share)
@@ -233,21 +216,26 @@ final class ScanResultViewController: UIViewController {
     private func makeAction(icon: UIImage?, title: String) -> UIView {
         let v = UIStackView()
         v.axis = .vertical
+        v.backgroundColor = .clear
         v.alignment = .center
         v.spacing = 6
+        
         let iv = UIImageView(image: icon)
         iv.tintColor = .appPrimary
         iv.contentMode = .scaleAspectFit
         iv.setContentHuggingPriority(.required, for: .vertical)
         iv.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
-            iv.widthAnchor.constraint(equalToConstant: 28),
-            iv.heightAnchor.constraint(equalToConstant: 28)
+            iv.widthAnchor.constraint(equalToConstant: 32),
+            iv.heightAnchor.constraint(equalToConstant: 32)
         ])
+        
         let lb = UILabel()
         lb.text = title
-        lb.font = .systemFont(ofSize: 12, weight: .medium)
-        lb.textColor = .secondaryLabel
+        lb.font = .systemFont(ofSize: 16, weight: .semibold)
+        lb.textColor = .textPrimary
+        
         v.addArrangedSubview(iv)
         v.addArrangedSubview(lb)
         return v
@@ -260,26 +248,25 @@ final class ScanResultViewController: UIViewController {
     ///   - showsButton: Optional trailing button (e.g., copy)
     private func makeInfoRow(title: String, value: String, showsButton: Bool = false, buttonImage: UIImage? = UIImage(systemName: "doc.on.doc")) -> UIView {
         let container = UIView()
-        container.backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.4)
         container.layer.cornerRadius = 12
         
         let h = UIStackView()
         h.axis = .horizontal
-        h.alignment = .center
-        h.distribution = .fill
+        h.alignment = .leading
+        h.distribution = .fillProportionally
         h.spacing = 8
         h.translatesAutoresizingMaskIntoConstraints = false
         
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        titleLabel.textColor = .secondaryLabel
+        titleLabel.textColor = .textSecondary
         
         let valueLabel = UILabel()
         valueLabel.text = value
         valueLabel.font = .systemFont(ofSize: 14, weight: .semibold)
-        valueLabel.textColor = .label
-        valueLabel.textAlignment = .right
+        valueLabel.textColor = .textPrimary
+        valueLabel.textAlignment = .left
         
         let spacer = UIView()
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
@@ -288,8 +275,8 @@ final class ScanResultViewController: UIViewController {
         h.addArrangedSubview(spacer)
         h.addArrangedSubview(valueLabel)
         
+        let btn = UIButton(type: .system)
         if showsButton {
-            let btn = UIButton(type: .system)
             btn.setImage(buttonImage, for: .normal)
             btn.tintColor = .appPrimary
             btn.setContentHuggingPriority(.required, for: .horizontal)
@@ -298,6 +285,8 @@ final class ScanResultViewController: UIViewController {
         
         container.addSubview(h)
         NSLayoutConstraint.activate([
+            titleLabel.widthAnchor.constraint(equalToConstant: 130),
+            btn.widthAnchor.constraint(equalToConstant: 40),
             h.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
             h.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
             h.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
