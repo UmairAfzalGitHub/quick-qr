@@ -22,6 +22,37 @@ final class SpotifyView: UIView {
     func getUrl() -> String? {
         return urlTextField.text
     }
+    
+    // MARK: - Setter Methods
+    func setUsername(_ username: String) {
+        urlTextField.text = username
+    }
+    
+    func setUrl(_ url: String) {
+        urlTextField.text = url
+    }
+    
+    // MARK: - Data Population Methods
+    func populateData(username: String = "", url: String = "") {
+        if !url.isEmpty {
+            setUrl(url)
+        } else if !username.isEmpty {
+            setUsername(username)
+        }
+    }
+    
+    /// Parse and populate Spotify data from a QR code content string
+    /// - Parameter content: The Spotify content string (URL or username)
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        if content.contains("spotify.com") {
+            populateData(url: content)
+        } else {
+            populateData(username: content)
+        }
+        return true
+    }
 
     // MARK: - UI Elements
     private let urlLabel: UILabel = {

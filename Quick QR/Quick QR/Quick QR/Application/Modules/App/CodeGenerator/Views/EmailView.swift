@@ -46,6 +46,67 @@ final class EmailView: UIView {
         return contentTextView.text.isEmpty ? nil : contentTextView.text
     }
     
+    // MARK: - Setter Methods
+    func setEmail(_ email: String) {
+        emailTextField.text = email
+    }
+    
+    func setSubject(_ subject: String) {
+        subjectTextField.text = subject
+    }
+    
+    func setBody(_ body: String) {
+        contentTextView.text = body
+        updateContentPlaceholder()
+    }
+    
+    // MARK: - Data Population Methods
+    func populateData(email: String, subject: String = "", body: String = "") {
+        setEmail(email)
+        setSubject(subject)
+        setBody(body)
+    }
+    
+    /// Parse and populate email data from a QR code content string
+    /// - Parameter content: The email content string (may have mailto: prefix)
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        if content.hasPrefix("mailto:") {
+            // Parse mailto format: mailto:email@example.com?subject=Subject&body=Body
+            let components = content.components(separatedBy: "?")
+            let email = String(components[0].dropFirst(7)) // Remove "mailto:"
+            
+            var subject = ""
+            var body = ""
+            
+            if components.count > 1 {
+                let queryParams = components[1].components(separatedBy: "&")
+                
+                for param in queryParams {
+                    let keyValue = param.components(separatedBy: "=")
+                    if keyValue.count == 2 {
+                        let key = keyValue[0].lowercased()
+                        let value = keyValue[1].removingPercentEncoding ?? keyValue[1]
+                        
+                        if key == "subject" {
+                            subject = value
+                        } else if key == "body" {
+                            body = value
+                        }
+                    }
+                }
+            }
+            
+            populateData(email: email, subject: subject, body: body)
+            return true
+        } else {
+            // Assume it's just an email address
+            populateData(email: content)
+            return true
+        }
+    }
+    
     // MARK: - UI Elements
     private let emailLabel: UILabel = {
         let label = UILabel()

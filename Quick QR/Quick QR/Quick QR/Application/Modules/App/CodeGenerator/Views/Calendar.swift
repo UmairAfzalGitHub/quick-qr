@@ -69,6 +69,104 @@ final class CalendarView: UIView {
         return contentTextView.text.isEmpty ? nil : contentTextView.text
     }
     
+    // MARK: - Setter Methods
+    func setTitle(_ title: String) {
+        titleTextField.text = title
+    }
+    
+    func setLocation(_ location: String) {
+        locationTextField.text = location
+    }
+    
+    func setAllDay(_ isAllDay: Bool) {
+        allDaySwitch.isOn = isAllDay
+        allDaySwitchChanged(allDaySwitch)
+    }
+    
+    func setStartDate(_ date: Date) {
+        startDatePicker.date = date
+        updateDateFields()
+    }
+    
+    func setEndDate(_ date: Date) {
+        endDatePicker.date = date
+        updateDateFields()
+    }
+    
+    func setDescription(_ description: String) {
+        contentTextView.text = description
+        updateContentPlaceholder()
+    }
+    
+    // MARK: - Data Population Methods
+    func populateData(title: String, location: String = "", isAllDay: Bool = false, startDate: Date? = nil, endDate: Date? = nil, description: String = "") {
+        setTitle(title)
+        setLocation(location)
+        setAllDay(isAllDay)
+        
+        if let startDate = startDate {
+            setStartDate(startDate)
+        }
+        
+        if let endDate = endDate {
+            setEndDate(endDate)
+        } else if let startDate = startDate {
+            // Default end date is 1 hour after start date
+            let defaultEndDate = Calendar.current.date(byAdding: .hour, value: 1, to: startDate) ?? startDate
+            setEndDate(defaultEndDate)
+        }
+        
+        setDescription(description)
+    }
+    
+    /// Parse and populate calendar event data from a QR code content string
+    /// - Parameter content: The calendar event content string (BEGIN:VEVENT...END:VEVENT)
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        if content.hasPrefix("BEGIN:VEVENT") {
+            let lines = content.components(separatedBy: .newlines)
+            var title = ""
+            var location = ""
+            var description = ""
+            var startDate: Date?
+            var endDate: Date?
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
+            
+            for line in lines {
+                if line.hasPrefix("SUMMARY:") {
+                    title = String(line.dropFirst(8))
+                } else if line.hasPrefix("LOCATION:") {
+                    location = String(line.dropFirst(9))
+                } else if line.hasPrefix("DESCRIPTION:") {
+                    description = String(line.dropFirst(12))
+                } else if line.hasPrefix("DTSTART:") {
+                    let dateString = String(line.dropFirst(8))
+                    startDate = dateFormatter.date(from: dateString)
+                } else if line.hasPrefix("DTEND:") {
+                    let dateString = String(line.dropFirst(6))
+                    endDate = dateFormatter.date(from: dateString)
+                }
+            }
+            
+            // Check if we have at least a title and start date
+            if let startDate = startDate {
+                populateData(
+                    title: title,
+                    location: location,
+                    isAllDay: false,
+                    startDate: startDate,
+                    endDate: endDate,
+                    description: description
+                )
+                return true
+            }
+        }
+        return false
+    }
+    
     // MARK: - UI Elements
     private let titleLabel: UILabel = {
         let label = UILabel()

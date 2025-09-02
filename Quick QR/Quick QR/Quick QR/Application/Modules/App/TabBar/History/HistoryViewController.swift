@@ -200,7 +200,24 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        // Handle selection - could regenerate the code or show details
+        
+        // Only handle selection in the Created tab
+        if !isScanSelected {
+            // Get the history items
+            let historyItems = HistoryManager.shared.getCreatedHistory()
+            
+            // Make sure we have a valid index
+            guard indexPath.row < historyItems.count else { return }
+            
+            // Get the selected history item
+            let selectedItem = historyItems[indexPath.row]
+            
+            // Create and configure the CodeGeneratorViewController
+            if let codeGeneratorVC = CodeGeneratorViewController.createFromHistoryItem(selectedItem) {
+                // Push the view controller to the navigation stack
+                navigationController?.pushViewController(codeGeneratorVC, animated: true)
+            }
+        }
     }
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {

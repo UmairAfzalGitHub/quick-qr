@@ -20,6 +20,54 @@ final class WhatsappView: UIView, CountriesViewControllerDelegate {
         let countryCode = codeLabel.text?.trimmingCharacters(in: .whitespaces) ?? "+1"
         return countryCode + phoneNumber
     }
+    
+    // MARK: - Setter Methods
+    func setPhoneNumber(_ phoneNumber: String) {
+        // Check if the phone number starts with a country code
+        if phoneNumber.hasPrefix("+") {
+            // Try to extract country code and number
+            if let countryCodeRange = phoneNumber.range(of: "\\+\\d+", options: .regularExpression) {
+                let countryCode = String(phoneNumber[countryCodeRange])
+                codeLabel.text = countryCode
+                
+                // Set the remaining part as the phone number
+                let numberStartIndex = phoneNumber.index(after: countryCodeRange.upperBound)
+                if numberStartIndex < phoneNumber.endIndex {
+                    let number = String(phoneNumber[numberStartIndex...])
+                    phoneNumberTextField.text = number
+                } else {
+                    phoneNumberTextField.text = ""
+                }
+            } else {
+                // If we can't parse it properly, just set the whole thing as the number
+                phoneNumberTextField.text = phoneNumber
+            }
+        } else {
+            // No country code, just set the number
+            phoneNumberTextField.text = phoneNumber
+        }
+    }
+    
+    // MARK: - Data Population Methods
+    func populateData(phoneNumber: String = "") {
+        if !phoneNumber.isEmpty {
+            setPhoneNumber(phoneNumber)
+        }
+    }
+    
+    /// Parse and populate WhatsApp data from a QR code content string
+    /// - Parameter content: The WhatsApp content string (URL or phone number)
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        if content.hasPrefix("https://wa.me/") {
+            let phoneNumber = String(content.dropFirst(13))
+            populateData(phoneNumber: phoneNumber)
+        } else {
+            populateData(phoneNumber: content)
+        }
+        return true
+    }
 
     // MARK: - UI Elements
     private let urlLabel: UILabel = {

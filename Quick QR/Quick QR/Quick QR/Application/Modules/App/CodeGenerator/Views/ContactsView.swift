@@ -37,6 +37,53 @@ final class ContactsView: UIView {
         return emailTextField.text
     }
     
+    // MARK: - Setter Methods
+    func setName(_ name: String) {
+        nameTextField.text = name
+    }
+    
+    func setPhone(_ phone: String) {
+        numberTextField.text = phone
+    }
+    
+    func setEmail(_ email: String) {
+        emailTextField.text = email
+    }
+    
+    // MARK: - Data Population Methods
+    func populateData(name: String, phone: String, email: String) {
+        setName(name)
+        setPhone(phone)
+        setEmail(email)
+    }
+    
+    /// Parse and populate contact data from a QR code content string
+    /// - Parameter content: The vCard content string (BEGIN:VCARD...END:VCARD)
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        if content.hasPrefix("BEGIN:VCARD") {
+            let lines = content.components(separatedBy: .newlines)
+            var name = ""
+            var phone = ""
+            var email = ""
+            
+            for line in lines {
+                if line.hasPrefix("FN:") {
+                    name = String(line.dropFirst(3))
+                } else if line.hasPrefix("TEL:") {
+                    phone = String(line.dropFirst(4))
+                } else if line.hasPrefix("EMAIL:") {
+                    email = String(line.dropFirst(6))
+                }
+            }
+            
+            populateData(name: name, phone: phone, email: email)
+            return true
+        }
+        return false
+    }
+    
     // MARK: - UI Elements
     private let nameLabel: UILabel = {
         let label = UILabel()

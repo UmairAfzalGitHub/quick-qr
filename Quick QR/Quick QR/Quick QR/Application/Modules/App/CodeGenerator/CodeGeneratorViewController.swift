@@ -11,6 +11,40 @@ import Foundation
 
 class CodeGeneratorViewController: UIViewController {
     
+    // MARK: - Static Factory Method
+    static func createFromHistoryItem(_ historyItem: HistoryItem) -> CodeGeneratorViewController? {
+        let viewController = CodeGeneratorViewController()
+        
+        // Convert history item to appropriate code type
+        switch historyItem.type {
+        case .qrCode:
+            if let qrType = QRCodeType.allCases.first(where: { $0.title.lowercased() == historyItem.subtype.lowercased() }) {
+                viewController.currentCodeType = qrType
+                viewController.prefilledContent = historyItem.content
+            } else {
+                return nil
+            }
+            
+        case .socialQRCode:
+            if let socialType = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == historyItem.subtype.lowercased() }) {
+                viewController.currentCodeType = socialType
+                viewController.prefilledContent = historyItem.content
+            } else {
+                return nil
+            }
+            
+        case .barCode:
+            if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == historyItem.subtype.lowercased() }) {
+                viewController.currentCodeType = barType
+                viewController.prefilledContent = historyItem.content
+            } else {
+                return nil
+            }
+        }
+        
+        return viewController
+    }
+    
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -43,6 +77,9 @@ class CodeGeneratorViewController: UIViewController {
     internal var currentCodeType: CodeTypeProtocol?
     internal var buttonAction: (() -> Void)?
     
+    // MARK: - Prefilled Content
+    internal var prefilledContent: String?
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,6 +87,11 @@ class CodeGeneratorViewController: UIViewController {
         setupUI()
         setupConstraints()
         setupActions()
+        
+        // Apply prefilled content if available
+        if let content = prefilledContent {
+            applyPrefilledContent(content)
+        }
     }
     
     // MARK: - UI Setup
@@ -579,6 +621,100 @@ class CodeGeneratorViewController: UIViewController {
             applicationActivities: nil
         )
         present(activityViewController, animated: true)
+    }
+    
+    // MARK: - Prefilled Content Handling
+    
+    /// Apply prefilled content to the appropriate view based on code type
+    private func applyPrefilledContent(_ content: String) {
+        guard let codeType = currentCodeType else { return }
+        
+        if let qrCodeType = codeType as? QRCodeType {
+            applyQRCodeContent(content, qrCodeType: qrCodeType)
+        } else if let socialQRCodeType = codeType as? SocialQRCodeType {
+            applySocialQRCodeContent(content, socialQRCodeType: socialQRCodeType)
+        } else if let barCodeType = codeType as? BarCodeType {
+            applyBarCodeContent(content, barCodeType: barCodeType)
+        }
+    }
+    
+    /// Handle QR code content based on QR code type
+    private func applyQRCodeContent(_ content: String, qrCodeType: QRCodeType) {
+        switch qrCodeType {
+        case .wifi:
+            // Let the WiFi view handle parsing the content
+            wifiView?.parseAndPopulateFromContent(content)
+            
+        case .phone:
+            // Let the Phone view handle parsing the content
+            phoneView?.parseAndPopulateFromContent(content)
+            
+        case .text:
+            // Let the Text view handle parsing the content
+            textView?.parseAndPopulateFromContent(content)
+            
+        case .contact:
+            // Let the Contacts view handle parsing the content
+            contactsView?.parseAndPopulateFromContent(content)
+            
+        case .email:
+            // Let the Email view handle parsing the content
+            emailView?.parseAndPopulateFromContent(content)
+            
+        case .location:
+            // Let the Location view handle parsing the content
+            locationView?.parseAndPopulateFromContent(content)
+            
+        case .events:
+            // Let the Calendar view handle parsing the content
+            calendarView?.parseAndPopulateFromContent(content)
+        case .website:
+            // Let the Website view handle parsing the content
+            websiteView?.parseAndPopulateFromContent(content)
+        }
+    }
+    
+    /// Handle social QR code content based on social media type
+    private func applySocialQRCodeContent(_ content: String, socialQRCodeType: SocialQRCodeType) {
+        switch socialQRCodeType {
+        case .facebook:
+            // Let the Facebook view handle parsing the content
+            facebookView?.parseAndPopulateFromContent(content)
+            
+        case .instagram:
+            // Let the Instagram view handle parsing the content
+            instagramView?.parseAndPopulateFromContent(content)
+            
+        case .tiktok:
+            // Let the TikTok view handle parsing the content
+            tiktokView?.parseAndPopulateFromContent(content)
+            
+        case .x:
+            // Let the X view handle parsing the content
+            xView?.parseAndPopulateFromContent(content)
+            
+        case .youtube:
+            // Let the YouTube view handle parsing the content
+            youtubeView?.parseAndPopulateFromContent(content)
+            
+        case .spotify:
+            // Let the Spotify view handle parsing the content
+            spotifyView?.parseAndPopulateFromContent(content)
+            
+        case .whatsapp:
+            // Let the WhatsApp view handle parsing the content
+            whatsappView?.parseAndPopulateFromContent(content)
+            
+        case .viber:
+            // Let the Viber view handle parsing the content
+            viberView?.parseAndPopulateFromContent(content)
+        }
+    }
+    
+    /// Handle bar code content
+    private func applyBarCodeContent(_ content: String, barCodeType: BarCodeType) {
+        // Set barcode content
+        barCodeView?.urlText = content
     }
     
     private func showErrorAlert(message: String) {
