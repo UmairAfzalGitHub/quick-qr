@@ -20,7 +20,23 @@ extension CodeGeneratorViewController {
                   !ssid.isEmpty else {
                 return ""
             }
-            return "SSID: \(ssid), Password: \(password.isEmpty ? "<none>" : "<hidden>"), Security: \(wifiView.isWEP() ? "WEP" : "WPA")"
+            
+            // Store the actual data in JSON format for proper parsing when loaded from history
+            // This allows us to keep the actual password while displaying a masked version in UI
+            let wifiData: [String: Any] = [
+                "ssid": ssid,
+                "password": password,
+                "isWep": wifiView.isWEP(),
+                "displayText": "SSID: \(ssid), Password: \(password.isEmpty ? "<none>" : password), Security: \(wifiView.isWEP() ? "WEP" : "WPA")"
+            ]
+            
+            if let jsonData = try? JSONSerialization.data(withJSONObject: wifiData),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                return jsonString
+            }
+            
+            // Fallback to the old format if JSON serialization fails
+            return "WIFI:S:\(ssid);T:\(wifiView.isWEP() ? "WEP" : "WPA");P:\(password);;"
             
         case .phone:
             guard let phoneView = phoneView,

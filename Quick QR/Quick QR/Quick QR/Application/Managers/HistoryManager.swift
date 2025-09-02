@@ -34,11 +34,24 @@ struct HistoryItem: Codable {
     // Convert to FavoriteItem for display
     func toFavoriteItem() -> FavoriteItem {
         let itemType: FavoriteItem.ItemType
+        var displayContent = content
         
         switch type {
         case .qrCode:
             if let qrType = QRCodeType.allCases.first(where: { $0.title.lowercased() == subtype.lowercased() }) {
                 itemType = .qrCode(qrType)
+                
+                // Special handling for WiFi QR codes that are stored as JSON
+                if qrType == .wifi, let data = content.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    // Extract the actual data from JSON
+                    if let ssid = json["ssid"] as? String {
+                        let password = json["password"] as? String ?? ""
+                        let isWep = json["isWep"] as? Bool ?? false
+                        // Show the actual password in history
+                        displayContent = "SSID: \(ssid), Password: \(password.isEmpty ? "<none>" : password), Security: \(isWep ? "WEP" : "WPA")"
+                    }
+                }
             } else {
                 itemType = .qrCode(.text) // Default fallback
             }
@@ -56,7 +69,7 @@ struct HistoryItem: Codable {
             }
         }
         
-        return FavoriteItem(type: itemType, title: title, url: content)
+        return FavoriteItem(type: itemType, title: title, url: displayContent)
     }
 }
 
