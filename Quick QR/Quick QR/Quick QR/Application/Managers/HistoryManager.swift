@@ -21,14 +21,16 @@ struct HistoryItem: Codable {
     let content: String
     let title: String
     let timestamp: Date
+    var isFavorite: Bool
     
-    init(id: String = UUID().uuidString, type: ItemType, subtype: String, content: String, title: String, timestamp: Date = Date()) {
+    init(id: String = UUID().uuidString, type: ItemType, subtype: String, content: String, title: String, timestamp: Date = Date(), isFavorite: Bool = false) {
         self.id = id
         self.type = type
         self.subtype = subtype
         self.content = content
         self.title = title
         self.timestamp = timestamp
+        self.isFavorite = isFavorite
     }
     
     // Convert to FavoriteItem for display
@@ -69,7 +71,7 @@ struct HistoryItem: Codable {
             }
         }
         
-        return FavoriteItem(type: itemType, title: title, url: displayContent)
+        return FavoriteItem(type: itemType, title: title, url: displayContent, id: id, isFavorite: isFavorite)
     }
 }
 
@@ -163,5 +165,31 @@ class HistoryManager {
             userDefaults.set(encoded, forKey: historyKey)
             userDefaults.synchronize()
         }
+    }
+    
+    // MARK: - Favorite Methods
+    
+    func toggleFavorite(forItemWithId id: String) -> Bool {
+        var history = getAllHistory()
+        
+        // Find the item and toggle its favorite status
+        if let index = history.firstIndex(where: { $0.id == id }) {
+            history[index].isFavorite.toggle()
+            
+            // Save the updated history
+            if let encoded = try? JSONEncoder().encode(history) {
+                userDefaults.set(encoded, forKey: historyKey)
+                userDefaults.synchronize()
+            }
+            
+            // Return the new favorite status
+            return history[index].isFavorite
+        }
+        
+        return false
+    }
+    
+    func getFavorites() -> [HistoryItem] {
+        return getAllHistory().filter { $0.isFavorite }
     }
 }

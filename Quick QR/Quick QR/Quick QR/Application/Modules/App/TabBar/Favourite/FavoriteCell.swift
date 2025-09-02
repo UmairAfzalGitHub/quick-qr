@@ -24,6 +24,10 @@ class FavoriteCell: UITableViewCell {
     private let favoriteButton = UIButton(type: .system)
     private let optionsButton = UIButton(type: .system)
     
+    // Item data
+    private var itemId: String = ""
+    private var isFavorite: Bool = false
+    
     weak var delegate: FavoriteCellDelegate?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -67,8 +71,8 @@ class FavoriteCell: UITableViewCell {
         
         // Favorite button
         favoriteButton.translatesAutoresizingMaskIntoConstraints = false
-        favoriteButton.setImage(UIImage(systemName: "heart.fill"), for: .normal)
-        favoriteButton.tintColor = .red
+        favoriteButton.setImage(UIImage(systemName: "heart"), for: .normal)
+        favoriteButton.tintColor = .systemGray
         favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
         contentView.addSubview(favoriteButton)
         
@@ -116,6 +120,8 @@ class FavoriteCell: UITableViewCell {
     func configure(with item: FavoriteItem) {
         titleLabel.text = item.title
         urlLabel.text = item.url
+        itemId = item.id
+        isFavorite = item.isFavorite
         
         // Set icon based on type
         switch item.type {
@@ -125,6 +131,19 @@ class FavoriteCell: UITableViewCell {
             iconImageView.image = socialType.icon
         case .barCode(let barType):
             iconImageView.image = barType.icon
+        }
+        
+        // Update favorite button appearance
+        updateFavoriteButtonAppearance()
+    }
+    
+    private func updateFavoriteButtonAppearance() {
+        if isFavorite {
+            favoriteButton.setImage(UIImage(systemName: "heart.fill"), for: .normal)
+            favoriteButton.tintColor = .red
+        } else {
+            favoriteButton.setImage(UIImage(systemName: "heart"), for: .normal)
+            favoriteButton.tintColor = .systemGray
         }
     }
 

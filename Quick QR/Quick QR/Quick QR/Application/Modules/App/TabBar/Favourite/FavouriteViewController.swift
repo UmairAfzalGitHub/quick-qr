@@ -8,10 +8,11 @@
 import UIKit
 import IOS_Helpers
 
-class FavouriteViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class FavouriteViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
     
     // MARK: - Properties
     private let tableView = UITableView()
+    private let emptyStateView = UIView()
     private var favorites: [FavoriteItem] = []
     
     // MARK: - Lifecycle
@@ -19,11 +20,11 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
-        loadFavorites()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        loadFavorites()
     }
     
     // MARK: - Setup
@@ -62,17 +63,28 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        
+        // Setup empty state view
+        setupEmptyStateView()
     }
     
     // MARK: - Data
     private func loadFavorites() {
-        // Mock data for demonstration
-        favorites = [
-            FavoriteItem(type: .qrCode(.website), title: "Website", url: "https://www.google.com"),
-            FavoriteItem(type: .qrCode(.email), title: "Email", url: "mailto:example@example.com"),
-            FavoriteItem(type: .socialQRCode(.whatsapp), title: "WhatsApp", url: "https://wa.me/1234567890")
-        ]
+        // Get all favorite items from HistoryManager
+        let favoriteItems = HistoryManager.shared.getFavorites()
+        
+        // Convert HistoryItems to FavoriteItems
+        favorites = favoriteItems.map { $0.toFavoriteItem() }
+        
+        // Refresh table view
         tableView.reloadData()
+        
+        // Show empty state if needed
+        if favorites.isEmpty {
+            showEmptyState()
+        } else {
+            hideEmptyState()
+        }
     }
     
     // MARK: - UITableViewDelegate & UITableViewDataSource
@@ -87,12 +99,104 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
         
         let favorite = favorites[indexPath.row]
         cell.configure(with: favorite)
+        cell.delegate = self
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         // Handle selection
+    }
+    
+    // MARK: - FavoriteCellDelegate
+    
+    func didTapFavouriteButton(cell: UITableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        
+        // Get the item ID from our data source
+        let itemId = favorites[indexPath.row].id
+        
+        // Toggle favorite status in the history manager (will unfavorite it)
+        let isFavorite = HistoryManager.shared.toggleFavorite(forItemWithId: itemId)
+        
+        // Since this is the favorites tab, if it's still marked as favorite (which shouldn't happen),
+        // we need to update the UI to reflect the current state
+        if !isFavorite {
+            // Remove from our data source
+            favorites.remove(at: indexPath.row)
+            
+            // Animate the removal
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            
+            // Show empty state if needed
+            if favorites.isEmpty {
+                showEmptyState()
+            }
+        } else {
+            // Just reload the row if for some reason it's still favorited
+            tableView.reloadRows(at: [indexPath], with: .none)
+        }
+    }
+    
+    func didTapOptionsButton(cell: UITableViewCell) {
+        // Handle options button tap if needed
+    }
+    
+    // MARK: - Empty State Handling
+    
+    private func setupEmptyStateView() {
+        emptyStateView.isHidden = true
+        view.addSubview(emptyStateView)
+        emptyStateView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            emptyStateView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            emptyStateView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
+        ])
+        
+        let imageView = UIImageView(image: UIImage(systemName: "heart"))
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .red
+        
+        let titleLabel = UILabel()
+        titleLabel.text = "No Favorites Yet"
+        titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
+        titleLabel.textAlignment = .center
+        
+        let subtitleLabel = UILabel()
+        subtitleLabel.text = "Tap the heart icon on any item to add it to favorites"
+        subtitleLabel.font = UIFont.systemFont(ofSize: 14)
+        subtitleLabel.textColor = .systemGray
+        subtitleLabel.textAlignment = .center
+        subtitleLabel.numberOfLines = 0
+        
+        let stackView = UIStackView(arrangedSubviews: [imageView, titleLabel, subtitleLabel])
+        stackView.axis = .vertical
+        stackView.spacing = 12
+        stackView.alignment = .center
+        
+        emptyStateView.addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            imageView.heightAnchor.constraint(equalToConstant: 80),
+            imageView.widthAnchor.constraint(equalToConstant: 80),
+            stackView.topAnchor.constraint(equalTo: emptyStateView.topAnchor),
+            stackView.leadingAnchor.constraint(equalTo: emptyStateView.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: emptyStateView.trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: emptyStateView.bottomAnchor)
+        ])
+    }
+    
+    private func showEmptyState() {
+        tableView.isHidden = true
+        emptyStateView.isHidden = false
+    }
+    
+    private func hideEmptyState() {
+        tableView.isHidden = false
+        emptyStateView.isHidden = true
     }
 }
 
@@ -108,4 +212,14 @@ struct FavoriteItem {
     let type: ItemType
     let title: String
     let url: String
+    let id: String
+    var isFavorite: Bool
+    
+    init(type: ItemType, title: String, url: String, id: String = UUID().uuidString, isFavorite: Bool = false) {
+        self.type = type
+        self.title = title
+        self.url = url
+        self.id = id
+        self.isFavorite = isFavorite
+    }
 }
