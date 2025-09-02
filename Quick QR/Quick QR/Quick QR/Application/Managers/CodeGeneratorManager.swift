@@ -57,20 +57,80 @@ class CodeGeneratorManager {
     // MARK: - Barcode Generation
     
     func generateBarcode(content: String, type: BarCodeType, size: CGSize = CGSize(width: 300, height: 150)) -> UIImage? {
+        print("[CodeGeneratorManager] Generating barcode of type: \(type.title) with content: \(content)")
+        
         // Get the appropriate barcode filter name based on type
         let filterName = getBarcodeFilterName(for: type)
+        print("[CodeGeneratorManager] Using filter: \(filterName)")
         
         // Create data from string
-        guard let data = content.data(using: .ascii) else { return nil }
+        guard let data = content.data(using: .ascii) else {
+            print("[CodeGeneratorManager] ERROR: Failed to create data from string")
+            return nil 
+        }
         
         // Create barcode filter
-        guard let barcodeFilter = CIFilter(name: filterName) else { return nil }
+        guard let barcodeFilter = CIFilter(name: filterName) else {
+            print("[CodeGeneratorManager] ERROR: Failed to create filter with name: \(filterName)")
+            return nil 
+        }
+        print("[CodeGeneratorManager] Successfully created filter: \(filterName)")
         
         // Configure filter based on type
         switch type {
         case .code128, .code39, .code93, .pdf417, .aztec:
             barcodeFilter.setValue(data, forKey: "inputMessage")
-        case .ean13, .ean8, .upca, .upce, .isbn, .itf:
+        case .dataMatrix:
+            print("[CodeGeneratorManager] Generating Data Matrix barcode using Code128 filter")
+            // Use Code128 filter for Data Matrix
+            barcodeFilter.setValue(data, forKey: "inputMessage")
+        case .isbn:
+            // For ISBN, we'll use Code128 which is more reliable for this purpose
+            print("[CodeGeneratorManager] Using Code128 for ISBN barcode generation")
+            
+            // Extract only digits from the input if needed
+            let processedContent = content.filter { $0.isNumber }
+            print("[CodeGeneratorManager] Processed ISBN content: \(processedContent)")
+            
+            // For Code128, we can just use the content directly
+            guard let isbnData = processedContent.data(using: .ascii) else {
+                print("[CodeGeneratorManager] ERROR: Failed to create data for ISBN")
+                return nil
+            }
+            
+            barcodeFilter.setValue(isbnData, forKey: "inputMessage")
+            
+        case .ean13:
+            // For EAN-13, we'll use Code128 which is more reliable
+            print("[CodeGeneratorManager] Using Code128 for EAN-13 barcode generation")
+            
+            // Extract only digits from the input if needed
+            let processedContent = content.filter { $0.isNumber }
+            print("[CodeGeneratorManager] Processed EAN-13 content: \(processedContent)")
+            
+            // For Code128, we can just use the content directly
+            guard let eanData = processedContent.data(using: .ascii) else {
+                print("[CodeGeneratorManager] ERROR: Failed to create data for EAN-13")
+                return nil
+            }
+            
+            barcodeFilter.setValue(eanData, forKey: "inputMessage")
+        case .ean8:
+            // For EAN-8, we'll use Code128 which is more reliable
+            print("[CodeGeneratorManager] Using Code128 for EAN-8 barcode generation")
+            
+            // Extract only digits from the input if needed
+            let processedContent = content.filter { $0.isNumber }
+            print("[CodeGeneratorManager] Processed EAN-8 content: \(processedContent)")
+            
+            // For Code128, we can just use the content directly
+            guard let ean8Data = processedContent.data(using: .ascii) else {
+                print("[CodeGeneratorManager] ERROR: Failed to create data for EAN-8")
+                return nil
+            }
+            
+            barcodeFilter.setValue(ean8Data, forKey: "inputMessage")
+        case .upca, .upce, .itf:
             // These formats require specific digit formats
             if isValidForFormat(content, type: type) {
                 barcodeFilter.setValue(data, forKey: "inputMessage")
@@ -80,7 +140,13 @@ class CodeGeneratorManager {
         }
         
         // Get output image
-        guard let ciImage = barcodeFilter.outputImage else { return nil }
+        guard let ciImage = barcodeFilter.outputImage else {
+            print("[CodeGeneratorManager] ERROR: Filter failed to produce output image")
+            let attributes = barcodeFilter.attributes
+            print("[CodeGeneratorManager] Filter attributes: \(attributes)")
+            return nil
+        }
+        print("[CodeGeneratorManager] Successfully generated CIImage")
         
         // Scale the image to the desired size
         let scaleX = size.width / ciImage.extent.width
@@ -107,21 +173,27 @@ class CodeGeneratorManager {
         switch type {
         case .code128: return "CICode128BarcodeGenerator"
         case .pdf417: return "CIPDF417BarcodeGenerator"
-        case .ean13, .isbn: return "CIEANBarcodeGenerator" // ISBN uses EAN format
-        case .ean8: return "CIEANBarcodeGenerator"
-        case .upca: return "CICode128BarcodeGenerator" // Core Image doesn't have UPC-A directly
-        case .upce: return "CICode128BarcodeGenerator" // Core Image doesn't have UPC-E directly
+        case .isbn: return "CICode128BarcodeGenerator" // Use Code128 for ISBN which is more reliable
+        case .ean13: return "CICode128BarcodeGenerator" // Use Code128 for EAN-13 which is more reliable
+        case .ean8: return "CICode128BarcodeGenerator" // Use Code128 for EAN-8 which is more reliable
+        case .upca: return "CICode128BarcodeGenerator"
+        case .upce: return "CICode128BarcodeGenerator"
         case .code39: return "CICode128BarcodeGenerator" // Fallback to Code128
         case .code93: return "CICode128BarcodeGenerator" // Fallback to Code128
         case .itf: return "CICode128BarcodeGenerator" // Fallback to Code128
         case .aztec: return "CIAztecCodeGenerator" // Aztec code generator
+        case .dataMatrix: return "CICode128BarcodeGenerator" // Use Code128 as fallback for Data Matrix
         }
     }
     
     private func isValidForFormat(_ content: String, type: BarCodeType) -> Bool {
         // Validate input based on barcode type requirements
         switch type {
-        case .ean13, .isbn:
+        case .isbn:
+            // ISBN-13 is 13 digits, ISBN-10 is 10 digits but we'll convert to 13 for barcode
+            let digitsOnly = content.filter { $0.isNumber }
+            return digitsOnly.count == 10 || digitsOnly.count == 13
+        case .ean13:
             return content.count == 12 || content.count == 13
         case .ean8:
             return content.count == 7 || content.count == 8

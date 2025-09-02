@@ -49,7 +49,7 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .code128: return UIImage(named: "code128-icon")
         case .itf: return UIImage(named: "itf-icon")
         case .pdf417: return UIImage(named: "pdf417-icon")
-        case .aztec: return UIImage(named: "pdf417-icon") // Reusing PDF417 icon until a specific one is available
+        case .aztec, .dataMatrix: return UIImage(named: "pdf417-icon") // Reusing PDF417 icon until a specific one is available
         }
     }
     
@@ -72,6 +72,7 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .itf: return "Enter plain text"
         case .pdf417: return "Enter plain text"
         case .aztec: return "Enter text or data for Aztec code"
+        case .dataMatrix: return "Enter text or data for Data Matrix code"
         }
     }
 }

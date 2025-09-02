@@ -397,13 +397,34 @@ class CodeGeneratorViewController: UIViewController {
     }
     
     private func generateBarCode(for type: BarCodeType) -> UIImage? {
-        guard let barCodeView = barCodeView,
-              let content = barCodeView.getContent(),
-              !content.isEmpty else {
+        print("[CodeGeneratorViewController] Attempting to generate barcode of type: \(type.title)")
+        
+        guard let barCodeView = barCodeView else {
+            print("[CodeGeneratorViewController] ERROR: barCodeView is nil")
             return nil
         }
         
-        return CodeGeneratorManager.shared.generateBarcode(content: content, type: type)
+        guard let content = barCodeView.getContent() else {
+            print("[CodeGeneratorViewController] ERROR: No content provided for barcode")
+            return nil
+        }
+        
+        if content.isEmpty {
+            print("[CodeGeneratorViewController] ERROR: Empty content for barcode")
+            return nil
+        }
+        
+        print("[CodeGeneratorViewController] Generating barcode with content: '\(content)'")
+        
+        let image = CodeGeneratorManager.shared.generateBarcode(content: content, type: type)
+        
+        if image == nil {
+            print("[CodeGeneratorViewController] ERROR: Failed to generate barcode image")
+        } else {
+            print("[CodeGeneratorViewController] Successfully generated barcode image")
+        }
+        
+        return image
     }
     
     private func presentResultScreen(with image: UIImage) {
@@ -716,6 +737,35 @@ class CodeGeneratorViewController: UIViewController {
     private func createBarcodeView(type: BarCodeType) -> UIView {
         barCodeView = BarCodeView()
         barCodeView?.type = type
+        
+        // Add test data based on barcode type
+        switch type {
+        case .code128:
+            barCodeView?.urlText = "ABC-123456789"
+        case .code39:
+            barCodeView?.urlText = "CODE-39"
+        case .code93:
+            barCodeView?.urlText = "CODE-93"
+        case .ean13:
+            barCodeView?.urlText = "5901234123457"
+        case .ean8:
+            barCodeView?.urlText = "96385074"
+        case .upca:
+            barCodeView?.urlText = "042100005264"
+        case .upce:
+            barCodeView?.urlText = "01234565"
+        case .itf:
+            barCodeView?.urlText = "1234567890"
+        case .pdf417:
+            barCodeView?.urlText = "PDF417 Test Data"
+        case .isbn:
+            barCodeView?.urlText = "9781234567897"
+        case .aztec:
+            barCodeView?.urlText = "AZTEC-TEST-12345"
+        case .dataMatrix:
+            barCodeView?.urlText = "DATAMATRIX-12345"
+        }
+        
         return barCodeView!
     }
     
