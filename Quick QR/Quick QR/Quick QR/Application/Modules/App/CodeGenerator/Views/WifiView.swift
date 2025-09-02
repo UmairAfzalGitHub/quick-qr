@@ -30,11 +30,23 @@ final class WifiView: UIView {
     
     // MARK: - Setter Methods
     func setSSID(_ ssid: String) {
-        ssIDTextField.text = ssid
+        // Remove any 'SSID:' prefix if present
+        if ssid.hasPrefix("SSID:") {
+            let cleanedSSID = ssid.dropFirst(5).trimmingCharacters(in: .whitespacesAndNewlines)
+            ssIDTextField.text = cleanedSSID
+        } else {
+            ssIDTextField.text = ssid
+        }
     }
     
     func setPassword(_ password: String) {
-        passwordTextField.text = password
+        // Remove any 'Password:' prefix if present
+        if password.hasPrefix("Password:") {
+            let cleanedPassword = password.dropFirst(9).trimmingCharacters(in: .whitespacesAndNewlines)
+            passwordTextField.text = cleanedPassword
+        } else {
+            passwordTextField.text = password
+        }
     }
     
     func setWEP(_ isWep: Bool) {
@@ -53,25 +65,87 @@ final class WifiView: UIView {
     /// - Returns: True if the content was successfully parsed, false otherwise
     @discardableResult
     func parseAndPopulateFromContent(_ content: String) -> Bool {
-        guard content.hasPrefix("WIFI:") else { return false }
-        
-        let components = content.components(separatedBy: ";").filter { !$0.isEmpty }
-        var ssid = ""
-        var password = ""
-        var isWep = false
-        
-        for component in components {
-            if component.hasPrefix("S:") {
-                ssid = String(component.dropFirst(2))
-            } else if component.hasPrefix("P:") {
-                password = String(component.dropFirst(2))
-            } else if component.hasPrefix("T:WEP") {
-                isWep = true
+        // Check if content is in standard WiFi QR code format
+        if content.hasPrefix("WIFI:") {
+            let components = content.components(separatedBy: ";").filter { !$0.isEmpty }
+            var ssid = ""
+            var password = ""
+            var isWep = false
+            
+            for component in components {
+                if component.hasPrefix("S:") {
+                    ssid = String(component.dropFirst(2))
+                } else if component.hasPrefix("P:") {
+                    password = String(component.dropFirst(2))
+                } else if component.hasPrefix("T:WEP") {
+                    isWep = true
+                }
             }
+            
+            populateData(ssid: ssid, password: password, isWep: isWep)
+            return true
+        } 
+        // If content is not in standard format, try to parse it as raw data
+        // This handles cases where the content might be stored differently in history
+        else {
+            // Try to decode JSON format if present
+            if let data = content.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                
+                // Extract the actual WiFi data from JSON
+                if let ssid = json["ssid"] as? String,
+                   let password = json["password"] as? String,
+                   let isWep = json["isWep"] as? Bool {
+                    // Use the actual values stored in JSON
+                    populateData(ssid: ssid, password: password, isWep: isWep)
+                    return true
+                }
+                
+                // Fallback: Try to extract from displayText if actual values aren't available
+                if let displayText = json["displayText"] as? String {
+                    // Parse the display text format: "SSID: xxx, Password: <hidden>, Security: xxx"
+                    let components = displayText.components(separatedBy: ", ")
+                    var extractedSsid = ""
+                    var extractedPassword = ""
+                    var extractedIsWep = false
+                    
+                    for component in components {
+                        if component.hasPrefix("SSID: ") {
+                            extractedSsid = String(component.dropFirst(6))
+                        } else if component.hasPrefix("Password: ") {
+                            // Note: This will be <hidden> or <none>, but we'll use it as a fallback
+                            extractedPassword = String(component.dropFirst(10))
+                        } else if component.hasPrefix("Security: ") {
+                            extractedIsWep = component.contains("WEP")
+                        }
+                    }
+                    
+                    if !extractedSsid.isEmpty {
+                        populateData(ssid: extractedSsid, password: extractedPassword, isWep: extractedIsWep)
+                        return true
+                    }
+                }
+            }
+            
+            // Try to parse as a simple string representation
+            let components = content.components(separatedBy: ",")
+            if components.count >= 2 {
+                let ssid = components[0].trimmingCharacters(in: .whitespacesAndNewlines)
+                let password = components[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                let isWep = components.count > 2 ? (components[2].lowercased() == "wep") : false
+                
+                populateData(ssid: ssid, password: password, isWep: isWep)
+                return true
+            }
+            
+            // If all else fails, just use the content as the SSID
+            if !content.isEmpty {
+                populateData(ssid: content, password: "", isWep: false)
+                return true
+            }
+            
+            return false
         }
-        
-        populateData(ssid: ssid, password: password, isWep: isWep)
-        return true
     }
     
     // MARK: - UI Elements

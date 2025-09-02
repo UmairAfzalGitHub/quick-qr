@@ -10,7 +10,7 @@ import UIKit
 import BetterSegmentedControl
 import IOS_Helpers
 
-class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
     
     private let betterSegmentedControl: BetterSegmentedControl = {
         let control = BetterSegmentedControl(
@@ -41,7 +41,6 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupUI()
         loadHistory()
     }
@@ -102,22 +101,23 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     private func loadHistory() {
-        // Get history based on selected segment
+        // Get the history items
         let historyItems = isScanSelected ? 
             HistoryManager.shared.getScanHistory() : 
             HistoryManager.shared.getCreatedHistory()
         
-        // Convert history items to favorite items for display
+        // Convert to FavoriteItem for display
         dataSource = historyItems.map { $0.toFavoriteItem() }
         
-        // If no history, show empty state
+        // Refresh table view
+        tableView.reloadData()
+        
+        // Show empty state if needed
         if dataSource.isEmpty {
             showEmptyState()
         } else {
             hideEmptyState()
         }
-        
-        tableView.reloadData()
     }
     
     @objc private func segmentChanged(_ sender: BetterSegmentedControl) {
@@ -195,6 +195,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         let favorite = dataSource[indexPath.row]
         cell.configure(with: favorite)
+        cell.delegate = self
         return cell
     }
     
@@ -246,5 +247,27 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }
         }
+    }
+    
+    // MARK: - FavoriteCellDelegate
+    
+    func didTapFavouriteButton(cell: UITableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        
+        // Get the item ID from our data source
+        let itemId = dataSource[indexPath.row].id
+        
+        // Toggle favorite status in the history manager
+        let newFavoriteStatus = HistoryManager.shared.toggleFavorite(forItemWithId: itemId)
+        
+        // Update our data source
+        dataSource[indexPath.row].isFavorite = newFavoriteStatus
+        
+        // Reload just this cell to update the UI
+        tableView.reloadRows(at: [indexPath], with: .none)
+    }
+    
+    func didTapOptionsButton(cell: UITableViewCell) {
+        // Handle options button tap if needed
     }
 }
