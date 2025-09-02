@@ -146,16 +146,22 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
     
     // MARK: - QR Type Detection
     private func matches(_ type: CodeTypeProtocol, raw: String, lower: String, url: URL?) -> Bool {
+        // Normalize rule lists to lowercase to ensure case-insensitive matching
+        let prefixes = type.prefixes.map { $0.lowercased() }
+        let substrings = type.contains.map { $0.lowercased() }
+        let schemes = type.schemes.map { $0.lowercased() }
+        let suffices = type.suffex.map { $0.lowercased() }
+
         // prefix match
-        if !type.prefixes.isEmpty && type.prefixes.contains(where: { lower.hasPrefix($0) }) { return true }
+        if !prefixes.isEmpty && prefixes.contains(where: { lower.hasPrefix($0) }) { return true }
         // substring match
-        if !type.contains.isEmpty && type.contains.contains(where: { lower.contains($0) }) { return true }
+        if !substrings.isEmpty && substrings.contains(where: { lower.contains($0) }) { return true }
         // url-based matches
         if let url = url {
             let scheme = url.scheme?.lowercased() ?? ""
             let host = (url.host ?? "").lowercased()
-            if !type.schemes.isEmpty && type.schemes.contains(scheme) { return true }
-            if !type.suffex.isEmpty && type.suffex.contains(where: { host.hasSuffix($0) }) { return true }
+            if !schemes.isEmpty && schemes.contains(scheme) { return true }
+            if !suffices.isEmpty && suffices.contains(where: { host.hasSuffix($0) }) { return true }
         }
         return false
     }
@@ -165,18 +171,24 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         let lower = raw.lowercased()
         let url = URL(string: raw)
 
+        // Short-circuit: SMS/SMSTO should always be Text
+        if lower.hasPrefix("sms:") || lower.hasPrefix("smsto:") {
+            return QRCodeType.text
+        }
+
         // 1) Social first
         for social in SocialQRCodeType.allCases {
             if matches(social, raw: raw, lower: lower, url: url) { return social }
         }
 
-        // 2)  QR types
-        for type in QRCodeType.allCases {
+        // 2) QR types with priority so Location wins over Website
+        let priority: [QRCodeType] = [.wifi, .phone, .contact, .email, .location, .events, .website, .text]
+        for type in priority {
             if matches(type, raw: raw, lower: lower, url: url) { return type }
         }
 
         // 3) Fallback
-        return QRCodeType.website
+        return QRCodeType.text
     }
     
     // MARK: - QR Detection Delegate
