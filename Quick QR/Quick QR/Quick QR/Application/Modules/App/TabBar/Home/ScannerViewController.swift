@@ -10,6 +10,16 @@ import AVFoundation
 
 class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     
+    // MARK: - Camera Session States
+    private enum CameraState {
+        case setup     // Initial setup
+        case ready     // Ready but not running
+        case running   // Actively capturing
+        case paused    // Temporarily paused
+    }
+    
+    private var cameraState: CameraState = .setup
+    
     private let iapImage: UIImageView = {
         let image = UIImageView()
         image.image = UIImage(named: "iap-icon")
@@ -39,8 +49,41 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         view.backgroundColor = .black
         setupUI()
         setupConstraints()
-        openCamera()
         hideCenterQRImageView()
+        
+        // Register for app lifecycle notifications
+        NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Make sure preview layer is visible
+        if let previewLayer = previewLayer {
+            previewLayer.opacity = 1.0
+            if previewLayer.superlayer == nil {
+                view.layer.insertSublayer(previewLayer, at: 0)
+            }
+        }
+        
+        // Pre-configure camera but don't start yet
+        prepareCamera()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Start camera with highest priority
+        startCameraSession(true)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // Completely stop camera when leaving to avoid privacy indicator
+        stopCameraSession()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     func setupUI() {
@@ -79,10 +122,13 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         }
     }
     
-    func openCamera() {
+    func prepareCamera() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
-            setupCamera()
+            // Camera already set up in viewDidLoad
+            if captureSession == nil {
+                setupCamera()
+            }
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
                 DispatchQueue.main.async {
@@ -101,32 +147,50 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
     }
     
     private func setupCamera() {
-        captureSession = AVCaptureSession()
-        guard let captureSession = captureSession else { return }
-        
-        // Input
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video),
-              let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
-              captureSession.canAddInput(videoInput) else { return }
-        captureSession.addInput(videoInput)
-        
-        // Output
-        let metadataOutput = AVCaptureMetadataOutput()
-        if captureSession.canAddOutput(metadataOutput) {
-            captureSession.addOutput(metadataOutput)
-            metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-            metadataOutput.metadataObjectTypes = [.qr] // only QR codes
+        // Only setup once
+        if captureSession != nil {
+            return
         }
         
-        // Preview
-        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer?.videoGravity = .resizeAspectFill
-        previewLayer?.frame = view.layer.bounds
-        if let previewLayer = previewLayer {
-            view.layer.insertSublayer(previewLayer, at: 0)
-        }
+        // Initialize session object
+        let session = AVCaptureSession()
+        self.captureSession = session
         
-        captureSession.startRunning()
+        // Create preview layer immediately to avoid white flash
+        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        previewLayer.videoGravity = .resizeAspectFill
+        previewLayer.frame = self.view.layer.bounds
+        previewLayer.backgroundColor = UIColor.black.cgColor
+        self.previewLayer = previewLayer
+        self.view.layer.insertSublayer(previewLayer, at: 0)
+        
+        // Configure camera session on background thread with highest priority
+        DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+            guard let self = self else { return }
+            
+            // Begin configuration
+            session.beginConfiguration()
+            
+            // Input
+            guard let videoCaptureDevice = AVCaptureDevice.default(for: .video),
+                  let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
+                  session.canAddInput(videoInput) else { return }
+            session.addInput(videoInput)
+            
+            // Output
+            let metadataOutput = AVCaptureMetadataOutput()
+            if session.canAddOutput(metadataOutput) {
+                session.addOutput(metadataOutput)
+                metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+                metadataOutput.metadataObjectTypes = [.qr] // only QR codes
+            }
+            
+            // Commit configuration
+            session.commitConfiguration()
+            
+            // Mark as ready but don't start yet
+            self.cameraState = .ready
+        }
     }
     
     private func showPermissionAlert() {
@@ -199,8 +263,8 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
               object.type == .qr,
               let qrValue = object.stringValue else { return }
         
-        // Stop scanning once found
-        captureSession?.stopRunning()
+        // Pause camera feed while showing alert
+        pauseCameraFeed()
         
         // Handle the QR value
         let detected = detectQRCodeType(from: qrValue)
@@ -209,8 +273,71 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         
         let alert = UIAlertController(title: detectedTitle, message: qrValue, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
-            self.captureSession?.startRunning() // restart if needed
+            self.resumeCameraFeed() // resume camera feed
         })
         present(alert, animated: true)
+    }
+    
+    // MARK: - Camera Session Management
+    
+    @objc private func appDidEnterBackground() {
+        // Fully stop the session when app goes to background to save resources
+        if cameraState == .running || cameraState == .paused {
+            stopCameraSession()
+        }
+    }
+    
+    @objc private func appWillEnterForeground() {
+        // Restart the session when app comes to foreground if we're visible
+        if self.isViewVisible() && (cameraState == .ready || cameraState == .paused) {
+            startCameraSession(true)
+        }
+    }
+    
+    private func isViewVisible() -> Bool {
+        // Check if view is in window hierarchy and not hidden
+        return self.isViewLoaded && self.view.window != nil
+    }
+    
+    private func startCameraSession(_ highPriority: Bool = false) {
+        let qos: DispatchQoS.QoSClass = highPriority ? .userInteractive : .userInitiated
+        
+        // Start on high priority thread
+        DispatchQueue.global(qos: qos).async { [weak self] in
+            guard let self = self, let captureSession = self.captureSession, !captureSession.isRunning else { return }
+            
+            // Start the session
+            captureSession.startRunning()
+            
+            // Update state
+            DispatchQueue.main.async {
+                self.cameraState = .running
+            }
+        }
+    }
+    
+    private func stopCameraSession() {
+        // Completely stop the session (for app background)
+        DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+            guard let self = self, let captureSession = self.captureSession, captureSession.isRunning else { return }
+            
+            // Stop the session
+            captureSession.stopRunning()
+            
+            // Update state
+            DispatchQueue.main.async {
+                self.cameraState = .ready
+            }
+        }
+    }
+    
+    private func pauseCameraFeed() {
+        // Stop the camera session when showing alert
+        stopCameraSession()
+    }
+    
+    private func resumeCameraFeed() {
+        // Resume camera with high priority
+        startCameraSession(true)
     }
 }
