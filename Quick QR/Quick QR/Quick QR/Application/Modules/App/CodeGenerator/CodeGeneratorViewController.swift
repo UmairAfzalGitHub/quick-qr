@@ -6,41 +6,79 @@
 //
 
 import UIKit
-
+import IOS_Helpers
+import Foundation
 
 class CodeGeneratorViewController: UIViewController {
+    
+    // MARK: - Static Factory Method
+    static func createFromHistoryItem(_ historyItem: HistoryItem) -> CodeGeneratorViewController? {
+        let viewController = CodeGeneratorViewController()
+        
+        // Convert history item to appropriate code type
+        switch historyItem.type {
+        case .qrCode:
+            if let qrType = QRCodeType.allCases.first(where: { $0.title.lowercased() == historyItem.subtype.lowercased() }) {
+                viewController.currentCodeType = qrType
+                viewController.prefilledContent = historyItem.content
+            } else {
+                return nil
+            }
+            
+        case .socialQRCode:
+            if let socialType = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == historyItem.subtype.lowercased() }) {
+                viewController.currentCodeType = socialType
+                viewController.prefilledContent = historyItem.content
+            } else {
+                return nil
+            }
+            
+        case .barCode:
+            if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == historyItem.subtype.lowercased() }) {
+                viewController.currentCodeType = barType
+                viewController.prefilledContent = historyItem.content
+            } else {
+                return nil
+            }
+        }
+        
+        return viewController
+    }
     
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let actionButton = AppButtonView()
     private let adContainerView = UIView()
-
-    private var wifiView: WifiView?
-    private var emailView: EmailView?
-    private var websiteView: WebsiteView?
-    private var phoneView: PhoneView?
-    private var textView: TextView?
-    private var contactsView: ContactsView?
-    private var locationView: LocationView?
-    private var tiktokView: TiktokView?
-    private var instagramView: InstagramView?
-    private var facebookView: FacebookView?
-    private var xView: XView?
-    private var spotifyView: SpotifyView?
-    private var youtubeView: YoutubeView?
-    private var whatsappView: WhatsappView?
-    private var viberView: ViberView?
-    private var barCodeView: BarCodeView?
-    private var calendarView: CalendarView?
-
+    
+    internal var wifiView: WifiView?
+    internal var emailView: EmailView?
+    internal var websiteView: WebsiteView?
+    internal var phoneView: PhoneView?
+    internal var textView: TextView?
+    internal var contactsView: ContactsView?
+    internal var locationView: LocationView?
+    internal var tiktokView: TiktokView?
+    internal var instagramView: InstagramView?
+    internal var facebookView: FacebookView?
+    internal var xView: XView?
+    internal var spotifyView: SpotifyView?
+    internal var youtubeView: YoutubeView?
+    internal var whatsappView: WhatsappView?
+    internal var viberView: ViberView?
+    internal var barCodeView: BarCodeView?
+    internal var calendarView: CalendarView?
+    
     // MARK: - Content View (to be replaced)
     private let replaceableContentView = UIView()
     private var placeholderHeightConstraint: NSLayoutConstraint?
-
+    
     // MARK: - Code Type
-    var currentCodeType: CodeTypeProtocol?
-    var buttonAction: (() -> Void)?
+    internal var currentCodeType: CodeTypeProtocol?
+    internal var buttonAction: (() -> Void)?
+    
+    // MARK: - Prefilled Content
+    internal var prefilledContent: String?
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -49,6 +87,11 @@ class CodeGeneratorViewController: UIViewController {
         setupUI()
         setupConstraints()
         setupActions()
+        
+        // Apply prefilled content if available
+        if let content = prefilledContent {
+            applyPrefilledContent(content)
+        }
     }
     
     // MARK: - UI Setup
@@ -67,7 +110,7 @@ class CodeGeneratorViewController: UIViewController {
         // Configure replaceable content view
         replaceableContentView.translatesAutoresizingMaskIntoConstraints = false
         replaceableContentView.backgroundColor = .clear
-
+        
         // Configure action button
         actionButton.translatesAutoresizingMaskIntoConstraints = false
         actionButton.configure(with: .primary(title: "Create", image: nil))
@@ -153,22 +196,38 @@ class CodeGeneratorViewController: UIViewController {
         print("Generating Code for: \(codeType.title)")
         
         var generatedImage: UIImage?
+        var contentToSave: String = ""
         
         if let qrCodeType = codeType as? QRCodeType {
             generatedImage = generateQRCode(for: qrCodeType)
+            // Save content based on QR code type
+            contentToSave = getQRCodeContent(for: qrCodeType)
+            if !contentToSave.isEmpty {
+                HistoryManager.shared.saveQRCodeHistory(type: qrCodeType, content: contentToSave)
+            }
         } else if let socialQRCodeType = codeType as? SocialQRCodeType {
             generatedImage = generateSocialQRCode(for: socialQRCodeType)
+            // Save content based on social QR code type
+            contentToSave = getSocialQRCodeContent(for: socialQRCodeType)
+            if !contentToSave.isEmpty {
+                HistoryManager.shared.saveSocialQRCodeHistory(type: socialQRCodeType, content: contentToSave)
+            }
         } else if let barCodeType = codeType as? BarCodeType {
             generatedImage = generateBarCode(for: barCodeType)
+            // Save barcode to history
+            if let content = barCodeView?.getContent(), !content.isEmpty {
+                HistoryManager.shared.saveBarCodeHistory(type: barCodeType, content: content)
+            }
         }
         
-        if let image = generatedImage {
-            // Show the generated code in a result screen
-            presentResultScreen(with: image)
-        } else {
-            // Show error alert
-            showErrorAlert(message: "Failed to generate code. Please check your input.")
+        guard let generatedImage = generatedImage else {
+            showAlert(title: "Error", message: "Failed to generate code. Please check your input and try again.")
+            return
         }
+        
+        let resultVC = CodeGenerationResultViewController()
+        configureResultVC(resultVC, with: generatedImage)
+        navigationController?.pushViewController(resultVC, animated: true)
     }
     
     private func generateQRCode(for type: QRCodeType) -> UIImage? {
@@ -393,6 +452,7 @@ class CodeGeneratorViewController: UIViewController {
             username = user
         }
         
+        // Generate the social QR code based on the type and username
         return CodeGeneratorManager.shared.generateSocialQRCode(type: type, username: username)
     }
     
@@ -427,17 +487,10 @@ class CodeGeneratorViewController: UIViewController {
         return image
     }
     
-    private func presentResultScreen(with image: UIImage) {
-        print("[CodeGeneratorViewController] Presenting result screen with image: \(image)")
-        let resultVC = CodeGenerationResultViewController()
-        configureResultVC(resultVC, with: image)
-        navigationController?.pushViewController(resultVC, animated: true)
-    }
-    
     private func configureResultVC(_ resultVC: CodeGenerationResultViewController, with image: UIImage) {
-        guard let codeType = currentCodeType else { 
+        guard let codeType = currentCodeType else {
             print("[CodeGeneratorViewController] Error: No code type available")
-            return 
+            return
         }
         
         print("[CodeGeneratorViewController] Configuring result VC for code type: \(codeType)")
@@ -568,6 +621,100 @@ class CodeGeneratorViewController: UIViewController {
             applicationActivities: nil
         )
         present(activityViewController, animated: true)
+    }
+    
+    // MARK: - Prefilled Content Handling
+    
+    /// Apply prefilled content to the appropriate view based on code type
+    private func applyPrefilledContent(_ content: String) {
+        guard let codeType = currentCodeType else { return }
+        
+        if let qrCodeType = codeType as? QRCodeType {
+            applyQRCodeContent(content, qrCodeType: qrCodeType)
+        } else if let socialQRCodeType = codeType as? SocialQRCodeType {
+            applySocialQRCodeContent(content, socialQRCodeType: socialQRCodeType)
+        } else if let barCodeType = codeType as? BarCodeType {
+            applyBarCodeContent(content, barCodeType: barCodeType)
+        }
+    }
+    
+    /// Handle QR code content based on QR code type
+    private func applyQRCodeContent(_ content: String, qrCodeType: QRCodeType) {
+        switch qrCodeType {
+        case .wifi:
+            // Let the WiFi view handle parsing the content
+            wifiView?.parseAndPopulateFromContent(content)
+            
+        case .phone:
+            // Let the Phone view handle parsing the content
+            phoneView?.parseAndPopulateFromContent(content)
+            
+        case .text:
+            // Let the Text view handle parsing the content
+            textView?.parseAndPopulateFromContent(content)
+            
+        case .contact:
+            // Let the Contacts view handle parsing the content
+            contactsView?.parseAndPopulateFromContent(content)
+            
+        case .email:
+            // Let the Email view handle parsing the content
+            emailView?.parseAndPopulateFromContent(content)
+            
+        case .location:
+            // Let the Location view handle parsing the content
+            locationView?.parseAndPopulateFromContent(content)
+            
+        case .events:
+            // Let the Calendar view handle parsing the content
+            calendarView?.parseAndPopulateFromContent(content)
+        case .website:
+            // Let the Website view handle parsing the content
+            websiteView?.parseAndPopulateFromContent(content)
+        }
+    }
+    
+    /// Handle social QR code content based on social media type
+    private func applySocialQRCodeContent(_ content: String, socialQRCodeType: SocialQRCodeType) {
+        switch socialQRCodeType {
+        case .facebook:
+            // Let the Facebook view handle parsing the content
+            facebookView?.parseAndPopulateFromContent(content)
+            
+        case .instagram:
+            // Let the Instagram view handle parsing the content
+            instagramView?.parseAndPopulateFromContent(content)
+            
+        case .tiktok:
+            // Let the TikTok view handle parsing the content
+            tiktokView?.parseAndPopulateFromContent(content)
+            
+        case .x:
+            // Let the X view handle parsing the content
+            xView?.parseAndPopulateFromContent(content)
+            
+        case .youtube:
+            // Let the YouTube view handle parsing the content
+            youtubeView?.parseAndPopulateFromContent(content)
+            
+        case .spotify:
+            // Let the Spotify view handle parsing the content
+            spotifyView?.parseAndPopulateFromContent(content)
+            
+        case .whatsapp:
+            // Let the WhatsApp view handle parsing the content
+            whatsappView?.parseAndPopulateFromContent(content)
+            
+        case .viber:
+            // Let the Viber view handle parsing the content
+            viberView?.parseAndPopulateFromContent(content)
+        }
+    }
+    
+    /// Handle bar code content
+    private func applyBarCodeContent(_ content: String, barCodeType: BarCodeType) {
+        // Set barcode content
+        barCodeView?.urlText = content
     }
     
     private func showErrorAlert(message: String) {
@@ -769,78 +916,6 @@ class CodeGeneratorViewController: UIViewController {
         return barCodeView!
     }
     
-    /// Helper method to create placeholder views for each type
-    private func createPlaceholderView(for type: String, description: String) -> UIView {
-        let containerView = UIView()
-        containerView.backgroundColor = .systemBackground
-        
-        let titleLabel = UILabel()
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = type
-        titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
-        titleLabel.textAlignment = .center
-        titleLabel.textColor = .label
-        
-        let descriptionLabel = UILabel()
-        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
-        descriptionLabel.text = description
-        descriptionLabel.font = .systemFont(ofSize: 16)
-        descriptionLabel.textAlignment = .center
-        descriptionLabel.textColor = .secondaryLabel
-        descriptionLabel.numberOfLines = 0
-        
-        containerView.addSubview(titleLabel)
-        containerView.addSubview(descriptionLabel)
-        
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 40),
-            titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-            
-            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
-            descriptionLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            descriptionLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-            descriptionLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -40)
-        ])
-        
-        return containerView
-    }
-    
-    /// Get the current Code type
-    func getCurrentCodeType() -> CodeTypeProtocol? {
-        return currentCodeType
-    }
-    
-    /// Replace the content view with a custom view from the previous screen
-    func replaceContentView(with newView: UIView) {
-        // Remove all subviews from the replaceable content view
-        replaceableContentView.subviews.forEach { $0.removeFromSuperview() }
-        
-        // Remove the placeholder height constraint to allow dynamic sizing
-        placeholderHeightConstraint?.isActive = false
-        placeholderHeightConstraint = nil
-        
-        // Add the new view
-        newView.translatesAutoresizingMaskIntoConstraints = false
-        replaceableContentView.addSubview(newView)
-        
-        // Constraint the new view to fill the replaceable content view
-        // The height will now be determined by the internal content of newView
-        NSLayoutConstraint.activate([
-            newView.topAnchor.constraint(equalTo: replaceableContentView.topAnchor),
-            newView.leadingAnchor.constraint(equalTo: replaceableContentView.leadingAnchor),
-            newView.trailingAnchor.constraint(equalTo: replaceableContentView.trailingAnchor),
-            newView.bottomAnchor.constraint(equalTo: replaceableContentView.bottomAnchor)
-        ])
-        
-        // Remove the border and background since content is loaded
-        replaceableContentView.layer.borderWidth = 0
-        replaceableContentView.backgroundColor = .clear
-        
-        // Force layout update to recalculate the scroll view's content size
-        view.layoutIfNeeded()
-    }
-    
     /// Add custom content to the scroll view (in addition to replaceable content)
     func addContentToScrollView(_ view: UIView) {
         contentView.addSubview(view)
@@ -849,6 +924,7 @@ class CodeGeneratorViewController: UIViewController {
     /// Set up content with auto layout in the scroll view (replaces replaceable content)
     func setupScrollableContent(with views: [UIView]) {
         // Remove existing content including replaceable content view
+        replaceableContentView.removeFromSuperview()
         contentView.subviews.forEach { $0.removeFromSuperview() }
         
         var previousView: UIView?
@@ -857,53 +933,45 @@ class CodeGeneratorViewController: UIViewController {
             view.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview(view)
             
+            // Set up constraints
             NSLayoutConstraint.activate([
                 view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-                view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+                view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             ])
             
-            if let previous = previousView {
-                view.topAnchor.constraint(equalTo: previous.bottomAnchor, constant: 16).isActive = true
+            if let previousView = previousView {
+                view.topAnchor.constraint(equalTo: previousView.bottomAnchor, constant: 16).isActive = true
             } else {
-                view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16).isActive = true
+                view.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
             }
             
             previousView = view
         }
         
-        // Set content view height
+        // Set bottom constraint for the last view
         if let lastView = previousView {
-            lastView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16).isActive = true
+            lastView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
         }
     }
     
-    /// Replace the ad container with custom ad view
-    func setAdView(_ adView: UIView) {
-        adContainerView.subviews.forEach { $0.removeFromSuperview() }
+    /// Replace the current content view with a new one
+    private func replaceContentView(with newView: UIView) {
+        // Remove any existing subviews
+        replaceableContentView.subviews.forEach { $0.removeFromSuperview() }
         
-        adView.translatesAutoresizingMaskIntoConstraints = false
-        adContainerView.addSubview(adView)
+        // Add the new view
+        newView.translatesAutoresizingMaskIntoConstraints = false
+        replaceableContentView.addSubview(newView)
         
+        // Remove the placeholder height constraint if it exists
+        placeholderHeightConstraint?.isActive = false
+        
+        // Set up constraints for the new view
         NSLayoutConstraint.activate([
-            adView.topAnchor.constraint(equalTo: adContainerView.topAnchor),
-            adView.leadingAnchor.constraint(equalTo: adContainerView.leadingAnchor),
-            adView.trailingAnchor.constraint(equalTo: adContainerView.trailingAnchor),
-            adView.bottomAnchor.constraint(equalTo: adContainerView.bottomAnchor)
+            newView.topAnchor.constraint(equalTo: replaceableContentView.topAnchor),
+            newView.leadingAnchor.constraint(equalTo: replaceableContentView.leadingAnchor),
+            newView.trailingAnchor.constraint(equalTo: replaceableContentView.trailingAnchor),
+            newView.bottomAnchor.constraint(equalTo: replaceableContentView.bottomAnchor)
         ])
-    }
-    
-    /// Get reference to scroll view for additional customization
-    func getScrollView() -> UIScrollView {
-        return scrollView
-    }
-    
-    /// Get reference to content view for direct manipulation
-    func getContentView() -> UIView {
-        return contentView
-    }
-    
-    /// Get reference to the replaceable content view
-    func getReplaceableContentView() -> UIView {
-        return replaceableContentView
     }
 }

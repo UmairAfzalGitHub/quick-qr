@@ -27,6 +27,48 @@ final class TextView: UIView {
         return contentTextView.text.isEmpty ? nil : contentTextView.text
     }
     
+    func getPhoneNumber() -> String? {
+        return phoneNumberTextField.text
+    }
+    
+    // MARK: - Setter Methods
+    func setText(_ text: String) {
+        contentTextView.text = text
+        updateContentPlaceholder()
+    }
+    
+    func setPhoneNumber(_ phoneNumber: String) {
+        phoneNumberTextField.text = phoneNumber
+    }
+    
+    // MARK: - Data Population Methods
+    func populateData(phoneNumber: String, text: String) {
+        setPhoneNumber(phoneNumber)
+        setText(text)
+    }
+    
+    /// Parse and populate SMS data from a QR code content string
+    /// - Parameter content: The SMS content string (SMSTO:+1234567890:Message)
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        if content.hasPrefix("SMSTO:") {
+            let parts = content.dropFirst(6).components(separatedBy: ":")
+            if parts.count >= 2 {
+                populateData(phoneNumber: parts[0], text: parts[1])
+                return true
+            } else if parts.count == 1 {
+                populateData(phoneNumber: parts[0], text: "")
+                return true
+            }
+        } else {
+            // Assume it's just a text message with no phone number
+            populateData(phoneNumber: "", text: content)
+            return true
+        }
+        return false
+    }
+    
     // MARK: - UI Elements
     private let phoneNumberLabel: UILabel = {
         let label = UILabel()

@@ -19,6 +19,30 @@ final class PhoneView: UIView {
         return phoneTextField.text
     }
     
+    // MARK: - Setter Methods
+    func setPhoneNumber(_ phoneNumber: String) {
+        phoneTextField.text = phoneNumber
+    }
+    
+    // MARK: - Data Population Methods
+    func populateData(phoneNumber: String) {
+        setPhoneNumber(phoneNumber)
+    }
+    
+    /// Parse and populate phone number from a QR code content string
+    /// - Parameter content: The phone number content string (may have tel: prefix)
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        if content.hasPrefix("tel:") {
+            let phoneNumber = String(content.dropFirst(4))
+            populateData(phoneNumber: phoneNumber)
+        } else {
+            populateData(phoneNumber: content)
+        }
+        return true
+    }
+    
     // MARK: - UI Elements
     private let phoneLabel: UILabel = {
         let label = UILabel()

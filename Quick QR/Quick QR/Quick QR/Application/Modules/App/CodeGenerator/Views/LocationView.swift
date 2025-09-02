@@ -27,6 +27,36 @@ final class LocationView: UIView {
     func getLongitude() -> String? {
         return longitudeTextField.text
     }
+    
+    // MARK: - Setter Methods
+    func setLatitude(_ latitude: String) {
+        latitudeTextField.text = latitude
+    }
+    
+    func setLongitude(_ longitude: String) {
+        longitudeTextField.text = longitude
+    }
+    
+    // MARK: - Data Population Methods
+    func populateData(latitude: String, longitude: String) {
+        setLatitude(latitude)
+        setLongitude(longitude)
+    }
+    
+    /// Parse and populate location data from a QR code content string
+    /// - Parameter content: The location content string (geo:latitude,longitude)
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        if content.hasPrefix("geo:") {
+            let coordinates = String(content.dropFirst(4)).components(separatedBy: ",")
+            if coordinates.count >= 2 {
+                populateData(latitude: coordinates[0], longitude: coordinates[1])
+                return true
+            }
+        }
+        return false
+    }
 
     // MARK: - UI Elements
     private let latitudeLabel: UILabel = {

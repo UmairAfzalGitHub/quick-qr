@@ -46,12 +46,12 @@ class CountryRepository {
             }
             
             // Accessing the countries and their cities
-            for country in countries {
-                print("Country: \(country.code)")
-                for city in country.cities ?? [] {
-                    print("\(city.cityName) - \(city.latitude), \(city.longitude), Phone Code: \(city.phoneCode)")
-                }
-            }
+//            for country in countries {
+//                print("Country: \(country.code)")
+//                for city in country.cities ?? [] {
+//                    print("\(city.cityName) - \(city.latitude), \(city.longitude), Phone Code: \(city.phoneCode)")
+//                }
+//            }
         } catch {
             print("Error decoding JSON: \(error)")
             return

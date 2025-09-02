@@ -19,6 +19,25 @@ final class WebsiteView: UIView {
         return websiteTextField.text
     }
     
+    // MARK: - Data Population Methods
+    func populateData(url: String) {
+        websiteTextField.text = url
+    }
+    
+    /// Parse and populate website URL from a QR code content string
+    /// - Parameter content: The website URL content string
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        if content.hasPrefix("http://") || content.hasPrefix("https://") {
+            populateData(url: content)
+        } else {
+            // If no protocol is specified, default to https://
+            populateData(url: "https://" + content)
+        }
+        return true
+    }
+    
     // MARK: - UI Elements
     private let websiteLabel: UILabel = {
         let label = UILabel()

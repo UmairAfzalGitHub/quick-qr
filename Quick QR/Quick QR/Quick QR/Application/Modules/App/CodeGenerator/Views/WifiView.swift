@@ -28,6 +28,52 @@ final class WifiView: UIView {
         return wepButton.backgroundColor == .appPrimary
     }
     
+    // MARK: - Setter Methods
+    func setSSID(_ ssid: String) {
+        ssIDTextField.text = ssid
+    }
+    
+    func setPassword(_ password: String) {
+        passwordTextField.text = password
+    }
+    
+    func setWEP(_ isWep: Bool) {
+        selectSecurityMode(isWep ? .wep : .wpa)
+    }
+    
+    // MARK: - Data Population Methods
+    func populateData(ssid: String, password: String, isWep: Bool) {
+        setSSID(ssid)
+        setPassword(password)
+        setWEP(isWep)
+    }
+    
+    /// Parse and populate WiFi data from a QR code content string
+    /// - Parameter content: The WiFi QR code content string (WIFI:S:<SSID>;P:<PASSWORD>;T:<WEP/WPA/WPA2>;)
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        guard content.hasPrefix("WIFI:") else { return false }
+        
+        let components = content.components(separatedBy: ";").filter { !$0.isEmpty }
+        var ssid = ""
+        var password = ""
+        var isWep = false
+        
+        for component in components {
+            if component.hasPrefix("S:") {
+                ssid = String(component.dropFirst(2))
+            } else if component.hasPrefix("P:") {
+                password = String(component.dropFirst(2))
+            } else if component.hasPrefix("T:WEP") {
+                isWep = true
+            }
+        }
+        
+        populateData(ssid: ssid, password: password, isWep: isWep)
+        return true
+    }
+    
     // MARK: - UI Elements
     private let ssIDLabel: UILabel = {
         let label = UILabel()

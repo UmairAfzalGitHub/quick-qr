@@ -27,6 +27,34 @@ final class InstagramView: UIView {
     func getUrl() -> String? {
         return urlTextField.text
     }
+    
+    // MARK: - Setter Methods
+    func setUsername(_ username: String) {
+        userNameTextField.text = username
+    }
+    
+    func setUrl(_ url: String) {
+        urlTextField.text = url
+    }
+    
+    // MARK: - Data Population Methods
+    func populateData(username: String = "", url: String = "") {
+        setUsername(username)
+        setUrl(url)
+    }
+    
+    /// Parse and populate Instagram data from a QR code content string
+    /// - Parameter content: The Instagram content string (URL or username)
+    /// - Returns: True if the content was successfully parsed, false otherwise
+    @discardableResult
+    func parseAndPopulateFromContent(_ content: String) -> Bool {
+        if content.contains("instagram.com") {
+            populateData(url: content)
+        } else {
+            populateData(username: content)
+        }
+        return true
+    }
 
     // MARK: - UI Elements
     private let userNameLabel: UILabel = {
