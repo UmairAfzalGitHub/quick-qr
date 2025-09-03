@@ -246,21 +246,26 @@ final class ScanResultViewController: UIViewController {
     ///   - title: Left label text
     ///   - value: Right label text
     ///   - showsButton: Optional trailing button (e.g., copy)
-    private func makeInfoRow(title: String, value: String, showsButton: Bool = false, buttonImage: UIImage? = UIImage(systemName: "doc.on.doc")) -> UIView {
+    private func makeInfoRow(title: String,
+                             value: String,
+                             showsButton: Bool = false,
+                             buttonImage: UIImage? = UIImage(systemName: "doc.on.doc")) -> UIView {
         let container = UIView()
         container.layer.cornerRadius = 12
+        container.translatesAutoresizingMaskIntoConstraints = false
         
-        let h = UIStackView()
-        h.axis = .horizontal
-        h.alignment = .leading
-        h.distribution = .fillProportionally
-        h.spacing = 8
-        h.translatesAutoresizingMaskIntoConstraints = false
+        let rowStack = UIStackView()
+        rowStack.axis = .horizontal
+        rowStack.alignment = .center
+        rowStack.distribution = .fill
+        rowStack.spacing = 8
+        rowStack.translatesAutoresizingMaskIntoConstraints = false
         
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = .systemFont(ofSize: 14, weight: .regular)
         titleLabel.textColor = .textSecondary
+        titleLabel.widthAnchor.constraint(equalToConstant: 130).isActive = true
         
         let valueLabel = UILabel()
         valueLabel.text = value
@@ -268,37 +273,33 @@ final class ScanResultViewController: UIViewController {
         valueLabel.textColor = .textPrimary
         valueLabel.textAlignment = .left
         
-        let spacer = UIView()
-        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        rowStack.addArrangedSubview(titleLabel)
+        rowStack.addArrangedSubview(valueLabel)
         
-        h.addArrangedSubview(titleLabel)
-        h.addArrangedSubview(spacer)
-        h.addArrangedSubview(valueLabel)
-        
-        let btn = UIButton(type: .system)
         if showsButton {
+            let btn = UIButton(type: .system)
             btn.setImage(buttonImage, for: .normal)
             btn.tintColor = .appPrimary
-            btn.setContentHuggingPriority(.required, for: .horizontal)
-            h.addArrangedSubview(btn)
+            btn.translatesAutoresizingMaskIntoConstraints = false
+            btn.widthAnchor.constraint(equalToConstant: 40).isActive = true
+            rowStack.addArrangedSubview(btn)
         }
         
-        container.addSubview(h)
+        container.addSubview(rowStack)
         NSLayoutConstraint.activate([
-            titleLabel.widthAnchor.constraint(equalToConstant: 130),
-            btn.widthAnchor.constraint(equalToConstant: 40),
-            h.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
-            h.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
-            h.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
-            h.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
+            rowStack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
+            rowStack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
+            rowStack.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
+            rowStack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
         ])
+        
         return container
     }
     
     // MARK: - Demo
     private func populateDummyRows() {
         let rows: [(String, String, Bool)] = [
-            ("Network name:", "PTCL-BB", false),
+            ("Network name:", "PTCL-BB", true),
             ("Security type:", "WPA", false),
             ("Password:", "123654789", true)
         ]
