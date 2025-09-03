@@ -177,17 +177,13 @@ class ScannerViewController: UIViewController {
 extension ScannerViewController: CodeScannerDelegate {
     
     func scannerDidDetectBarcode(value: String, type: AVMetadataObject.ObjectType, title: String) {
-        // Pause camera feed while showing alert
+        // Pause camera feed while showing scan result
         scannerManager.pauseCameraFeed()
         
-        var alertTitle = title
-        var message = value
-        
-        // Handle QR codes specially with content type detection
+        // Log the detected code
         if type == .qr {
             if let detected = detectQRCodeType(from: value) {
-                alertTitle = detected.title
-                print("QR Code Detected [\(alertTitle)]: \(value)")
+                print("QR Code Detected [\(detected.title)]: \(value)")
             } else {
                 print("QR Code Detected: \(value)")
             }
@@ -195,21 +191,15 @@ extension ScannerViewController: CodeScannerDelegate {
             print("\(title) Detected: \(value)")
         }
         
-        // Create alert with appropriate title based on barcode type
-        let alert = UIAlertController(title: alertTitle, message: message, preferredStyle: .alert)
+        // Create and present the scan result view controller
+        let resultVC = ScanResultViewController(scannedData: value, metadataObjectType: type)
+        resultVC.modalPresentationStyle = .fullScreen
+        resultVC.dismissHandler = { [weak self] in
+            // Resume camera feed when the result view is dismissed
+            self?.scannerManager.resumeCameraFeed()
+        }
         
-        // Add copy action
-        alert.addAction(UIAlertAction(title: "Copy", style: .default) { _ in
-            UIPasteboard.general.string = value
-            self.scannerManager.resumeCameraFeed()
-        })
-        
-        // Add OK action
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
-            self.scannerManager.resumeCameraFeed()
-        })
-        
-        present(alert, animated: true)
+        present(resultVC, animated: true)
     }
     
     func scannerDidUpdatePermission(granted: Bool) {
