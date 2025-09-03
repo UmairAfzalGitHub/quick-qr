@@ -7,18 +7,25 @@
 
 import UIKit
 import AVFoundation
+import CoreImage
 
-class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+class ScannerViewController: UIViewController {
     
-    // MARK: - Camera Session States
-    private enum CameraState {
-        case setup     // Initial setup
-        case ready     // Ready but not running
-        case running   // Actively capturing
-        case paused    // Temporarily paused
-    }
+    // MARK: - Properties
     
-    private var cameraState: CameraState = .setup
+    private let scannerManager = CodeScannerManager()
+    
+    // Focus animation view
+    private let focusIndicator: UIView = {
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
+        view.layer.borderWidth = 2.0
+        view.layer.borderColor = UIColor.yellow.cgColor
+        view.backgroundColor = .clear
+        // Square shape, no corner radius
+        view.alpha = 0
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     private let iapImage: UIImageView = {
         let image = UIImageView()
@@ -41,9 +48,6 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         return imageView
     }()
     
-    private var captureSession: AVCaptureSession?
-    private var previewLayer: AVCaptureVideoPreviewLayer?
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -51,45 +55,39 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         setupConstraints()
         hideCenterQRImageView()
         
-        // Register for app lifecycle notifications
-        NotificationCenter.default.addObserver(self, selector: #selector(appDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(appWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        // Configure scanner manager
+        scannerManager.delegate = self
+        scannerManager.previewContainer = view
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        // Make sure preview layer is visible
-        if let previewLayer = previewLayer {
-            previewLayer.opacity = 1.0
-            if previewLayer.superlayer == nil {
-                view.layer.insertSublayer(previewLayer, at: 0)
-            }
-        }
         
         // Pre-configure camera but don't start yet
-        prepareCamera()
+        scannerManager.prepareCamera()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // Start camera with highest priority
-        startCameraSession(true)
+        scannerManager.startCameraSession(true)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // Completely stop camera when leaving to avoid privacy indicator
-        stopCameraSession()
-    }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
+        scannerManager.stopCameraSession()
     }
     
     func setupUI() {
         view.addSubview(iapImage)
         view.addSubview(scannerFrameImageView)
         scannerFrameImageView.addSubview(qrTempImageView)
+        view.addSubview(focusIndicator)
+        
+        // Add tap gesture recognizer for focus
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+        view.addGestureRecognizer(tapGesture)
     }
     
     func setupConstraints() {
@@ -122,74 +120,39 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         }
     }
     
-    func prepareCamera() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            // Camera already set up in viewDidLoad
-            if captureSession == nil {
-                setupCamera()
-            }
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-                DispatchQueue.main.async {
-                    if granted {
-                        self?.setupCamera()
-                    } else {
-                        self?.showPermissionAlert()
-                    }
-                }
-            }
-        case .denied, .restricted:
-            showPermissionAlert()
-        @unknown default:
-            break
-        }
+    // MARK: - Tap to Focus
+    
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+        let touchPoint = gesture.location(in: view)
+        
+        // Convert touch point to camera's coordinate space
+        let focusPoint = scannerManager.convertToPointOfInterest(touchPoint: touchPoint)
+        
+        // Set focus at point
+        scannerManager.focusAtPoint(focusPoint)
+        
+        // Show focus animation
+        showFocusAnimation(at: touchPoint)
     }
     
-    private func setupCamera() {
-        // Only setup once
-        if captureSession != nil {
-            return
-        }
+    private func showFocusAnimation(at point: CGPoint) {
+        // Position focus indicator at tap point
+        focusIndicator.center = point
         
-        // Initialize session object
-        let session = AVCaptureSession()
-        self.captureSession = session
+        // Reset any ongoing animations
+        focusIndicator.layer.removeAllAnimations()
         
-        // Create preview layer immediately to avoid white flash
-        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
-        previewLayer.videoGravity = .resizeAspectFill
-        previewLayer.frame = self.view.layer.bounds
-        previewLayer.backgroundColor = UIColor.black.cgColor
-        self.previewLayer = previewLayer
-        self.view.layer.insertSublayer(previewLayer, at: 0)
+        // Make visible and animate
+        focusIndicator.alpha = 1.0
+        focusIndicator.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
         
-        // Configure camera session on background thread with highest priority
-        DispatchQueue.global(qos: .userInteractive).async { [weak self] in
-            guard let self = self else { return }
-            
-            // Begin configuration
-            session.beginConfiguration()
-            
-            // Input
-            guard let videoCaptureDevice = AVCaptureDevice.default(for: .video),
-                  let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice),
-                  session.canAddInput(videoInput) else { return }
-            session.addInput(videoInput)
-            
-            // Output
-            let metadataOutput = AVCaptureMetadataOutput()
-            if session.canAddOutput(metadataOutput) {
-                session.addOutput(metadataOutput)
-                metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-                metadataOutput.metadataObjectTypes = [.qr] // only QR codes
-            }
-            
-            // Commit configuration
-            session.commitConfiguration()
-            
-            // Mark as ready but don't start yet
-            self.cameraState = .ready
+        // Animate focus indicator
+        UIView.animate(withDuration: 0.3, animations: {
+            self.focusIndicator.transform = .identity
+        }) { _ in
+            UIView.animate(withDuration: 0.2, delay: 0.5, options: [], animations: {
+                self.focusIndicator.alpha = 0
+            })
         }
     }
     
@@ -207,29 +170,56 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         }))
         present(alert, animated: true, completion: nil)
     }
+}
+
+// MARK: - CodeScannerDelegate
+
+extension ScannerViewController: CodeScannerDelegate {
     
-    // MARK: - QR Type Detection
-    private func matches(_ type: CodeTypeProtocol, raw: String, lower: String, url: URL?) -> Bool {
-        // Normalize rule lists to lowercase to ensure case-insensitive matching
-        let prefixes = type.prefixes.map { $0.lowercased() }
-        let substrings = type.contains.map { $0.lowercased() }
-        let schemes = type.schemes.map { $0.lowercased() }
-        let suffices = type.suffex.map { $0.lowercased() }
-
-        // prefix match
-        if !prefixes.isEmpty && prefixes.contains(where: { lower.hasPrefix($0) }) { return true }
-        // substring match
-        if !substrings.isEmpty && substrings.contains(where: { lower.contains($0) }) { return true }
-        // url-based matches
-        if let url = url {
-            let scheme = url.scheme?.lowercased() ?? ""
-            let host = (url.host ?? "").lowercased()
-            if !schemes.isEmpty && schemes.contains(scheme) { return true }
-            if !suffices.isEmpty && suffices.contains(where: { host.hasSuffix($0) }) { return true }
+    func scannerDidDetectBarcode(value: String, type: AVMetadataObject.ObjectType, title: String) {
+        // Pause camera feed while showing alert
+        scannerManager.pauseCameraFeed()
+        
+        var alertTitle = title
+        var message = value
+        
+        // Handle QR codes specially with content type detection
+        if type == .qr {
+            if let detected = detectQRCodeType(from: value) {
+                alertTitle = detected.title
+                print("QR Code Detected [\(alertTitle)]: \(value)")
+            } else {
+                print("QR Code Detected: \(value)")
+            }
+        } else {
+            print("\(title) Detected: \(value)")
         }
-        return false
+        
+        // Create alert with appropriate title based on barcode type
+        let alert = UIAlertController(title: alertTitle, message: message, preferredStyle: .alert)
+        
+        // Add copy action
+        alert.addAction(UIAlertAction(title: "Copy", style: .default) { _ in
+            UIPasteboard.general.string = value
+            self.scannerManager.resumeCameraFeed()
+        })
+        
+        // Add OK action
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            self.scannerManager.resumeCameraFeed()
+        })
+        
+        present(alert, animated: true)
     }
-
+    
+    func scannerDidUpdatePermission(granted: Bool) {
+        if !granted {
+            showPermissionAlert()
+        }
+    }
+    
+    // MARK: - QR Type Detection Helper
+    
     private func detectQRCodeType(from value: String) -> CodeTypeProtocol? {
         let raw = value.trimmingCharacters(in: .whitespacesAndNewlines)
         let lower = raw.lowercased()
@@ -255,89 +245,24 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         return QRCodeType.text
     }
     
-    // MARK: - QR Detection Delegate
-    func metadataOutput(_ output: AVCaptureMetadataOutput,
-                        didOutput metadataObjects: [AVMetadataObject],
-                        from connection: AVCaptureConnection) {
-        guard let object = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
-              object.type == .qr,
-              let qrValue = object.stringValue else { return }
-        
-        // Pause camera feed while showing alert
-        pauseCameraFeed()
-        
-        // Handle the QR value
-        let detected = detectQRCodeType(from: qrValue)
-        let detectedTitle = (detected?.title ?? "QR Code")
-        print("QR Code Detected [\(detectedTitle)]: \(qrValue)")
-        
-        let alert = UIAlertController(title: detectedTitle, message: qrValue, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
-            self.resumeCameraFeed() // resume camera feed
-        })
-        present(alert, animated: true)
-    }
-    
-    // MARK: - Camera Session Management
-    
-    @objc private func appDidEnterBackground() {
-        // Fully stop the session when app goes to background to save resources
-        if cameraState == .running || cameraState == .paused {
-            stopCameraSession()
+    private func matches(_ type: CodeTypeProtocol, raw: String, lower: String, url: URL?) -> Bool {
+        // Normalize rule lists to lowercase to ensure case-insensitive matching
+        let prefixes = type.prefixes.map { $0.lowercased() }
+        let substrings = type.contains.map { $0.lowercased() }
+        let schemes = type.schemes.map { $0.lowercased() }
+        let suffices = type.suffex.map { $0.lowercased() }
+
+        // prefix match
+        if !prefixes.isEmpty && prefixes.contains(where: { lower.hasPrefix($0) }) { return true }
+        // substring match
+        if !substrings.isEmpty && substrings.contains(where: { lower.contains($0) }) { return true }
+        // url-based matches
+        if let url = url {
+            let scheme = url.scheme?.lowercased() ?? ""
+            let host = (url.host ?? "").lowercased()
+            if !schemes.isEmpty && schemes.contains(scheme) { return true }
+            if !suffices.isEmpty && suffices.contains(where: { host.hasSuffix($0) }) { return true }
         }
-    }
-    
-    @objc private func appWillEnterForeground() {
-        // Restart the session when app comes to foreground if we're visible
-        if self.isViewVisible() && (cameraState == .ready || cameraState == .paused) {
-            startCameraSession(true)
-        }
-    }
-    
-    private func isViewVisible() -> Bool {
-        // Check if view is in window hierarchy and not hidden
-        return self.isViewLoaded && self.view.window != nil
-    }
-    
-    private func startCameraSession(_ highPriority: Bool = false) {
-        let qos: DispatchQoS.QoSClass = highPriority ? .userInteractive : .userInitiated
-        
-        // Start on high priority thread
-        DispatchQueue.global(qos: qos).async { [weak self] in
-            guard let self = self, let captureSession = self.captureSession, !captureSession.isRunning else { return }
-            
-            // Start the session
-            captureSession.startRunning()
-            
-            // Update state
-            DispatchQueue.main.async {
-                self.cameraState = .running
-            }
-        }
-    }
-    
-    private func stopCameraSession() {
-        // Completely stop the session (for app background)
-        DispatchQueue.global(qos: .userInteractive).async { [weak self] in
-            guard let self = self, let captureSession = self.captureSession, captureSession.isRunning else { return }
-            
-            // Stop the session
-            captureSession.stopRunning()
-            
-            // Update state
-            DispatchQueue.main.async {
-                self.cameraState = .ready
-            }
-        }
-    }
-    
-    private func pauseCameraFeed() {
-        // Stop the camera session when showing alert
-        stopCameraSession()
-    }
-    
-    private func resumeCameraFeed() {
-        // Resume camera with high priority
-        startCameraSession(true)
+        return false
     }
 }
