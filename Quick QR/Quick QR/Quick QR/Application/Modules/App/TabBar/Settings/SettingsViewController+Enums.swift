@@ -13,7 +13,6 @@ enum SettingsSection: Int, CaseIterable {
     case premium
     case preferences
     case other
-    case developer // New section for developer options
     
     var title: String {
         switch self {
@@ -23,8 +22,6 @@ enum SettingsSection: Int, CaseIterable {
             return "Preferences"
         case .other:
             return "Other"
-        case .developer:
-            return "Developer"
         }
     }
 }
@@ -48,11 +45,11 @@ enum PreferenceItem: Int, CaseIterable {
     var icon: UIImage? {
         switch self {
         case .beep:
-            return UIImage(systemName: "speaker.wave.2")
+            return UIImage(named: "beep-settings")
         case .vibration:
-            return UIImage(systemName: "iphone.radiowaves.left.and.right")
+            return UIImage(named: "vibrate-settings")
         case .language:
-            return UIImage(systemName: "globe")
+            return UIImage(named: "lang-settings")
         }
     }
     
@@ -88,31 +85,13 @@ enum OtherItem: Int, CaseIterable {
     var icon: UIImage? {
         switch self {
         case .shareApp:
-            return UIImage(systemName: "square.and.arrow.up")
+            return UIImage(named: "share-settings")
         case .rateUs:
-            return UIImage(systemName: "star")
+            return UIImage(named: "rate-settings")
         case .feedback:
-            return UIImage(systemName: "envelope")
+            return UIImage(named: "feedback-settings")
         case .privacyPolicy:
-            return UIImage(systemName: "lock.shield")
-        }
-    }
-}
-
-enum DeveloperItem: Int, CaseIterable {
-    case testRunner
-    
-    var title: String {
-        switch self {
-        case .testRunner:
-            return "Test Runner"
-        }
-    }
-    
-    var icon: UIImage? {
-        switch self {
-        case .testRunner:
-            return UIImage(systemName: "hammer")
+            return UIImage(named: "privacy-settings")
         }
     }
 }

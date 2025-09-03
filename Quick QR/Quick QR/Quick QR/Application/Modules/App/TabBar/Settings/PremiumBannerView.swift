@@ -8,10 +8,17 @@
 import Foundation
 import UIKit
 
+// MARK: - PremiumBannerViewDelegate
+protocol PremiumBannerViewDelegate: AnyObject {
+    func premiumBannerViewDidTap(_ bannerView: PremiumBannerView)
+}
+
 // MARK: - PremiumBannerView
 class PremiumBannerView: UIView {
     
     // MARK: - Properties
+    weak var delegate: PremiumBannerViewDelegate?
+    
     private let containerView = UIView()
     private let bgImageView = UIImageView()
     private let diamondImageView = UIImageView()
@@ -39,6 +46,12 @@ class PremiumBannerView: UIView {
         containerView.backgroundColor = UIColor.customColor(fromHex: "FFEDD9")
         containerView.layer.cornerRadius = 12
         addSubview(containerView)
+        
+        // Add tap gesture recognizer
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        containerView.addGestureRecognizer(tapGesture)
+        containerView.isUserInteractionEnabled = true
+        self.isUserInteractionEnabled = true
         
         bgImageView.image = UIImage(named: "banner-bg-settings")
         bgImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -119,6 +132,12 @@ class PremiumBannerView: UIView {
     // MARK: - Actions
     @objc private func upgradeButtonTapped() {
         // Handle upgrade button tap
+        delegate?.premiumBannerViewDidTap(self)
+    }
+    
+    @objc private func handleTap() {
+        // Notify delegate about the tap
+        delegate?.premiumBannerViewDidTap(self)
     }
 }
 
