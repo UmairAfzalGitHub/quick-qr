@@ -130,58 +130,95 @@ final class ScanResultViewController: UIViewController {
     
     @objc private func actionButtonTapped(_ sender: UITapGestureRecognizer) {
         guard let view = sender.view, let actionType = view.accessibilityLabel else { return }
+        guard let scanResult = scanResult else { return }
+        
+        // Get raw data from scan result
+        let data = ScanResultManager.shared.getRawData(from: scanResult) ?? ""
         
         switch actionType {
         case "Call":
-            if case .qrCode(_, let data) = scanResult {
-                let phoneNumber = data.replacingOccurrences(of: "tel:", with: "")
-                    .replacingOccurrences(of: "telprompt:", with: "")
-                if let url = URL(string: "tel://\(phoneNumber)") {
-                    UIApplication.shared.open(url)
+            if case .qrCode(.phone, _) = scanResult {
+                ScanResultManager.shared.openPhoneCall(from: data) { success, errorMessage in
+                    if !success, let message = errorMessage {
+                        self.showToast(message: message)
+                    }
                 }
             }
             
         case "Email":
-            if case .qrCode(_, let data) = scanResult {
-                var email = data
-                if data.hasPrefix("mailto:") {
-                    email = data
-                } else {
-                    email = "mailto:\(data)"
-                }
-                if let url = URL(string: email) {
-                    UIApplication.shared.open(url)
+            if case .qrCode(.email, _) = scanResult {
+                ScanResultManager.shared.openEmail(from: data) { success, errorMessage in
+                    if !success, let message = errorMessage {
+                        self.showToast(message: message)
+                    }
                 }
             }
             
-        case "Open", "Open Map":
-            if case .qrCode(_, let data) = scanResult, let url = URL(string: data) {
-                UIApplication.shared.open(url)
-            } else if case .socialQR(_, let data) = scanResult, let url = URL(string: data) {
-                UIApplication.shared.open(url)
+        case "Open":
+            if case .qrCode(.website, _) = scanResult {
+                ScanResultManager.shared.openURL(data) { success, errorMessage in
+                    if !success, let message = errorMessage {
+                        self.showToast(message: message)
+                    }
+                }
+            } else if case .socialQR(_, _) = scanResult {
+                ScanResultManager.shared.openURL(data) { success, errorMessage in
+                    if !success, let message = errorMessage {
+                        self.showToast(message: message)
+                    }
+                }
+            }
+            
+        case "Open Map":
+            if case .qrCode(.location, _) = scanResult {
+                ScanResultManager.shared.openLocation(from: data) { success, errorMessage in
+                    if !success, let message = errorMessage {
+                        self.showToast(message: message)
+                    }
+                }
             }
             
         case "Save Contact":
-            if case .qrCode(.contact, let data) = scanResult {
-                // Create and save contact
-                saveContact(from: data)
+            if case .qrCode(.contact, _) = scanResult {
+                ScanResultManager.shared.saveContact(from: data) { success, error in
+                    if success {
+                        self.showToast(message: "Contact saved successfully")
+                    } else {
+                        self.showToast(message: error?.localizedDescription ?? "Could not save contact")
+                    }
+                }
             }
             
         case "Connect":
-            if case .qrCode(.wifi, let data) = scanResult {
-                // Extract SSID and password
-                connectToWifi(from: data)
+            if case .qrCode(.wifi, _) = scanResult {
+                let wifiInfo = ScanResultManager.shared.connectToWifi(from: data)
+                if let ssid = wifiInfo.ssid, !ssid.isEmpty {
+                    self.showToast(message: "Network information copied: \(ssid)")
+                } else {
+                    self.showToast(message: "Could not parse WiFi information")
+                }
+            }
+            
+        case "Send SMS":
+            if case .qrCode(.text, _) = scanResult {
+                ScanResultManager.shared.openSMS(from: data) { success, errorMessage in
+                    if !success, let message = errorMessage {
+                        self.showToast(message: message)
+                    }
+                }
             }
             
         case "Copy":
-            if let data = getRawData() {
-                UIPasteboard.general.string = data
-                showToast(message: "Copied to clipboard")
-            }
+            UIPasteboard.general.string = data
+            showToast(message: "Copied to clipboard")
             
         case "Search Product":
-            if case .barcode(_, let data, _) = scanResult, let url = URL(string: "https://www.google.com/search?q=\(data)") {
-                UIApplication.shared.open(url)
+            if case .barcode(_, _, _) = scanResult {
+                ScanResultManager.shared.searchProduct(barcode: data) { success, errorMessage in
+                    if !success, let message = errorMessage {
+                        self.showToast(message: message)
+                    }
+                }
             }
             
         case "Download":
@@ -306,16 +343,16 @@ final class ScanResultViewController: UIViewController {
     
     private func setupInfoCard() {
         rowsStack.axis = .vertical
-        rowsStack.spacing = 12
+        rowsStack.spacing = 6  // Reduced from 12 to 6
         rowsStack.disableIntrinsicContentSizeScrolling = true
         rowsStack.translatesAutoresizingMaskIntoConstraints = false
         infoCardView.addSubview(rowsStack)
         NSLayoutConstraint.activate([
-            rowsStack.leadingAnchor.constraint(equalTo: infoCardView.leadingAnchor, constant: 16),
-            rowsStack.trailingAnchor.constraint(equalTo: infoCardView.trailingAnchor, constant: -16),
-            rowsStack.topAnchor.constraint(equalTo: infoCardView.topAnchor, constant: 16),
-            rowsStack.bottomAnchor.constraint(equalTo: infoCardView.bottomAnchor, constant: -16),
-            rowsStack.heightAnchor.constraint(greaterThanOrEqualToConstant: 100)
+            rowsStack.leadingAnchor.constraint(equalTo: infoCardView.leadingAnchor, constant: 12), // Reduced from 16 to 12
+            rowsStack.trailingAnchor.constraint(equalTo: infoCardView.trailingAnchor, constant: -12), // Reduced from -16 to -12
+            rowsStack.topAnchor.constraint(equalTo: infoCardView.topAnchor, constant: 12), // Reduced from 16 to 12
+            rowsStack.bottomAnchor.constraint(equalTo: infoCardView.bottomAnchor, constant: -12), // Reduced from -16 to -12
+            rowsStack.heightAnchor.constraint(greaterThanOrEqualToConstant: 80) // Reduced from 100 to 80
         ])
         
         // AD badge inside adContainer
@@ -329,55 +366,11 @@ final class ScanResultViewController: UIViewController {
     
     // MARK: - Builders
     private func makeAction(icon: UIImage?, title: String) -> UIView {
-        // Create a container view that will be tappable
-        let container = UIView()
-        container.backgroundColor = .clear
-        container.isUserInteractionEnabled = true
+        // Use ScanResultManager to create action button
+        let container = ScanResultManager.shared.makeActionButton(icon: icon, title: title)
         
-        // Create the stack view for content
-        let v = UIStackView()
-        v.axis = .vertical
-        v.backgroundColor = .clear
-        v.alignment = .center
-        v.spacing = 6
-        v.translatesAutoresizingMaskIntoConstraints = false
-        
-        let iv = UIImageView(image: icon)
-        iv.tintColor = .appPrimary
-        iv.contentMode = .scaleAspectFit
-        iv.setContentHuggingPriority(.required, for: .vertical)
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            iv.widthAnchor.constraint(equalToConstant: 32),
-            iv.heightAnchor.constraint(equalToConstant: 32)
-        ])
-        
-        let lb = UILabel()
-        lb.text = title
-        lb.font = .systemFont(ofSize: 16, weight: .semibold)
-        lb.textColor = .textPrimary
-        
-        v.addArrangedSubview(iv)
-        v.addArrangedSubview(lb)
-        
-        // Add the stack view to the container
-        container.addSubview(v)
-        
-        // Set up constraints
-        NSLayoutConstraint.activate([
-            v.topAnchor.constraint(equalTo: container.topAnchor),
-            v.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            v.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            v.trailingAnchor.constraint(equalTo: container.trailingAnchor)
-        ])
-        
-        // Store the title in the accessibilityLabel for action handling
+        // Set accessibility label for the container (used for tap handling)
         container.accessibilityLabel = title
-        
-        // Add tap gesture recognizer
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(actionButtonTapped(_:)))
-        container.addGestureRecognizer(tapGesture)
         
         return container
     }
@@ -387,54 +380,22 @@ final class ScanResultViewController: UIViewController {
     ///   - title: Left label text
     ///   - value: Right label text
     ///   - showsButton: Optional trailing button (e.g., copy)
+    ///   - buttonImage: Image for the button
+    ///   - buttonAction: Optional selector for button action
+    ///   - target: Optional target for button action
     private func makeInfoRow(title: String,
                              value: String,
                              showsButton: Bool = false,
-                             buttonImage: UIImage? = UIImage(systemName: "doc.on.doc")) -> UIView {
-        let container = UIView()
-        container.layer.cornerRadius = 12
-        container.translatesAutoresizingMaskIntoConstraints = false
-        
-        let rowStack = UIStackView()
-        rowStack.axis = .horizontal
-        rowStack.alignment = .center
-        rowStack.distribution = .fill
-        rowStack.spacing = 8
-        rowStack.translatesAutoresizingMaskIntoConstraints = false
-        
-        let titleLabel = UILabel()
-        titleLabel.text = title
-        titleLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        titleLabel.textColor = .textSecondary
-        titleLabel.widthAnchor.constraint(equalToConstant: 130).isActive = true
-        
-        let valueLabel = UILabel()
-        valueLabel.text = value
-        valueLabel.font = .systemFont(ofSize: 14, weight: .semibold)
-        valueLabel.textColor = .textPrimary
-        valueLabel.textAlignment = .left
-        
-        rowStack.addArrangedSubview(titleLabel)
-        rowStack.addArrangedSubview(valueLabel)
-        
-        if showsButton {
-            let btn = UIButton(type: .system)
-            btn.setImage(buttonImage, for: .normal)
-            btn.tintColor = .appPrimary
-            btn.translatesAutoresizingMaskIntoConstraints = false
-            btn.widthAnchor.constraint(equalToConstant: 40).isActive = true
-            rowStack.addArrangedSubview(btn)
-        }
-        
-        container.addSubview(rowStack)
-        NSLayoutConstraint.activate([
-            rowStack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
-            rowStack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
-            rowStack.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
-            rowStack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -12)
-        ])
-        
-        return container
+                             buttonImage: UIImage? = UIImage(systemName: "doc.on.doc"),
+                             buttonAction: Selector? = nil,
+                             target: Any? = nil) -> UIView {
+        // Use ScanResultManager to create info row
+        return ScanResultManager.shared.makeInfoRow(title: title, 
+                                                   value: value, 
+                                                   showsButton: showsButton, 
+                                                   buttonImage: buttonImage,
+                                                   buttonAction: buttonAction,
+                                                   target: target)
     }
     
     // MARK: - Update UI
@@ -501,7 +462,25 @@ final class ScanResultViewController: UIViewController {
             rowsStack.addArrangedSubview(makeInfoRow(title: "Phone number:", value: phoneNumber, showsButton: false))
             
         case .text:
-            rowsStack.addArrangedSubview(makeInfoRow(title: "Text:", value: data, showsButton: true))
+            // Check if this is an SMS QR code (format: SMSTO:number:message or sms:number:message)
+            if data.hasPrefix("SMSTO:") || data.hasPrefix("smsto:") || data.hasPrefix("SMS:") || data.hasPrefix("sms:") {
+                // Parse SMS data
+                let prefix = data.hasPrefix("SMSTO:") || data.hasPrefix("smsto:") ? "SMSTO:" : "sms:"
+                let smsComponents = data.replacingOccurrences(of: prefix, with: "", options: .caseInsensitive).components(separatedBy: ":")
+                
+                if smsComponents.count >= 1 {
+                    let phoneNumber = smsComponents[0].trimmingCharacters(in: .whitespacesAndNewlines)
+                    rowsStack.addArrangedSubview(makeInfoRow(title: "Phone number:", value: phoneNumber, showsButton: true))
+                    
+                    if smsComponents.count >= 2 {
+                        let message = smsComponents[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                        rowsStack.addArrangedSubview(makeInfoRow(title: "Message:", value: message, showsButton: true))
+                    }
+                }
+            } else {
+                // Regular text QR code
+                rowsStack.addArrangedSubview(makeInfoRow(title: "Text:", value: data, showsButton: true))
+            }
             
         case .contact:
             // Basic parsing for vCard or MeCard format
@@ -555,24 +534,48 @@ final class ScanResultViewController: UIViewController {
             
         case .email:
             // Format: mailto:email@example.com or MATMSG:TO:email@example.com;SUB:subject;BODY:body;;
-            var email = data
             if data.hasPrefix("mailto:") {
-                email = data.replacingOccurrences(of: "mailto:", with: "")
-                rowsStack.addArrangedSubview(makeInfoRow(title: "Email:", value: email, showsButton: true))
+                // Parse mailto: format which can include subject and body as query parameters
+                // Example: mailto:someone@example.com?subject=Hello&body=Message
+                let mailtoComponents = data.components(separatedBy: "?")
+                let emailAddress = mailtoComponents[0].replacingOccurrences(of: "mailto:", with: "")
+                
+                // Add email row
+                rowsStack.addArrangedSubview(makeInfoRow(title: "Email:", value: emailAddress, showsButton: true))
+                
+                // Parse query parameters if they exist
+                if mailtoComponents.count > 1, let queryItems = mailtoComponents[1].components(separatedBy: "&").map({ $0.components(separatedBy: "=") }) as? [[String]] {
+                    for item in queryItems {
+                        if item.count == 2 {
+                            let key = item[0].lowercased()
+                            let value = item[1].replacingOccurrences(of: "+", with: " ")
+                                .removingPercentEncoding ?? item[1]
+                            
+                            if key == "subject" {
+                                rowsStack.addArrangedSubview(makeInfoRow(title: "Subject:", value: value, showsButton: true))
+                            } else if key == "body" {
+                                rowsStack.addArrangedSubview(makeInfoRow(title: "Content:", value: value, showsButton: true))
+                            }
+                        }
+                    }
+                }
             } else if data.hasPrefix("MATMSG:") {
                 let to = extractValue(from: data, key: "TO:")
                 let subject = extractValue(from: data, key: "SUB:")
                 let body = extractValue(from: data, key: "BODY:")
                 
                 if let to = to {
-                    rowsStack.addArrangedSubview(makeInfoRow(title: "To:", value: to, showsButton: true))
+                    rowsStack.addArrangedSubview(makeInfoRow(title: "Email:", value: to, showsButton: true))
                 }
                 if let subject = subject {
                     rowsStack.addArrangedSubview(makeInfoRow(title: "Subject:", value: subject, showsButton: true))
                 }
                 if let body = body {
-                    rowsStack.addArrangedSubview(makeInfoRow(title: "Body:", value: body, showsButton: true))
+                    rowsStack.addArrangedSubview(makeInfoRow(title: "Content:", value: body, showsButton: true))
                 }
+            } else {
+                // Plain email address
+                rowsStack.addArrangedSubview(makeInfoRow(title: "Email:", value: data, showsButton: true))
             }
             
         case .website:
@@ -651,7 +654,12 @@ final class ScanResultViewController: UIViewController {
             case .events:
                 actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "events-icon")?.withRenderingMode(.alwaysTemplate), title: "Add to Calendar"))
             case .text:
-                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "copy-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "doc.on.doc"), title: "Copy"))
+                // Check if this is an SMS QR code
+                if data.hasPrefix("SMSTO:") || data.hasPrefix("smsto:") || data.hasPrefix("SMS:") || data.hasPrefix("sms:") {
+                    actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "message-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "message.fill"), title: "Send SMS"))
+                } else {
+                    actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "copy-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "doc.on.doc"), title: "Copy"))
+                }
             }
             
         case .socialQR(let type, _):
@@ -678,7 +686,7 @@ final class ScanResultViewController: UIViewController {
     
     /// Generate a QR code image from a string
     private func generateQRCode(from string: String, size: CGFloat = 200) -> UIImage? {
-        return ScanResultManager.shared.generateQRCode(from: string, size: size)
+        return CodeGeneratorManager.shared.generateQRCode(from: string, size: CGSize(width: size, height: size))
     }
     
     /// Extract a value from a string using a key
@@ -727,33 +735,13 @@ final class ScanResultViewController: UIViewController {
     
     /// Save contact from vCard data
     private func saveContact(from vCardData: String) {
-        ScanResultManager.shared.saveContact(from: vCardData) { [weak self] success, error in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                if success {
-                    self.showToast(message: "Contact saved successfully")
-                } else if let error = error {
-                    self.showToast(message: "Error saving contact: \(error.localizedDescription)")
-                } else {
-                    self.showToast(message: "Could not save contact")
-                }
-            }
-        }
+        ScanResultManager.shared.handleSaveContact(from: vCardData, on: self)
     }
     
     /// Connect to WiFi network
     private func connectToWifi(from wifiData: String) {
-        let wifiInfo = ScanResultManager.shared.connectToWifi(from: wifiData)
-        
-        if let ssid = wifiInfo.ssid, let password = wifiInfo.password {
-            // On iOS, we can't programmatically connect to WiFi networks
-            // Show the information to the user instead
-            let message = "Network: \(ssid)\nPassword copied to clipboard"
-            UIPasteboard.general.string = password
-            showToast(message: message)
-        } else {
-            showToast(message: "Invalid WiFi QR code format")
+        ScanResultManager.shared.handleWifiConnection(from: wifiData) { success, message in
+            self.showToast(message: message)
         }
     }
     
