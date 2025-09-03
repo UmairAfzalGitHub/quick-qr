@@ -7,6 +7,9 @@
 
 import UIKit
 import AVFoundation
+import EventKit
+// Import for BarCodeType enum
+import Foundation
 
 final class ScanResultViewController: UIViewController {
     // MARK: - Properties
@@ -227,6 +230,12 @@ final class ScanResultViewController: UIViewController {
         case "Share":
             shareQRCode()
             
+        case "Add to Calendar":
+            if case .qrCode(.events, _) = scanResult {
+                // Add event to calendar
+                addEventToCalendar(from: data)
+            }
+            
         default:
             break
         }
@@ -372,6 +381,11 @@ final class ScanResultViewController: UIViewController {
         // Set accessibility label for the container (used for tap handling)
         container.accessibilityLabel = title
         
+        // Add tap gesture recognizer
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(actionButtonTapped(_:)))
+        container.isUserInteractionEnabled = true
+        container.addGestureRecognizer(tapGesture)
+        
         return container
     }
     
@@ -406,9 +420,22 @@ final class ScanResultViewController: UIViewController {
         typeIconView.image = scanResult.icon?.withRenderingMode(.alwaysTemplate)
         typeTitleLabel.text = scanResult.title
         
-        // Generate QR code image for the scanned data
-        if let qrImage = generateQRCode(from: scannedData) {
-            qrImageView.image = qrImage
+        // Generate appropriate image based on scan result type
+        switch scanResult {
+        case .barcode(let barCodeType, let data, _):
+            // For barcodes, generate a barcode image using CodeGeneratorManager
+            if let barcodeImage = CodeGeneratorManager.shared.generateBarcode(content: data, type: barCodeType) {
+                qrImageView.image = barcodeImage
+            } else {
+                // Fallback to text representation for unsupported barcode types
+                qrImageView.image = generateTextImage(text: data, barcodeType: barCodeType.title)
+            }
+            
+        default:
+            // For QR codes and other types, generate a QR code image
+            if let qrImage = generateQRCode(from: scannedData) {
+                qrImageView.image = qrImage
+            }
         }
         
         // Update info rows based on scan result type
@@ -591,8 +618,28 @@ final class ScanResultViewController: UIViewController {
             }
             
         case .events:
-            // Basic event info
-            rowsStack.addArrangedSubview(makeInfoRow(title: "Event data:", value: data, showsButton: true))
+            // Parse and display event data in multiple rows
+            if data.hasPrefix("BEGIN:VEVENT") {
+                // iCalendar format
+                if let summary = extractEventValue(from: data, key: "SUMMARY:") {
+                    rowsStack.addArrangedSubview(makeInfoRow(title: "Title:", value: summary, showsButton: true))
+                }
+                if let location = extractEventValue(from: data, key: "LOCATION:") {
+                    rowsStack.addArrangedSubview(makeInfoRow(title: "Location:", value: location, showsButton: true))
+                }
+                if let description = extractEventValue(from: data, key: "DESCRIPTION:") {
+                    rowsStack.addArrangedSubview(makeInfoRow(title: "Description:", value: description, showsButton: true))
+                }
+                if let startDate = extractEventValue(from: data, key: "DTSTART:") {
+                    rowsStack.addArrangedSubview(makeInfoRow(title: "Start:", value: formatEventDate(startDate), showsButton: false))
+                }
+                if let endDate = extractEventValue(from: data, key: "DTEND:") {
+                    rowsStack.addArrangedSubview(makeInfoRow(title: "End:", value: formatEventDate(endDate), showsButton: false))
+                }
+            } else {
+                // Unknown format, show raw data
+                rowsStack.addArrangedSubview(makeInfoRow(title: "Event data:", value: data, showsButton: true))
+            }
         }
     }
     
@@ -689,6 +736,69 @@ final class ScanResultViewController: UIViewController {
         return CodeGeneratorManager.shared.generateQRCode(from: string, size: CGSize(width: size, height: size))
     }
     
+    
+    /// Generate a text image for barcode types that can't be visually represented
+    private func generateTextImage(text: String, barcodeType: String, size: CGFloat = 200) -> UIImage? {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        
+        let image = renderer.image { context in
+            // Draw background
+            UIColor.white.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: size, height: size))
+            
+            // Draw barcode type text
+            let typeAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 16, weight: .bold),
+                .foregroundColor: UIColor.black
+            ]
+            
+            let typeText = "\(barcodeType)"
+            let typeSize = typeText.size(withAttributes: typeAttributes)
+            let typeRect = CGRect(
+                x: (size - typeSize.width) / 2,
+                y: size / 3 - typeSize.height / 2,
+                width: typeSize.width,
+                height: typeSize.height
+            )
+            typeText.draw(in: typeRect, withAttributes: typeAttributes)
+            
+            // Draw barcode value text
+            let valueAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 14),
+                .foregroundColor: UIColor.darkGray
+            ]
+            
+            // Truncate text if too long
+            let maxLength = 20
+            let displayText = text.count > maxLength ? text.prefix(maxLength) + "..." : text
+            let valueText = String(displayText)
+            
+            let valueSize = valueText.size(withAttributes: valueAttributes)
+            let valueRect = CGRect(
+                x: (size - valueSize.width) / 2,
+                y: 2 * size / 3 - valueSize.height / 2,
+                width: valueSize.width,
+                height: valueSize.height
+            )
+            valueText.draw(in: valueRect, withAttributes: valueAttributes)
+            
+            // Draw barcode-like lines
+            UIColor.black.setStroke()
+            let lineY = size / 2
+            let lineHeight = size / 10
+            
+            for i in 0..<10 {
+                let lineWidth = CGFloat.random(in: 2...10)
+                let lineX = CGFloat(i) * (size / 10) + CGFloat.random(in: 0...5)
+                let linePath = UIBezierPath(rect: CGRect(x: lineX, y: lineY - lineHeight/2, width: lineWidth, height: lineHeight))
+                linePath.stroke()
+                linePath.fill()
+            }
+        }
+        
+        return image
+    }
+    
     /// Extract a value from a string using a key
     private func extractValue(from string: String, key: String) -> String? {
         return ScanResultManager.shared.extractValue(from: string, key: key)
@@ -748,5 +858,127 @@ final class ScanResultViewController: UIViewController {
     /// Show toast message
     private func showToast(message: String) {
         ScanResultManager.shared.showToast(message: message, on: view)
+    }
+    
+    // MARK: - Event Handling
+    
+    /// Extract a value from an iCalendar event string
+    private func extractEventValue(from eventData: String, key: String) -> String? {
+        let lines = eventData.components(separatedBy: .newlines)
+        
+        for line in lines {
+            if line.hasPrefix(key) {
+                return line.replacingOccurrences(of: key, with: "")
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+        }
+        
+        return nil
+    }
+    
+    /// Format an iCalendar date string to a more readable format
+    private func formatEventDate(_ dateString: String) -> String {
+        // iCalendar format: YYYYMMDDTHHMMSSZ or YYYYMMDD
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        
+        if let date = formatter.date(from: dateString) {
+            formatter.dateFormat = "MMM d, yyyy h:mm a"
+            formatter.timeZone = TimeZone.current
+            return formatter.string(from: date)
+        } else {
+            // Try without time component
+            formatter.dateFormat = "yyyyMMdd"
+            if let date = formatter.date(from: dateString) {
+                formatter.dateFormat = "MMM d, yyyy"
+                return formatter.string(from: date)
+            }
+        }
+        
+        return dateString // Return original if parsing fails
+    }
+    
+    /// Add an event to the calendar from iCalendar data
+    private func addEventToCalendar(from eventData: String) {
+        // Parse event data
+        let summary = extractEventValue(from: eventData, key: "SUMMARY:") ?? "New Event"
+        let location = extractEventValue(from: eventData, key: "LOCATION:")
+        let description = extractEventValue(from: eventData, key: "DESCRIPTION:")
+        let startDateString = extractEventValue(from: eventData, key: "DTSTART:")
+        let endDateString = extractEventValue(from: eventData, key: "DTEND:")
+        
+        // Create event
+        let eventStore = EKEventStore()
+        
+        eventStore.requestAccess(to: .event) { [weak self] granted, error in
+            guard let self = self else { return }
+            
+            if !granted {
+                DispatchQueue.main.async {
+                    self.showToast(message: "Calendar access denied")
+                }
+                return
+            }
+            
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.showToast(message: "Error: \(error.localizedDescription)")
+                }
+                return
+            }
+            
+            let event = EKEvent(eventStore: eventStore)
+            event.title = summary
+            event.location = location
+            event.notes = description
+            
+            // Set start and end dates if available
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
+            formatter.timeZone = TimeZone(abbreviation: "UTC")
+            
+            if let startDateString = startDateString, let startDate = formatter.date(from: startDateString) {
+                event.startDate = startDate
+                
+                // If no end date, set it to 1 hour after start
+                if let endDateString = endDateString, let endDate = formatter.date(from: endDateString) {
+                    event.endDate = endDate
+                } else {
+                    event.endDate = startDate.addingTimeInterval(3600) // 1 hour
+                }
+            } else {
+                // Try without time component
+                formatter.dateFormat = "yyyyMMdd"
+                
+                if let startDateString = startDateString, let startDate = formatter.date(from: startDateString) {
+                    event.startDate = startDate
+                    
+                    if let endDateString = endDateString, let endDate = formatter.date(from: endDateString) {
+                        event.endDate = endDate
+                    } else {
+                        event.endDate = startDate.addingTimeInterval(86400) // 1 day
+                    }
+                } else {
+                    // Use current date if parsing fails
+                    let now = Date()
+                    event.startDate = now
+                    event.endDate = now.addingTimeInterval(3600) // 1 hour
+                }
+            }
+            
+            event.calendar = eventStore.defaultCalendarForNewEvents
+            
+            do {
+                try eventStore.save(event, span: .thisEvent)
+                DispatchQueue.main.async {
+                    self.showToast(message: "Event added to calendar")
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.showToast(message: "Could not save event: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 }
