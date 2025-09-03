@@ -23,8 +23,8 @@ class SettingsViewController: UIViewController,
     private let premiumBannerView = PremiumBannerView()
     
     // State properties
-    private var isBeepEnabled = true
-    private var isVibrationEnabled = true
+    private var isBeepEnabled: Bool = FeedbackManager.shared.isSoundEnabled
+    private var isVibrationEnabled: Bool = FeedbackManager.shared.isVibrationEnabled
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -66,10 +66,12 @@ class SettingsViewController: UIViewController,
             switch item {
             case .beep:
                 isBeepEnabled = isOn
-                // Save preference
+                // Save preference to FeedbackManager
+                FeedbackManager.shared.isSoundEnabled = isOn
             case .vibration:
                 isVibrationEnabled = isOn
-                // Save preference
+                // Save preference to FeedbackManager
+                FeedbackManager.shared.isVibrationEnabled = isOn
             default:
                 break
             }
