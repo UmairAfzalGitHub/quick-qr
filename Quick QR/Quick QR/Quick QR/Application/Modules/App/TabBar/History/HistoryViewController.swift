@@ -101,15 +101,10 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     private func loadHistory() {
-        // Get the history items
         let historyItems = isScanSelected ? 
             HistoryManager.shared.getScanHistory() : 
             HistoryManager.shared.getCreatedHistory()
-        
-        // Convert to FavoriteItem for display
         dataSource = historyItems.map { $0.toFavoriteItem() }
-        
-        // Refresh table view
         tableView.reloadData()
         
         // Show empty state if needed

@@ -110,6 +110,9 @@ final class ScanResultViewController: UIViewController {
         // Configure navigation bar
         navigationController?.navigationBar.tintColor = .appPrimary
         
+        // Save scan result to history
+        saveScanResultToHistory()
+        
         // Setup UI components
         setupLayout()
         setupTopCard()
@@ -133,6 +136,20 @@ final class ScanResultViewController: UIViewController {
     
     // MARK: - Actions
     
+    private func saveScanResultToHistory() {
+        guard let scanResult = scanResult else { return }
+        switch scanResult {
+        case .qrCode(let type, let data):
+            HistoryManager.shared.saveScannedQRCodeHistory(type: type, content: data)
+        case .socialQR(let type, let data):
+            HistoryManager.shared.saveScannedSocialQRCodeHistory(type: type, content: data)
+        case .barcode(let type, let data, _):
+            HistoryManager.shared.saveScannedBarCodeHistory(type: type, content: data)
+        case .unknown:
+            // Optionally handle unknown types
+            break
+        }
+    }
     
     @objc private func actionButtonTapped(_ sender: UITapGestureRecognizer) {
         guard let view = sender.view, let actionType = view.accessibilityLabel else { return }
