@@ -75,13 +75,11 @@ class CodeGenerationResultViewController: UIViewController {
         barCodeImageView.translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Wi-Fi Name"
         titleLabel.textAlignment = .center
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         titleLabel.textColor = .textPrimary
         
         descLabel.translatesAutoresizingMaskIntoConstraints = false
-        descLabel.text = "PTCL - BB"
         descLabel.textAlignment = .center
         descLabel.font = UIFont.systemFont(ofSize: 22, weight: .bold)
         descLabel.textColor = .appPrimary

@@ -13,7 +13,7 @@ class ScannerViewController: UIViewController {
     
     // MARK: - Properties
     
-    private let scannerManager = CodeScannerManager()
+    let scannerManager = CodeScannerManager()
     
     // Focus animation view
     private let focusIndicator: UIView = {
@@ -191,15 +191,22 @@ extension ScannerViewController: CodeScannerDelegate {
             print("\(title) Detected: \(value)")
         }
         
-        // Create and present the scan result view controller
+        // Create and push the scan result view controller
         let resultVC = ScanResultViewController(scannedData: value, metadataObjectType: type)
-        resultVC.modalPresentationStyle = .fullScreen
-        resultVC.dismissHandler = { [weak self] in
-            // Resume camera feed when the result view is dismissed
-            self?.scannerManager.resumeCameraFeed()
+        
+        // Set up a navigation controller if needed
+        if navigationController == nil {
+            // If we're not in a navigation controller, wrap in one
+            let navController = UINavigationController(rootViewController: resultVC)
+            navController.modalPresentationStyle = .fullScreen
+            present(navController, animated: true)
+        } else {
+            // Push to existing navigation controller
+            navigationController?.pushViewController(resultVC, animated: true)
         }
         
-        present(resultVC, animated: true)
+        // Pause camera feed while showing results
+        // It will resume when user navigates back
     }
     
     func scannerDidUpdatePermission(granted: Bool) {

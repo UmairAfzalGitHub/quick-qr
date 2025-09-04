@@ -8,8 +8,8 @@
 import UIKit
 import AVFoundation
 import EventKit
-// Import for BarCodeType enum
 import Foundation
+import GoogleMobileAds
 
 final class ScanResultViewController: UIViewController {
     // MARK: - Properties
@@ -17,23 +17,10 @@ final class ScanResultViewController: UIViewController {
     private var scannedData: String = ""
     private var metadataObjectType: AVMetadataObject.ObjectType?
     
-    /// Closure to be called when the view controller is dismissed
-    var dismissHandler: (() -> Void)?
     // MARK: - UI
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
-    
-    private lazy var closeButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "xmark.circle.fill")?.withRenderingMode(.alwaysTemplate), for: .normal)
-        button.tintColor = .white
-        button.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        button.layer.cornerRadius = 15
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
-        return button
-    }()
-    
+
     private let topCardView: UIView = {
         let v = UIView()
         v.backgroundColor = .white
@@ -51,7 +38,7 @@ final class ScanResultViewController: UIViewController {
         return v
     }()
     private let typeIconView: UIImageView = {
-        let iv = UIImageView(image: UIImage(named: "wifi-icon")?.withRenderingMode(.alwaysTemplate).withTintColor(.white))
+        let iv = UIImageView(image: UIImage(named: "wifi-icon")?.withRenderingMode(.alwaysOriginal))
         iv.contentMode = .scaleAspectFit
         iv.tintColor = .white
         iv.translatesAutoresizingMaskIntoConstraints = false
@@ -100,6 +87,9 @@ final class ScanResultViewController: UIViewController {
         return lb
     }()
     
+    private var nativeAdView: NativeAdView!
+    var nativeAd: GoogleMobileAds.NativeAd?
+    
     // MARK: - Initializers
     init(scannedData: String, metadataObjectType: AVMetadataObject.ObjectType? = nil) {
         super.init(nibName: nil, bundle: nil)
@@ -116,20 +106,33 @@ final class ScanResultViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appSecondaryBackground
+        
+        // Configure navigation bar
+        navigationController?.navigationBar.tintColor = .appPrimary
+        
+        // Setup UI components
         setupLayout()
         setupTopCard()
         setupInfoCard()
         setupActions()
         updateUIForScanResult()
+        
+        AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) { ad in
+            self.showGoogleNativeAd(nativeAd: ad)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        // If we're navigating back, resume camera feed in the scanner
+        if isMovingFromParent, let scannerVC = navigationController?.viewControllers.first as? ScannerViewController {
+            scannerVC.scannerManager.resumeCameraFeed()
+        }
     }
     
     // MARK: - Actions
     
-    @objc private func closeButtonTapped() {
-        // Call the dismissHandler before dismissing
-        dismissHandler?()
-        dismiss(animated: true)
-    }
     
     @objc private func actionButtonTapped(_ sender: UITapGestureRecognizer) {
         guard let view = sender.view, let actionType = view.accessibilityLabel else { return }
@@ -254,23 +257,15 @@ final class ScanResultViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentStack)
         
-        // Add close button
-        view.addSubview(closeButton)
-        
         // Add Ad container outside the scroll view
         adContainer.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(adContainer)
         
         NSLayoutConstraint.activate([
-            // Close button constraints
-            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            closeButton.widthAnchor.constraint(equalToConstant: 30),
-            closeButton.heightAnchor.constraint(equalToConstant: 30),
             
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
             // Place scrollView above the adContainer
             scrollView.bottomAnchor.constraint(equalTo: adContainer.topAnchor),
             
@@ -373,6 +368,55 @@ final class ScanResultViewController: UIViewController {
         ])
     }
     
+    private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
+        guard let nativeAd else { return }
+        let nibView = Bundle.main.loadNibNamed("OnBoardingNativeAdView", owner: nil, options: nil)?.first
+        guard let nativeAdView = nibView as? NativeAdView else { return }
+        setAdView(nativeAdView)
+
+        (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+        nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+
+        // Configure optional assets
+        (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
+        nativeAdView.bodyView?.isHidden = nativeAd.body == nil
+        
+        (nativeAdView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
+        nativeAdView.callToActionView?.isHidden = nativeAd.callToAction == nil
+        nativeAdView.callToActionView?.layer.cornerRadius = 12.0
+        
+        (nativeAdView.iconView as? UIImageView)?.image = nativeAd.icon?.image
+        nativeAdView.iconView?.isHidden = nativeAd.icon == nil
+        
+        (nativeAdView.advertiserView as? UILabel)?.text = nativeAd.advertiser
+        nativeAdView.advertiserView?.isHidden = nativeAd.advertiser == nil
+        
+        // Disable user interaction on call-to-action view for SDK to handle touches
+        nativeAdView.callToActionView?.isUserInteractionEnabled = false
+        
+        nativeAdView.nativeAd = nativeAd
+    }
+    
+    private func setAdView(_ view: NativeAdView) {
+        // Remove the previous ad view
+        nativeAdView = view
+        adContainer.addSubview(nativeAdView)
+        nativeAdView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Layout constraints for positioning the native ad view
+        let viewDictionary = ["_nativeAdView": nativeAdView!]
+        adContainer.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "H:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+        adContainer.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "V:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+    }
+    
     // MARK: - Builders
     private func makeAction(icon: UIImage?, title: String) -> UIView {
         // Use ScanResultManager to create action button
@@ -416,9 +460,20 @@ final class ScanResultViewController: UIViewController {
     private func updateUIForScanResult() {
         guard let scanResult = scanResult else { return }
         
-        // Update type icon and title
-        typeIconView.image = scanResult.icon?.withRenderingMode(.alwaysTemplate)
+        // Update top title label with code type
+        
+        // Update type icon and title in the card
+        typeIconView.image = scanResult.icon?.withRenderingMode(.alwaysOriginal)
         typeTitleLabel.text = scanResult.title
+        
+        // Set background color based on scan result type
+        if case .socialQR = scanResult {
+            // Remove background color for social icons
+            iconContainer.backgroundColor = .clear
+        } else {
+            // Use app primary color for other icons
+            iconContainer.backgroundColor = UIColor.appPrimary
+        }
         
         // Generate appropriate image based on scan result type
         switch scanResult {
@@ -710,7 +765,9 @@ final class ScanResultViewController: UIViewController {
             }
             
         case .socialQR(let type, _):
-            actionsStack.addArrangedSubview(makeAction(icon: type.icon?.withRenderingMode(.alwaysTemplate), title: "Open"))
+            // Use the social platform's icon for the action button
+            let socialIcon = type.icon?.withRenderingMode(.alwaysOriginal)
+            actionsStack.addArrangedSubview(makeAction(icon: socialIcon, title: "Open"))
             
         case .barcode(let type, let data, _):
             // For product barcodes, show "Search Product"
