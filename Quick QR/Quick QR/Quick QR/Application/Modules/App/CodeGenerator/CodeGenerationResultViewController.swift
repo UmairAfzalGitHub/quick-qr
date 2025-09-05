@@ -248,6 +248,58 @@ class CodeGenerationResultViewController: UIViewController {
     }
     
     @objc private func saveButtonTapped() {
-        saveAction?()
+        // Present action sheet for save options
+        let alert = UIAlertController(title: "Save Code", message: "Choose where to save your code image.", preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "Save to Gallery", style: .default, handler: { _ in
+            self.saveImageToGallery()
+        }))
+        alert.addAction(UIAlertAction(title: "Save to Files", style: .default, handler: { _ in
+            self.saveAction?()
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = self.saveButton
+            popover.sourceRect = self.saveButton.bounds
+        }
+        present(alert, animated: true)
+    }
+
+    private func saveImageToGallery() {
+        let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
+        guard let imageToSave = image else {
+            let alert = UIAlertController(title: "Error", message: "No image to save.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+            return
+        }
+        PhotosManager.shared.save(image: imageToSave) { result in
+            switch result {
+            case .success:
+                let alert = UIAlertController(title: "Saved!", message: "Image saved to gallery.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+            case .failure(let error):
+                let message: String
+                if let photosError = error as? PhotosManager.PhotosError {
+                    switch photosError {
+                    case .authorizationDenied:
+                        message = "Permission denied. Enable Photos access in Settings."
+                    case .authorizationRestricted:
+                        message = "Photos access is restricted."
+                    case .notDetermined:
+                        message = "Photos permission not determined."
+                    case .creationFailed:
+                        message = "Failed to save image."
+                    default:
+                        message = error.localizedDescription
+                    }
+                } else {
+                    message = error.localizedDescription
+                }
+                let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+            }
+        }
     }
 }

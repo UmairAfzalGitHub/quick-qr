@@ -10,6 +10,7 @@ import AVFoundation
 import EventKit
 import Foundation
 import GoogleMobileAds
+import Photos
 
 final class ScanResultViewController: UIViewController {
     // MARK: - Properties
@@ -32,7 +33,7 @@ final class ScanResultViewController: UIViewController {
     private let titleStack = UIStackView()
     private let iconContainer: UIView = {
         let v = UIView()
-        v.backgroundColor = UIColor.appPrimary
+        v.backgroundColor = .clear
         v.layer.cornerRadius = 18
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
@@ -510,16 +511,7 @@ final class ScanResultViewController: UIViewController {
         // Update type icon and title in the card
         typeIconView.image = scanResult.icon?.withRenderingMode(.alwaysOriginal)
         typeTitleLabel.text = scanResult.title
-        
-        // Set background color based on scan result type
-        if case .socialQR = scanResult {
-            // Remove background color for social icons
-            iconContainer.backgroundColor = .clear
-        } else {
-            // Use app primary color for other icons
-            iconContainer.backgroundColor = UIColor.appPrimary
-        }
-        
+
         // Generate appropriate image based on scan result type
         switch scanResult {
         case .barcode(let barCodeType, let data, _):
@@ -923,14 +915,73 @@ final class ScanResultViewController: UIViewController {
     
     /// Save QR code image to photo library
     private func saveQRCodeImage() {
+        // Present action sheet for save options
+        let alert = UIAlertController(title: "Save Code", message: "Choose where to save your code image.", preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "Save to Gallery", style: .default, handler: { _ in
+            self.saveImageToGallery()
+        }))
+        alert.addAction(UIAlertAction(title: "Save to Files", style: .default, handler: { _ in
+            self.saveImageToFiles()
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = self.qrImageView
+            popover.sourceRect = self.qrImageView.bounds
+        }
+        present(alert, animated: true)
+    }
+
+    private func saveImageToGallery() {
         guard let qrImage = qrImageView.image else {
             showToast(message: "Could not save QR code image")
             return
         }
-        
+        PhotosManager.shared.save(image: qrImage) { result in
+            switch result {
+            case .success:
+                self.showToast(message: "Image saved to gallery.")
+            case .failure(let error):
+                let message: String
+                if let photosError = error as? PhotosManager.PhotosError {
+                    switch photosError {
+                    case .authorizationDenied:
+                        message = "Permission denied. Enable Photos access in Settings."
+                    case .authorizationRestricted:
+                        message = "Photos access is restricted."
+                    case .notDetermined:
+                        message = "Photos permission not determined."
+                    case .creationFailed:
+                        message = "Failed to save image."
+                    default:
+                        message = error.localizedDescription
+                    }
+                } else {
+                    message = error.localizedDescription
+                }
+                self.showToast(message: message)
+            }
+        }
+    }
+
+    @objc private func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        print("[DEBUG] didFinishSavingWithError called")
+        if let error = error {
+            print("[DEBUG] Error saving image to gallery: \(error.localizedDescription)")
+            self.showToast(message: error.localizedDescription)
+        } else {
+            print("[DEBUG] Image saved to gallery successfully")
+            self.showToast(message: "Image saved to gallery.")
+        }
+    }
+
+    private func saveImageToFiles() {
+        guard let qrImage = qrImageView.image else {
+            showToast(message: "Could not save QR code image")
+            return
+        }
         ScanResultManager.shared.saveQRCodeImage(qrImage) { success, error in
             if success {
-                self.showToast(message: "Image saved to Photos")
+                self.showToast(message: "Image saved to Files")
             } else if let error = error {
                 self.showToast(message: "Error saving image: \(error.localizedDescription)")
             } else {
