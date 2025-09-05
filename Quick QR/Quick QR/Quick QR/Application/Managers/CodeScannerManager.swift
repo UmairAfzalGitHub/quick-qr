@@ -36,6 +36,7 @@ class CodeScannerManager: NSObject {
         case ready     // Ready but not running
         case running   // Actively capturing
         case paused    // Temporarily paused
+        case cooldown  // Temporary cooldown after detection
     }
     
     // MARK: - Properties
@@ -45,6 +46,12 @@ class CodeScannerManager: NSObject {
     
     private var captureSession: AVCaptureSession?
     private var previewLayer: AVCaptureVideoPreviewLayer?
+    
+    // Debounce properties
+    private var lastScannedValue: String? = nil
+    private var cooldownTimer: Timer? = nil
+    private var cooldownDuration: TimeInterval = 1.5 // Seconds to wait before allowing another scan
+    
     private var cameraState: CameraState = .setup {
         didSet {
             delegate?.scannerDidUpdateState(cameraState)
@@ -289,20 +296,60 @@ class CodeScannerManager: NSObject {
         // Check if preview container is in window hierarchy and not hidden
         return previewContainer?.window != nil && !(previewContainer?.isHidden ?? true)
     }
+    
+    // MARK: - Cooldown Management
+    
+    /// Start the cooldown timer to prevent multiple scans of the same code
+    private func startCooldownTimer() {
+        // Cancel any existing timer
+        cooldownTimer?.invalidate()
+        
+        // Create a new timer
+        cooldownTimer = Timer.scheduledTimer(withTimeInterval: cooldownDuration, repeats: false) { [weak self] _ in
+            guard let self = self else { return }
+            
+            // Reset the last scanned value
+            self.lastScannedValue = nil
+            
+            // Return to running state if we were in cooldown
+            if self.cameraState == .cooldown {
+                self.cameraState = .running
+            }
+        }
+    }
 }
 
 // MARK: - AVCaptureMetadataOutputObjectsDelegate
 
 extension CodeScannerManager: AVCaptureMetadataOutputObjectsDelegate {
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        // Skip processing if we're in cooldown state
+        if cameraState == .cooldown {
+            return
+        }
+        
         guard let object = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
               let barcodeValue = object.stringValue else { return }
+        
+        // Check if this is the same code we just scanned
+        if barcodeValue == lastScannedValue {
+            return
+        }
+        
+        // Store the new scanned value
+        lastScannedValue = barcodeValue
         
         // Get barcode type and title
         let (title, _) = getBarcodeTypeInfo(from: object.type)
         
         // Provide feedback (sound and/or haptic) if enabled
         FeedbackManager.shared.provideScanFeedback()
+        
+        // Enter cooldown state
+        cameraState = .cooldown
+        
+        // Start cooldown timer
+        startCooldownTimer()
         
         // Notify delegate
         delegate?.scannerDidDetectBarcode(value: barcodeValue, type: object.type, title: title)

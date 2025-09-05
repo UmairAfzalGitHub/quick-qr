@@ -7,6 +7,7 @@
 
 import UIKit
 import IOS_Helpers
+import AVFoundation
 
 class FavouriteViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
     
@@ -71,10 +72,7 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
     // MARK: - Data
     private func loadFavorites() {
         // Get all favorite items from HistoryManager
-        let favoriteItems = HistoryManager.shared.getFavorites()
-        
-        // Convert HistoryItems to FavoriteItems
-        favorites = favoriteItems.map { $0.toFavoriteItem() }
+        favorites = HistoryManager.shared.getFavorites()
         
         // Refresh table view
         tableView.reloadData()
@@ -105,7 +103,59 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        // Handle selection
+        let favorite = favorites[indexPath.row]
+        // Find the original HistoryItem
+        let allCreated = HistoryManager.shared.getCreatedHistory()
+        let allScanned = HistoryManager.shared.getScanHistory()
+        let historyItem: HistoryItem? = {
+            switch favorite.origin {
+            case .created:
+                return allCreated.first { $0.id == favorite.id }
+            case .scanned:
+                return allScanned.first { $0.id == favorite.id }
+            }
+        }()
+        guard let item = historyItem else { return }
+        switch favorite.origin {
+        case .created:
+            // Use CodeGenerationResultViewController logic from HistoryViewController
+            let resultVC = CodeGenerationResultViewController()
+            switch item.type {
+            case .qrCode:
+                if let qrImage = CodeGeneratorManager.shared.generateQRCode(from: item.content) {
+                    resultVC.setQRCodeImage(qrImage)
+                }
+                resultVC.setTitleAndDescription(title: item.title, description: "QR Code")
+            case .socialQRCode:
+                if let socialType = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == item.subtype.lowercased() }) {
+                    if let qrImage = CodeGeneratorManager.shared.generateSocialQRCode(type: socialType, username: item.content) {
+                        resultVC.setQRCodeImage(qrImage)
+                    }
+                    resultVC.setTitleAndDescription(title: item.title, description: "Social QR")
+                }
+            case .barCode:
+                if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == item.subtype.lowercased() }) {
+                    if let barcodeImage = CodeGeneratorManager.shared.generateBarcode(content: item.content, type: barType) {
+                        resultVC.setBarCodeImage(barcodeImage)
+                        resultVC.setBarCodeType(icon: barType.icon, title: barType.title)
+                    }
+                    resultVC.setTitleAndDescription(title: item.title, description: "Barcode")
+                }
+            }
+            navigationController?.pushViewController(resultVC, animated: true)
+        case .scanned:
+            // Use ScanResultViewController logic from HistoryViewController
+            var metadataType: AVMetadataObject.ObjectType = .qr
+            if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == item.subtype.lowercased() }) {
+                metadataType = barType.metadataObjectType
+            } else if let _ = QRCodeType.allCases.first(where: { $0.title.lowercased() == item.subtype.lowercased() }) {
+                metadataType = .qr
+            } else if let _ = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == item.subtype.lowercased() }) {
+                metadataType = .qr
+            }
+            let scanResultVC = ScanResultViewController(scannedData: item.content, metadataObjectType: metadataType)
+            navigationController?.pushViewController(scanResultVC, animated: true)
+        }
     }
     
     // MARK: - FavoriteCellDelegate
@@ -208,18 +258,23 @@ struct FavoriteItem {
         case socialQRCode(SocialQRCodeType)
         case barCode(BarCodeType)
     }
-    
+    enum Origin {
+        case created
+        case scanned
+    }
     let type: ItemType
     let title: String
     let url: String
     let id: String
     var isFavorite: Bool
+    let origin: Origin
     
-    init(type: ItemType, title: String, url: String, id: String = UUID().uuidString, isFavorite: Bool = false) {
+    init(type: ItemType, title: String, url: String, id: String = UUID().uuidString, isFavorite: Bool = false, origin: Origin) {
         self.type = type
         self.title = title
         self.url = url
         self.id = id
         self.isFavorite = isFavorite
+        self.origin = origin
     }
 }

@@ -78,7 +78,7 @@ final class AppButtonView: UIView {
         contentStack.axis = .horizontal
         contentStack.spacing = 8
         contentStack.alignment = .center
-        contentStack.distribution = .equalCentering
+        contentStack.distribution = .fill
         contentStack.translatesAutoresizingMaskIntoConstraints = false
 
         imageView.contentMode = .scaleAspectFit
@@ -108,11 +108,13 @@ final class AppButtonView: UIView {
             containerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
             
-            // Content stack constraints
-            contentStack.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
-            contentStack.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10),
-            contentStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            contentStack.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16)
+            // Content stack constraints - center stack horizontally and vertically
+            contentStack.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            contentStack.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            contentStack.leadingAnchor.constraint(greaterThanOrEqualTo: containerView.leadingAnchor, constant: 16),
+            contentStack.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: -16),
+            contentStack.topAnchor.constraint(greaterThanOrEqualTo: containerView.topAnchor, constant: 10),
+            contentStack.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: -10)
         ])
     }
 
@@ -172,32 +174,21 @@ final class AppButtonView: UIView {
             containerView.layer.borderWidth = 0
             
             if let image = image {
-                // With image: use fill distribution and add spacer views for centering
-                contentStack.distribution = .fill
-                
-                // Add leading spacer
-                let leadingSpacer = UIView()
-                leadingSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-                contentStack.addArrangedSubview(leadingSpacer)
-                
-                // Add image
-                imageView.image = image
-                imageView.setContentHuggingPriority(.required, for: .horizontal)
+                imageView.image = image.withRenderingMode(.alwaysTemplate)
+                imageView.tintColor = .white
                 contentStack.addArrangedSubview(imageView)
+                contentStack.setCustomSpacing(8, after: imageView)
+                titleLabel.text = title
+                titleLabel.textColor = .white
+                contentStack.addArrangedSubview(titleLabel)
+                contentStack.alignment = .center
+                contentStack.distribution = .fill
             } else {
-                // No image: use equal centering for automatic centering
-                contentStack.distribution = .equalCentering
-            }
-            
-            titleLabel.text = title
-            titleLabel.textColor = .white
-            contentStack.addArrangedSubview(titleLabel)
-            
-            if image != nil {
-                // Add trailing spacer to balance the leading one
-                let trailingSpacer = UIView()
-                trailingSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-                contentStack.addArrangedSubview(trailingSpacer)
+                titleLabel.text = title
+                titleLabel.textColor = .white
+                contentStack.addArrangedSubview(titleLabel)
+                contentStack.alignment = .center
+                contentStack.distribution = .fill
             }
 
         case let .secondary(title, image):
@@ -206,32 +197,20 @@ final class AppButtonView: UIView {
             containerView.layer.borderColor = UIColor.systemBlue.cgColor
             
             if let image = image {
-                // With image: use fill distribution and add spacer views for centering
-                contentStack.distribution = .fill
-                
-                // Add leading spacer
-                let leadingSpacer = UIView()
-                leadingSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-                contentStack.addArrangedSubview(leadingSpacer)
-                
-                // Add image
                 imageView.image = image
-                imageView.setContentHuggingPriority(.required, for: .horizontal)
                 contentStack.addArrangedSubview(imageView)
+                contentStack.setCustomSpacing(8, after: imageView)
+                titleLabel.text = title
+                titleLabel.textColor = UIColor.systemBlue
+                contentStack.addArrangedSubview(titleLabel)
+                contentStack.alignment = .center
+                contentStack.distribution = .fill
             } else {
-                // No image: use equal centering for automatic centering
-                contentStack.distribution = .equalCentering
-            }
-            
-            titleLabel.text = title
-            titleLabel.textColor = UIColor.systemBlue
-            contentStack.addArrangedSubview(titleLabel)
-            
-            if image != nil {
-                // Add trailing spacer to balance the leading one
-                let trailingSpacer = UIView()
-                trailingSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-                contentStack.addArrangedSubview(trailingSpacer)
+                titleLabel.text = title
+                titleLabel.textColor = UIColor.systemBlue
+                contentStack.addArrangedSubview(titleLabel)
+                contentStack.alignment = .center
+                contentStack.distribution = .fill
             }
         }
     }

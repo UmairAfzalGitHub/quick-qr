@@ -22,8 +22,9 @@ struct HistoryItem: Codable {
     let title: String
     let timestamp: Date
     var isFavorite: Bool
+    let imageFileName: String?
     
-    init(id: String = UUID().uuidString, type: ItemType, subtype: String, content: String, title: String, timestamp: Date = Date(), isFavorite: Bool = false) {
+    init(id: String = UUID().uuidString, type: ItemType, subtype: String, content: String, title: String, timestamp: Date = Date(), isFavorite: Bool = false, imageFileName: String? = nil) {
         self.id = id
         self.type = type
         self.subtype = subtype
@@ -31,10 +32,11 @@ struct HistoryItem: Codable {
         self.title = title
         self.timestamp = timestamp
         self.isFavorite = isFavorite
+        self.imageFileName = imageFileName
     }
     
     // Convert to FavoriteItem for display
-    func toFavoriteItem() -> FavoriteItem {
+    func toFavoriteItem(origin: FavoriteItem.Origin) -> FavoriteItem {
         let itemType: FavoriteItem.ItemType
         var displayContent = content
         
@@ -71,7 +73,7 @@ struct HistoryItem: Codable {
             }
         }
         
-        return FavoriteItem(type: itemType, title: title, url: displayContent, id: id, isFavorite: isFavorite)
+        return FavoriteItem(type: itemType, title: title, url: displayContent, id: id, isFavorite: isFavorite, origin: origin)
     }
 }
 
@@ -81,11 +83,13 @@ class HistoryManager {
     
     private let userDefaults = UserDefaults.standard
     private let historyKey = "com.quickqr.history"
+    private let scanHistoryKey = "com.quickqr.scanhistory"
     
     private init() {}
     
     // MARK: - Save Methods
     
+    // Created codes
     func saveQRCodeHistory(type: QRCodeType, content: String) {
         let item = HistoryItem(
             type: .qrCode,
@@ -93,7 +97,7 @@ class HistoryManager {
             content: content,
             title: type.title
         )
-        saveHistoryItem(item)
+        saveHistoryItem(item, forScan: false)
     }
     
     func saveSocialQRCodeHistory(type: SocialQRCodeType, content: String) {
@@ -103,7 +107,7 @@ class HistoryManager {
             content: content,
             title: type.title
         )
-        saveHistoryItem(item)
+        saveHistoryItem(item, forScan: false)
     }
     
     func saveBarCodeHistory(type: BarCodeType, content: String) {
@@ -113,20 +117,52 @@ class HistoryManager {
             content: content,
             title: type.title
         )
-        saveHistoryItem(item)
+        saveHistoryItem(item, forScan: false)
     }
     
-    private func saveHistoryItem(_ item: HistoryItem) {
-        var history = getAllHistory()
-        history.insert(item, at: 0) // Add new items at the beginning
-        
-        // Limit history to 100 items to prevent excessive storage
+    // Scanned codes
+    func saveScannedQRCodeHistory(type: QRCodeType, content: String, imageFileName: String? = nil) {
+        let item = HistoryItem(
+            type: .qrCode,
+            subtype: type.title,
+            content: content,
+            title: type.title,
+            imageFileName: imageFileName
+        )
+        saveHistoryItem(item, forScan: true)
+    }
+    
+    func saveScannedSocialQRCodeHistory(type: SocialQRCodeType, content: String, imageFileName: String? = nil) {
+        let item = HistoryItem(
+            type: .socialQRCode,
+            subtype: type.title,
+            content: content,
+            title: type.title,
+            imageFileName: imageFileName
+        )
+        saveHistoryItem(item, forScan: true)
+    }
+    
+    func saveScannedBarCodeHistory(type: BarCodeType, content: String, imageFileName: String? = nil) {
+        let item = HistoryItem(
+            type: .barCode,
+            subtype: type.title,
+            content: content,
+            title: type.title,
+            imageFileName: imageFileName
+        )
+        saveHistoryItem(item, forScan: true)
+    }
+    
+    private func saveHistoryItem(_ item: HistoryItem, forScan: Bool) {
+        let key = forScan ? scanHistoryKey : historyKey
+        var history = getHistory(forScan: forScan)
+        history.insert(item, at: 0)
         if history.count > 100 {
             history = Array(history.prefix(100))
         }
-        
         if let encoded = try? JSONEncoder().encode(history) {
-            userDefaults.set(encoded, forKey: historyKey)
+            userDefaults.set(encoded, forKey: key)
             userDefaults.synchronize()
         }
     }
@@ -145,51 +181,73 @@ class HistoryManager {
         return getAllHistory()
     }
     
+    private func getHistory(forScan: Bool) -> [HistoryItem] {
+        let key = forScan ? scanHistoryKey : historyKey
+        guard let data = userDefaults.data(forKey: key),
+              let history = try? JSONDecoder().decode([HistoryItem].self, from: data) else {
+            return []
+        }
+        return history
+    }
+    
     func getScanHistory() -> [HistoryItem] {
-        // For Phase 2 - currently returns empty array
-        return []
+        return getHistory(forScan: true)
     }
     
     // MARK: - Delete Methods
     
     func clearAllHistory() {
         userDefaults.removeObject(forKey: historyKey)
+        userDefaults.removeObject(forKey: scanHistoryKey)
         userDefaults.synchronize()
     }
     
-    func deleteHistoryItem(withId id: String) {
-        var history = getAllHistory()
-        history.removeAll { $0.id == id }
-        
-        if let encoded = try? JSONEncoder().encode(history) {
-            userDefaults.set(encoded, forKey: historyKey)
-            userDefaults.synchronize()
+    func deleteHistoryItem(withId id: String, fromScan: Bool? = nil) {
+        // If fromScan is nil, try both
+        if let fromScan = fromScan {
+            var history = getHistory(forScan: fromScan)
+            history.removeAll { $0.id == id }
+            let key = fromScan ? scanHistoryKey : historyKey
+            if let encoded = try? JSONEncoder().encode(history) {
+                userDefaults.set(encoded, forKey: key)
+                userDefaults.synchronize()
+            }
+        } else {
+            // Try deleting from both created and scan history
+            deleteHistoryItem(withId: id, fromScan: false)
+            deleteHistoryItem(withId: id, fromScan: true)
         }
     }
     
     // MARK: - Favorite Methods
     
     func toggleFavorite(forItemWithId id: String) -> Bool {
-        var history = getAllHistory()
-        
-        // Find the item and toggle its favorite status
+        // Try toggling in created history
+        var history = getHistory(forScan: false)
         if let index = history.firstIndex(where: { $0.id == id }) {
             history[index].isFavorite.toggle()
-            
-            // Save the updated history
             if let encoded = try? JSONEncoder().encode(history) {
                 userDefaults.set(encoded, forKey: historyKey)
                 userDefaults.synchronize()
             }
-            
-            // Return the new favorite status
             return history[index].isFavorite
         }
-        
+        // Try toggling in scan history
+        var scanHistory = getHistory(forScan: true)
+        if let index = scanHistory.firstIndex(where: { $0.id == id }) {
+            scanHistory[index].isFavorite.toggle()
+            if let encoded = try? JSONEncoder().encode(scanHistory) {
+                userDefaults.set(encoded, forKey: scanHistoryKey)
+                userDefaults.synchronize()
+            }
+            return scanHistory[index].isFavorite
+        }
         return false
     }
     
-    func getFavorites() -> [HistoryItem] {
-        return getAllHistory().filter { $0.isFavorite }
+    func getFavorites() -> [FavoriteItem] {
+        let createdFavorites = getHistory(forScan: false).filter { $0.isFavorite }.map { $0.toFavoriteItem(origin: .created) }
+        let scanFavorites = getHistory(forScan: true).filter { $0.isFavorite }.map { $0.toFavoriteItem(origin: .scanned) }
+        return createdFavorites + scanFavorites
     }
 }

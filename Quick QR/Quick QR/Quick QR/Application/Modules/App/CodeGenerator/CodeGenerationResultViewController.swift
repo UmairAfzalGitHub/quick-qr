@@ -75,13 +75,11 @@ class CodeGenerationResultViewController: UIViewController {
         barCodeImageView.translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Wi-Fi Name"
         titleLabel.textAlignment = .center
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         titleLabel.textColor = .textPrimary
         
         descLabel.translatesAutoresizingMaskIntoConstraints = false
-        descLabel.text = "PTCL - BB"
         descLabel.textAlignment = .center
         descLabel.font = UIFont.systemFont(ofSize: 22, weight: .bold)
         descLabel.textColor = .appPrimary
@@ -250,6 +248,54 @@ class CodeGenerationResultViewController: UIViewController {
     }
     
     @objc private func saveButtonTapped() {
-        saveAction?()
+        // Present action sheet for save options
+        let alert = UIAlertController(title: "Save Code", message: "Choose where to save your code image.", preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "Save to Gallery", style: .default, handler: { _ in
+            self.saveImageToGallery()
+        }))
+        alert.addAction(UIAlertAction(title: "Save to Files", style: .default, handler: { _ in
+            self.saveImageToFiles()
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = self.saveButton
+            popover.sourceRect = self.saveButton.bounds
+        }
+        present(alert, animated: true)
+    }
+
+    private func saveImageToGallery() {
+        let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
+        guard let imageToSave = image else {
+            let alert = UIAlertController(title: "Error", message: "No image to save.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+            return
+        }
+        PhotosManager.shared.save(image: imageToSave) { result in
+            switch result {
+            case .success:
+                let alert = UIAlertController(title: "Saved!", message: "Image saved to gallery.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+            case .failure(let error):
+                let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+            }
+        }
+    }
+
+    private func saveImageToFiles() {
+        let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
+        guard let imageToSave = image else {
+            let alert = UIAlertController(title: "Error", message: "No image to save.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+            return
+        }
+        PhotosManager.shared.saveToFiles(image: imageToSave, presenter: self) { result in
+            print(result)
+        }
     }
 }

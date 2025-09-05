@@ -13,7 +13,7 @@ class ScannerViewController: UIViewController {
     
     // MARK: - Properties
     
-    private let scannerManager = CodeScannerManager()
+    let scannerManager = CodeScannerManager()
     
     // Focus animation view
     private let focusIndicator: UIView = {
@@ -177,17 +177,13 @@ class ScannerViewController: UIViewController {
 extension ScannerViewController: CodeScannerDelegate {
     
     func scannerDidDetectBarcode(value: String, type: AVMetadataObject.ObjectType, title: String) {
-        // Pause camera feed while showing alert
+        // Pause camera feed while showing scan result
         scannerManager.pauseCameraFeed()
         
-        var alertTitle = title
-        var message = value
-        
-        // Handle QR codes specially with content type detection
+        // Log the detected code
         if type == .qr {
             if let detected = detectQRCodeType(from: value) {
-                alertTitle = detected.title
-                print("QR Code Detected [\(alertTitle)]: \(value)")
+                print("QR Code Detected [\(detected.title)]: \(value)")
             } else {
                 print("QR Code Detected: \(value)")
             }
@@ -195,21 +191,22 @@ extension ScannerViewController: CodeScannerDelegate {
             print("\(title) Detected: \(value)")
         }
         
-        // Create alert with appropriate title based on barcode type
-        let alert = UIAlertController(title: alertTitle, message: message, preferredStyle: .alert)
+        // Create and push the scan result view controller
+        let resultVC = ScanResultViewController(scannedData: value, metadataObjectType: type)
         
-        // Add copy action
-        alert.addAction(UIAlertAction(title: "Copy", style: .default) { _ in
-            UIPasteboard.general.string = value
-            self.scannerManager.resumeCameraFeed()
-        })
+        // Set up a navigation controller if needed
+        if navigationController == nil {
+            // If we're not in a navigation controller, wrap in one
+            let navController = UINavigationController(rootViewController: resultVC)
+            navController.modalPresentationStyle = .fullScreen
+            present(navController, animated: true)
+        } else {
+            // Push to existing navigation controller
+            navigationController?.pushViewController(resultVC, animated: true)
+        }
         
-        // Add OK action
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
-            self.scannerManager.resumeCameraFeed()
-        })
-        
-        present(alert, animated: true)
+        // Pause camera feed while showing results
+        // It will resume when user navigates back
     }
     
     func scannerDidUpdatePermission(granted: Bool) {

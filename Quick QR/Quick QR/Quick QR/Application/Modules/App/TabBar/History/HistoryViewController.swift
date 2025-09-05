@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import BetterSegmentedControl
 import IOS_Helpers
+import AVFoundation
 
 class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
     
@@ -38,6 +39,8 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     private var dataSource: [FavoriteItem] = []
+    private var scanDataSource: [HistoryItem] = []
+    private var createdDataSource: [HistoryItem] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,9 +50,10 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        // Refresh history data when view appears
+        // Fetch and store both scan and created history
+        scanDataSource = HistoryManager.shared.getScanHistory()
+        createdDataSource = HistoryManager.shared.getCreatedHistory()
         loadHistory()
-        
         // Update clear button visibility based on data
         navigationItem.rightBarButtonItem?.isEnabled = !dataSource.isEmpty
     }
@@ -101,15 +105,11 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
     private func loadHistory() {
-        // Get the history items
         let historyItems = isScanSelected ? 
             HistoryManager.shared.getScanHistory() : 
             HistoryManager.shared.getCreatedHistory()
-        
-        // Convert to FavoriteItem for display
-        dataSource = historyItems.map { $0.toFavoriteItem() }
-        
-        // Refresh table view
+        let origin: FavoriteItem.Origin = isScanSelected ? .scanned : .created
+        dataSource = historyItems.map { $0.toFavoriteItem(origin: origin) }
         tableView.reloadData()
         
         // Show empty state if needed
@@ -204,20 +204,50 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         // Only handle selection in the Created tab
         if !isScanSelected {
-            // Get the history items
-            let historyItems = HistoryManager.shared.getCreatedHistory()
-            
-            // Make sure we have a valid index
-            guard indexPath.row < historyItems.count else { return }
-            
-            // Get the selected history item
-            let selectedItem = historyItems[indexPath.row]
-            
-            // Create and configure the CodeGeneratorViewController
-            if let codeGeneratorVC = CodeGeneratorViewController.createFromHistoryItem(selectedItem) {
-                // Push the view controller to the navigation stack
-                navigationController?.pushViewController(codeGeneratorVC, animated: true)
+            // Use local createdDataSource
+            guard indexPath.row < createdDataSource.count else { return }
+            let selectedItem = createdDataSource[indexPath.row]
+
+            let resultVC = CodeGenerationResultViewController()
+            switch selectedItem.type {
+            case .qrCode:
+                if let qrImage = CodeGeneratorManager.shared.generateQRCode(from: selectedItem.content) {
+                    resultVC.setQRCodeImage(qrImage)
+                }
+                resultVC.setTitleAndDescription(title: selectedItem.title, description: "QR Code")
+            case .socialQRCode:
+                if let socialType = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == selectedItem.subtype.lowercased() }) {
+                    if let qrImage = CodeGeneratorManager.shared.generateSocialQRCode(type: socialType, username: selectedItem.content) {
+                        resultVC.setQRCodeImage(qrImage)
+                    }
+                    resultVC.setTitleAndDescription(title: selectedItem.title, description: "Social QR")
+                }
+            case .barCode:
+                if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == selectedItem.subtype.lowercased() }) {
+                    if let barcodeImage = CodeGeneratorManager.shared.generateBarcode(content: selectedItem.content, type: barType) {
+                        resultVC.setBarCodeImage(barcodeImage)
+                        resultVC.setBarCodeType(icon: barType.icon, title: barType.title)
+                    }
+                    resultVC.setTitleAndDescription(title: selectedItem.title, description: "Barcode")
+                }
             }
+            navigationController?.pushViewController(resultVC, animated: true)
+        } else {
+            // Use local scanDataSource
+            guard indexPath.row < scanDataSource.count else { return }
+            let selectedItem = scanDataSource[indexPath.row]
+            // Try to infer code type
+            var metadataType: AVMetadataObject.ObjectType = .qr
+            // If the subtype matches a barcode type, treat as barcode
+            if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == selectedItem.subtype.lowercased() }) {
+                metadataType = barType.metadataObjectType
+            } else if let _ = QRCodeType.allCases.first(where: { $0.title.lowercased() == selectedItem.subtype.lowercased() }) {
+                metadataType = .qr
+            } else if let _ = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == selectedItem.subtype.lowercased() }) {
+                metadataType = .qr
+            }
+            let scanResultVC = ScanResultViewController(scannedData: selectedItem.content, metadataObjectType: metadataType)
+            navigationController?.pushViewController(scanResultVC, animated: true)
         }
     }
     

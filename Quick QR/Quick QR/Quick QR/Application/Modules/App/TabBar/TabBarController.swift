@@ -61,6 +61,7 @@ class TabBarController: UITabBarController {
         let scanVC = ScannerViewController()
         scanVC.view.backgroundColor = .systemBackground
         scanVC.title = "" // Empty title for center tab
+        let scanNavController = UINavigationController(rootViewController: scanVC)
         
         let historyVC = HistoryViewController()
         historyVC.view.backgroundColor = .systemBackground
@@ -90,16 +91,16 @@ class TabBarController: UITabBarController {
         let historyItem = UITabBarItem(title: "History", image: historyImage, tag: 3)
         let settingsItem = UITabBarItem(title: "Settings", image: settingsImage, tag: 4)
         
-        createVC.tabBarItem = createItem
-        favoriteVC.tabBarItem = favoriteItem
-        scanVC.tabBarItem = scanItem
-        historyVC.tabBarItem = historyItem
-        settingsVC.tabBarItem = settingsItem
+        createNavController.tabBarItem = createItem
+        favoriteNavController.tabBarItem = favoriteItem
+        scanNavController.tabBarItem = scanItem
+        historyNavController.tabBarItem = historyItem
+        settingsNavController.tabBarItem = settingsItem
         
         // Set view controllers
         self.viewControllers = [createNavController,
                                 favoriteNavController,
-                                scanVC,
+                                scanNavController,
                                 historyNavController,
                                 settingsNavController]
         

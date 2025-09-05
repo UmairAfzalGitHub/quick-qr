@@ -16,7 +16,8 @@ import IOS_Helpers
 class SettingsViewController: UIViewController,
                               SettingsCellDelegate,
                               UITableViewDelegate,
-                              UITableViewDataSource{
+                              UITableViewDataSource,
+                              PremiumBannerViewDelegate {
     
     // MARK: - Properties
     private let tableView = UITableView(frame: .zero, style: .grouped)
@@ -49,6 +50,7 @@ class SettingsViewController: UIViewController,
         
         // Set up premium banner as header view for first section
         premiumBannerView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 120)
+        premiumBannerView.delegate = self
         
         view.addSubview(tableView)
         
@@ -98,8 +100,6 @@ class SettingsViewController: UIViewController,
             return PreferenceItem.allCases.count
         case .other:
             return OtherItem.allCases.count
-        case .developer:
-            return DeveloperItem.allCases.count
         }
     }
     
@@ -125,10 +125,6 @@ class SettingsViewController: UIViewController,
         case .other:
             let item = OtherItem(rawValue: indexPath.row)!
             cell.configure(with: item.title, icon: item.icon, accessoryType: .navigation)
-            
-        case .developer:
-            let item = DeveloperItem(rawValue: indexPath.row)!
-            cell.configure(with: item.title, icon: item.icon, accessoryType: .navigation)
         }
         
         return cell
@@ -144,7 +140,7 @@ class SettingsViewController: UIViewController,
         
         if section == .premium {
             return premiumBannerView
-        } else if section == .other || section == .developer {
+        } else if section == .other {
             // Create a custom header view with bold black text
             let headerView = UIView()
             headerView.backgroundColor = .systemBackground
@@ -178,6 +174,8 @@ class SettingsViewController: UIViewController,
         let section = SettingsSection(rawValue: section)!
         if section == .premium {
             return 120
+        } else if section == .other {
+            return 40
         }
         return 0
     }
@@ -214,5 +212,14 @@ class SettingsViewController: UIViewController,
         default:
             break
         }
+    }
+    
+    // MARK: - PremiumBannerViewDelegate
+    
+    func premiumBannerViewDidTap(_ bannerView: PremiumBannerView) {
+        // Present the IAPViewController
+        let iapViewController = IAPViewController()
+        iapViewController.modalPresentationStyle = .fullScreen
+        present(iapViewController, animated: true)
     }
 }

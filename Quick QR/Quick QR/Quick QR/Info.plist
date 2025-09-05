@@ -2,8 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>This app needs access to your photo library to save QR/barcode images.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>This app needs access to your photo library to save and view QR/barcode images.</string>
+    
+    <key>NSContactsUsageDescription</key>
+    <string>This app requires access to the contacts to save new contacts.</string>
     <key>NSCameraUsageDescription</key>
     <string>This app requires access to the camera to scan QR codes.</string>
+    <key>NSCalendarsUsageDescription</key>
+    <string>This app requires access to your calendar to add events from QR codes.</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-3940256099942544~3347511713</string>
 	<key>UIApplicationSceneManifest</key>

@@ -27,6 +27,7 @@ class SettingsCell: UITableViewCell {
     private let iconImageView = UIImageView()
     private let titleLabel = UILabel()
     private let toggleSwitch = UISwitch()
+    private let chevronImageView = UIImageView()
     
     // MARK: - Initialization
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -62,6 +63,15 @@ class SettingsCell: UITableViewCell {
         toggleSwitch.isHidden = true
         contentView.addSubview(toggleSwitch)
         
+        // Custom chevron
+        chevronImageView.translatesAutoresizingMaskIntoConstraints = false
+        chevronImageView.contentMode = .scaleAspectFit
+        chevronImageView.tintColor = UIColor.systemGray2
+        chevronImageView.image = UIImage(systemName: "chevron.right")
+        chevronImageView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
+        chevronImageView.isHidden = true
+        contentView.addSubview(chevronImageView)
+        
         // Layout
         NSLayoutConstraint.activate([
             iconContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
@@ -76,9 +86,16 @@ class SettingsCell: UITableViewCell {
             
             titleLabel.leadingAnchor.constraint(equalTo: iconContainer.trailingAnchor, constant: 16),
             titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: toggleSwitch.leadingAnchor, constant: -16),
             
             toggleSwitch.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            toggleSwitch.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+            toggleSwitch.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            
+            // Custom chevron constraints
+            chevronImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            chevronImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            chevronImageView.widthAnchor.constraint(equalToConstant: 14),
+            chevronImageView.heightAnchor.constraint(equalToConstant: 24)
         ])
     }
     
@@ -92,13 +109,15 @@ class SettingsCell: UITableViewCell {
             selectionStyle = .none
             self.accessoryType = .none
             toggleSwitch.isHidden = false
+            chevronImageView.isHidden = true
             toggleSwitch.isOn = isOn
             toggleSwitch.tag = tag
             
         case .navigation:
             selectionStyle = .default
-            self.accessoryType = .disclosureIndicator
+            self.accessoryType = .none // Don't use the default indicator
             toggleSwitch.isHidden = true
+            chevronImageView.isHidden = false
         }
     }
     
