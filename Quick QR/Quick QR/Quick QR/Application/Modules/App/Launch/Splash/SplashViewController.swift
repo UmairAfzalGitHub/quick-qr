@@ -15,16 +15,26 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
         hideCustomNavigationBar()
         IAPManager.shared.fetchSubscriptions()
         IAPManager.shared.checkSubscriptionStatus(completion: {[weak self] isSubscribed in
-            guard let self, !isSubscribed else {
-                self?.animateForTwoSeconds()
+            guard let self else { return }
+            
+            if isSubscribed {
+                // If subscribed, no need for ads consent
+                self.animateForTwoSeconds()
                 return
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
+            
+            // Wait for ads consent before proceeding
+            DispatchQueue.main.async {
                 AdsConsentManager.shared.checkAdsState {
+                    // Only setup ads and navigate after consent is handled
                     AdManager.shared.setupAds()
-                    self.animateForTwoSeconds()
+                    AdManager.shared.preloadNativeAds()
+                    
+                    self.progressBar.animateIndeterminate(duration: 4.0, speed: 1.5) {
+                        self.animateForTwoSeconds(preload: false)
+                    }
                 }
-            })
+            }
         })
     }
 
@@ -89,9 +99,9 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
         }
     }
     
-    func animateForTwoSeconds() {
+    func animateForTwoSeconds(preload: Bool = true) {
         let onBoardingStatus = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
-        if onBoardingStatus == false {
+        if onBoardingStatus == false && preload {
             AdManager.shared.preloadNativeAds()
         }
 

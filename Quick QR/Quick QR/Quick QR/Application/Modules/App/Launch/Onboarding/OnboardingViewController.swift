@@ -30,6 +30,11 @@ class OnboardingViewController: UIViewController,
         nativeAd = AdManager.shared.getNativeAd()
         if let googleAd = nativeAd {
             showGoogleNativeAd(nativeAd: googleAd)
+        } else {
+            AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+                self?.nativeAd = ad
+                self?.showGoogleNativeAd(nativeAd: ad)
+            }
         }
     }
     
