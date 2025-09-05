@@ -138,16 +138,44 @@ final class ScanResultViewController: UIViewController {
     
     private func saveScanResultToHistory() {
         guard let scanResult = scanResult else { return }
+        var imageFileName: String? = nil
+        if let image = generateCodeImage(for: scanResult) {
+            imageFileName = saveImageToDocuments(image)
+        }
         switch scanResult {
         case .qrCode(let type, let data):
-            HistoryManager.shared.saveScannedQRCodeHistory(type: type, content: data)
+            HistoryManager.shared.saveScannedQRCodeHistory(type: type, content: data, imageFileName: imageFileName)
         case .socialQR(let type, let data):
-            HistoryManager.shared.saveScannedSocialQRCodeHistory(type: type, content: data)
+            HistoryManager.shared.saveScannedSocialQRCodeHistory(type: type, content: data, imageFileName: imageFileName)
         case .barcode(let type, let data, _):
-            HistoryManager.shared.saveScannedBarCodeHistory(type: type, content: data)
+            HistoryManager.shared.saveScannedBarCodeHistory(type: type, content: data, imageFileName: imageFileName)
         case .unknown:
             // Optionally handle unknown types
             break
+        }
+    }
+
+    private func generateCodeImage(for scanResult: ScanDataParser.ScanResult) -> UIImage? {
+        switch scanResult {
+        case .qrCode(_, let data), .socialQR(_, let data):
+            return CodeGeneratorManager.shared.generateQRCode(from: data)
+        case .barcode(let type, let data, _):
+            return CodeGeneratorManager.shared.generateBarcode(content: data, type: type)
+        default:
+            return nil
+        }
+    }
+
+    private func saveImageToDocuments(_ image: UIImage) -> String? {
+        guard let data = image.pngData() else { return nil }
+        let fileName = "scanned_\(UUID().uuidString).png"
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(fileName)
+        do {
+            try data.write(to: url)
+            return fileName
+        } catch {
+            print("Failed to save scanned code image: \(error)")
+            return nil
         }
     }
     

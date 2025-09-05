@@ -22,8 +22,9 @@ struct HistoryItem: Codable {
     let title: String
     let timestamp: Date
     var isFavorite: Bool
+    let imageFileName: String?
     
-    init(id: String = UUID().uuidString, type: ItemType, subtype: String, content: String, title: String, timestamp: Date = Date(), isFavorite: Bool = false) {
+    init(id: String = UUID().uuidString, type: ItemType, subtype: String, content: String, title: String, timestamp: Date = Date(), isFavorite: Bool = false, imageFileName: String? = nil) {
         self.id = id
         self.type = type
         self.subtype = subtype
@@ -31,6 +32,7 @@ struct HistoryItem: Codable {
         self.title = title
         self.timestamp = timestamp
         self.isFavorite = isFavorite
+        self.imageFileName = imageFileName
     }
     
     // Convert to FavoriteItem for display
@@ -119,32 +121,35 @@ class HistoryManager {
     }
     
     // Scanned codes
-    func saveScannedQRCodeHistory(type: QRCodeType, content: String) {
+    func saveScannedQRCodeHistory(type: QRCodeType, content: String, imageFileName: String? = nil) {
         let item = HistoryItem(
             type: .qrCode,
             subtype: type.title,
             content: content,
-            title: type.title
+            title: type.title,
+            imageFileName: imageFileName
         )
         saveHistoryItem(item, forScan: true)
     }
     
-    func saveScannedSocialQRCodeHistory(type: SocialQRCodeType, content: String) {
+    func saveScannedSocialQRCodeHistory(type: SocialQRCodeType, content: String, imageFileName: String? = nil) {
         let item = HistoryItem(
             type: .socialQRCode,
             subtype: type.title,
             content: content,
-            title: type.title
+            title: type.title,
+            imageFileName: imageFileName
         )
         saveHistoryItem(item, forScan: true)
     }
     
-    func saveScannedBarCodeHistory(type: BarCodeType, content: String) {
+    func saveScannedBarCodeHistory(type: BarCodeType, content: String, imageFileName: String? = nil) {
         let item = HistoryItem(
             type: .barCode,
             subtype: type.title,
             content: content,
-            title: type.title
+            title: type.title,
+            imageFileName: imageFileName
         )
         saveHistoryItem(item, forScan: true)
     }

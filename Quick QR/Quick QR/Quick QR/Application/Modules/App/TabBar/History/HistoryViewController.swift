@@ -201,18 +201,36 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         if !isScanSelected {
             // Get the history items
             let historyItems = HistoryManager.shared.getCreatedHistory()
-            
-            // Make sure we have a valid index
             guard indexPath.row < historyItems.count else { return }
-            
-            // Get the selected history item
             let selectedItem = historyItems[indexPath.row]
-            
-            // Create and configure the CodeGeneratorViewController
-            if let codeGeneratorVC = CodeGeneratorViewController.createFromHistoryItem(selectedItem) {
-                // Push the view controller to the navigation stack
-                navigationController?.pushViewController(codeGeneratorVC, animated: true)
+
+            // Instantiate result VC
+            let resultVC = CodeGenerationResultViewController()
+
+            // Configure based on type
+            switch selectedItem.type {
+            case .qrCode:
+                if let qrImage = CodeGeneratorManager.shared.generateQRCode(from: selectedItem.content) {
+                    resultVC.setQRCodeImage(qrImage)
+                }
+                resultVC.setTitleAndDescription(title: selectedItem.title, description: "QR Code")
+            case .socialQRCode:
+                if let socialType = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == selectedItem.subtype.lowercased() }) {
+                    if let qrImage = CodeGeneratorManager.shared.generateSocialQRCode(type: socialType, username: selectedItem.content) {
+                        resultVC.setQRCodeImage(qrImage)
+                    }
+                    resultVC.setTitleAndDescription(title: selectedItem.title, description: "Social QR")
+                }
+            case .barCode:
+                if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == selectedItem.subtype.lowercased() }) {
+                    if let barcodeImage = CodeGeneratorManager.shared.generateBarcode(content: selectedItem.content, type: barType) {
+                        resultVC.setBarCodeImage(barcodeImage)
+                        resultVC.setBarCodeType(icon: barType.icon, title: barType.title)
+                    }
+                    resultVC.setTitleAndDescription(title: selectedItem.title, description: "Barcode")
+                }
             }
+            navigationController?.pushViewController(resultVC, animated: true)
         }
     }
     
