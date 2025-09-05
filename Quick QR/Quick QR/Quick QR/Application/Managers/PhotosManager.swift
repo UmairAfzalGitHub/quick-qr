@@ -8,12 +8,13 @@
 import Foundation
 import UIKit
 import Photos
+import UniformTypeIdentifiers
 
-final class PhotosManager {
-
+final class PhotosManager: NSObject, UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate {
+    
     static let shared = PhotosManager()
-    private init() {}
-
+    private override init() {}
+    
     enum PhotosError: Error {
         case authorizationDenied
         case authorizationRestricted
@@ -22,13 +23,15 @@ final class PhotosManager {
         case albumCreationFailed
         case unknown(Error)
     }
-
+    
+    private var pendingCompletion: ((Result<URL, Error>) -> Void)?
+    
     // MARK: - Public methods
-
+    
     func save(image: UIImage, completion: @escaping (Result<PHObjectPlaceholder, Error>) -> Void) {
         requestAddAuthorization { [weak self] authStatus in
             guard let self = self else { return }
-
+            
             switch authStatus {
             case .authorized, .limited:
                 self.performSave(image: image, completion: completion)
@@ -44,11 +47,11 @@ final class PhotosManager {
             }
         }
     }
-
+    
     func save(image: UIImage, toAlbumNamed albumName: String, completion: @escaping (Result<Void, Error>) -> Void) {
         requestAddAuthorization { [weak self] authStatus in
             guard let self = self else { return }
-
+            
             switch authStatus {
             case .authorized, .limited:
                 self.save(image: image, intoAlbumNamed: albumName, completion: completion)
@@ -67,9 +70,46 @@ final class PhotosManager {
             }
         }
     }
-
+    
+    /// Save a UIImage into Files app (iCloud Drive / On My iPhone).
+    /// - Parameters:
+    ///   - image: The UIImage you want to save.
+    ///   - fileName: The file name (e.g., "MyImage.jpg").
+    ///   - presenter: A UIViewController that will present the document picker.
+    ///   - completion: Called with the URL where the file was exported, or an error.
+    func saveToFiles(image: UIImage,
+                     fileName: String = "Image.jpg",
+                     presenter: UIViewController,
+                     completion: @escaping (Result<URL, Error>) -> Void) {
+        // Convert UIImage to JPEG data
+        guard let imageData = image.jpegData(compressionQuality: 0.9) else {
+            completion(.failure(NSError(domain: "PhotosManager", code: -1,
+                                        userInfo: [NSLocalizedDescriptionKey: "Could not convert image to data."])))
+            return
+        }
+        
+        // Create a temporary file
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        do {
+            try imageData.write(to: tempURL)
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        // Document picker for exporting
+        let picker = UIDocumentPickerViewController(forExporting: [tempURL])
+        picker.delegate = self
+        picker.presentationController?.delegate = self
+        
+        // Store completion so we can call it later in delegate
+        self.pendingCompletion = completion
+        
+        presenter.present(picker, animated: true)
+    }
+    
     // MARK: - Private helpers
-
+    
     private func requestAddAuthorization(_ completion: @escaping (PHAuthorizationStatus) -> Void) {
         if #available(iOS 14, *) {
             PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
@@ -83,14 +123,14 @@ final class PhotosManager {
             }
         }
     }
-
+    
     private func performSave(image: UIImage, completion: @escaping (Result<PHObjectPlaceholder, Error>) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.9) else {
             self.log("Image conversion to JPEG failed")
             DispatchQueue.main.async { completion(.failure(PhotosError.creationFailed)) }
             return
         }
-
+        
         PHPhotoLibrary.shared().performChanges({
             let creationRequest = PHAssetCreationRequest.forAsset()
             let options = PHAssetResourceCreationOptions()
@@ -110,7 +150,7 @@ final class PhotosManager {
             }
         })
     }
-
+    
     private func save(image: UIImage, intoAlbumNamed albumName: String, completion: @escaping (Result<Void, Error>) -> Void) {
         getOrCreateAlbum(named: albumName) { result in
             switch result {
@@ -120,7 +160,7 @@ final class PhotosManager {
                     DispatchQueue.main.async { completion(.failure(PhotosError.creationFailed)) }
                     return
                 }
-
+                
                 PHPhotoLibrary.shared().performChanges({
                     let assetRequest = PHAssetCreationRequest.forAsset()
                     let options = PHAssetResourceCreationOptions()
@@ -143,21 +183,21 @@ final class PhotosManager {
                         }
                     }
                 })
-
+                
             case .failure(let error):
                 self.log("Failed to get or create album '\(albumName)': \(error.localizedDescription)")
                 DispatchQueue.main.async { completion(.failure(error)) }
             }
         }
     }
-
+    
     private func getOrCreateAlbum(named title: String, completion: @escaping (Result<PHAssetCollection, Error>) -> Void) {
         if let existing = fetchAlbum(named: title) {
             log("Album '\(title)' found")
             completion(.success(existing))
             return
         }
-
+        
         var placeholder: PHObjectPlaceholder?
         PHPhotoLibrary.shared().performChanges({
             let createAlbumRequest = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: title)
@@ -185,16 +225,34 @@ final class PhotosManager {
             }
         })
     }
-
+    
     private func fetchAlbum(named title: String) -> PHAssetCollection? {
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(format: "localizedTitle = %@", title)
         let collections = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .albumRegular, options: fetchOptions)
         return collections.firstObject
     }
-
+    
     // MARK: - Logging helper
     private func log(_ message: String) {
         print("[PhotosManager] \(message)")
+    }
+    
+    // MARK: - UIDocumentPickerDelegate
+
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        if let url = urls.first {
+            pendingCompletion?(.success(url))
+        } else {
+            pendingCompletion?(.failure(NSError(domain: "PhotosManager", code: -2,
+                                                userInfo: [NSLocalizedDescriptionKey: "No URL returned."])))
+        }
+        pendingCompletion = nil
+    }
+
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        pendingCompletion?(.failure(NSError(domain: "PhotosManager", code: -3,
+                                            userInfo: [NSLocalizedDescriptionKey: "User cancelled."])))
+        pendingCompletion = nil
     }
 }

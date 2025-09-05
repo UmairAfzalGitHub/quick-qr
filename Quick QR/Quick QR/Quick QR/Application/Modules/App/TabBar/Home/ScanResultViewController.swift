@@ -979,13 +979,12 @@ final class ScanResultViewController: UIViewController {
             showToast(message: "Could not save QR code image")
             return
         }
-        ScanResultManager.shared.saveQRCodeImage(qrImage) { success, error in
-            if success {
+        PhotosManager.shared.saveToFiles(image: qrImage, presenter: self) { result in
+            switch result {
+            case .success:
                 self.showToast(message: "Image saved to Files")
-            } else if let error = error {
+            case .failure(let error):
                 self.showToast(message: "Error saving image: \(error.localizedDescription)")
-            } else {
-                self.showToast(message: "Failed to save image")
             }
         }
     }

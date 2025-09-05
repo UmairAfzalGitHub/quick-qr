@@ -598,20 +598,28 @@ class CodeGeneratorViewController: UIViewController {
     }
     
     private func saveImageToGallery(_ image: UIImage) {
-        UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+        PhotosManager.shared.save(image: image) { result in
+            switch result {
+            case .success:
+                let alert = UIAlertController(title: "Success", message: "Image saved to your photo library", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+            case .failure(let error):
+                self.showErrorAlert(message: "Failed to save image: \(error.localizedDescription)")
+            }
+        }
     }
-    
-    @objc private func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-        if let error = error {
-            showErrorAlert(message: "Failed to save image: \(error.localizedDescription)")
-        } else {
-            let alert = UIAlertController(
-                title: "Success",
-                message: "Image saved to your photo library",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            present(alert, animated: true)
+
+    private func saveImageToFiles(_ image: UIImage) {
+        PhotosManager.shared.saveToFiles(image: image, presenter: self) { result in
+            switch result {
+            case .success:
+                let alert = UIAlertController(title: "Saved!", message: "Image saved to Files.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+            case .failure(let error):
+                self.showErrorAlert(message: error.localizedDescription)
+            }
         }
     }
     

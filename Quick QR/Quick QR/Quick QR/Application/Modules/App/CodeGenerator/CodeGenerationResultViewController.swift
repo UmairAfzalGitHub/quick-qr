@@ -254,7 +254,7 @@ class CodeGenerationResultViewController: UIViewController {
             self.saveImageToGallery()
         }))
         alert.addAction(UIAlertAction(title: "Save to Files", style: .default, handler: { _ in
-            self.saveAction?()
+            self.saveImageToFiles()
         }))
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         if let popover = alert.popoverPresentationController {
@@ -279,27 +279,23 @@ class CodeGenerationResultViewController: UIViewController {
                 alert.addAction(UIAlertAction(title: "OK", style: .default))
                 self.present(alert, animated: true)
             case .failure(let error):
-                let message: String
-                if let photosError = error as? PhotosManager.PhotosError {
-                    switch photosError {
-                    case .authorizationDenied:
-                        message = "Permission denied. Enable Photos access in Settings."
-                    case .authorizationRestricted:
-                        message = "Photos access is restricted."
-                    case .notDetermined:
-                        message = "Photos permission not determined."
-                    case .creationFailed:
-                        message = "Failed to save image."
-                    default:
-                        message = error.localizedDescription
-                    }
-                } else {
-                    message = error.localizedDescription
-                }
-                let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+                let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default))
                 self.present(alert, animated: true)
             }
+        }
+    }
+
+    private func saveImageToFiles() {
+        let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
+        guard let imageToSave = image else {
+            let alert = UIAlertController(title: "Error", message: "No image to save.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+            return
+        }
+        PhotosManager.shared.saveToFiles(image: imageToSave, presenter: self) { result in
+            print(result)
         }
     }
 }
