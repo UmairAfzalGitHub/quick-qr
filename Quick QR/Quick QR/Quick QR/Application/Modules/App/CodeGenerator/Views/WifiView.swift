@@ -152,7 +152,7 @@ final class WifiView: UIView {
     private let ssIDLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Network Name SSID"
+        label.text = Strings.Label.networkNameSSID
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -161,7 +161,7 @@ final class WifiView: UIView {
     private let ssIDTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter SSID"
+        tf.placeholder = Strings.Label.enterSSID
         tf.keyboardType = .namePhonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
@@ -176,7 +176,7 @@ final class WifiView: UIView {
     private let passwordLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Password"
+        label.text = Strings.Label.password
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -185,7 +185,7 @@ final class WifiView: UIView {
     private let passwordTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter Password"
+        tf.placeholder = Strings.Label.enterPassword
         tf.keyboardType = .namePhonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
@@ -200,7 +200,7 @@ final class WifiView: UIView {
     private let securityModeLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Security Mode"
+        label.text = Strings.Label.securityMode
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -239,7 +239,7 @@ final class WifiView: UIView {
     
     private let noneButton: UIButton = {
         let button = UIButton()
-        button.setTitle("None", for: .normal)
+        button.setTitle(Strings.Label.none, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         button.setTitleColor(.textPrimary, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false

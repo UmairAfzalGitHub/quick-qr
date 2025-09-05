@@ -91,10 +91,10 @@ class CodeGenerationResultViewController: UIViewController {
         buttonsStackView.spacing = 8
         buttonsStackView.translatesAutoresizingMaskIntoConstraints = false
         
-        shareButton.configure(with: .primary(title: "Share", image: UIImage(systemName: "square.and.arrow.up")))
+        shareButton.configure(with: .primary(title: Strings.Label.share, image: UIImage(systemName: "square.and.arrow.up")))
         shareButton.translatesAutoresizingMaskIntoConstraints = false
         
-        saveButton.configure(with: .secondary(title: "Save", image: UIImage(systemName: "square.and.arrow.down")))
+        saveButton.configure(with: .secondary(title: Strings.Label.save, image: UIImage(systemName: "square.and.arrow.down")))
         saveButton.translatesAutoresizingMaskIntoConstraints = false
         
         adView.backgroundColor = .gray

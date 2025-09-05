@@ -111,7 +111,7 @@ final class EmailView: UIView {
     private let emailLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Email address"
+        label.text = Strings.Label.emailAddress
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -120,7 +120,7 @@ final class EmailView: UIView {
     private let emailTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter name"
+        tf.placeholder = Strings.Label.enterEmailAddress
         tf.keyboardType = .emailAddress
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
@@ -135,7 +135,7 @@ final class EmailView: UIView {
     private let subjectLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Subject"
+        label.text = Strings.Label.subject
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -144,7 +144,7 @@ final class EmailView: UIView {
     private let subjectTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Please enter something"
+        tf.placeholder = Strings.Label.pleaseEnterSomething
         tf.autocapitalizationType = .sentences
         tf.autocorrectionType = .yes
         tf.backgroundColor = .systemBackground
@@ -157,7 +157,7 @@ final class EmailView: UIView {
     private let contentLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Content"
+        label.text = Strings.Label.content
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -187,7 +187,7 @@ final class EmailView: UIView {
     private let contentPlaceholderLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Please enter something"
+        label.text = Strings.Label.pleaseEnterSomething
         label.font = UIFont.systemFont(ofSize: 16)
         label.textColor = UIColor.placeholderText
         return label

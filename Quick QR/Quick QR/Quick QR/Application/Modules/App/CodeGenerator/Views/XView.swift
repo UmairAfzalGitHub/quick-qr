@@ -60,7 +60,7 @@ final class XView: UIView {
     private let userNameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "User name"
+        label.text = Strings.Label.enterName
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -69,7 +69,7 @@ final class XView: UIView {
     private let userNameTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter user name"
+        tf.placeholder = Strings.Label.enterUserName
         tf.keyboardType = .namePhonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
@@ -84,7 +84,7 @@ final class XView: UIView {
     private let urlLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Custom URL (optional)"
+        label.text = Strings.Label.url
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -93,7 +93,7 @@ final class XView: UIView {
     private let urlTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter custom URL (optional)"
+        tf.placeholder = Strings.Label.enterUrl
         tf.keyboardType = .URL
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no

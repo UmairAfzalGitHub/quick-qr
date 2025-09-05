@@ -171,7 +171,7 @@ final class CalendarView: UIView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Title"
+        label.text = Strings.Label.title
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -180,7 +180,7 @@ final class CalendarView: UIView {
     private let titleTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter a title"
+        tf.placeholder = Strings.Label.enterATitle
         tf.keyboardType = .namePhonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
@@ -195,7 +195,7 @@ final class CalendarView: UIView {
     private let locationLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Location"
+        label.text = Strings.Label.location
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -204,7 +204,7 @@ final class CalendarView: UIView {
     private let locationTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Please enter something"
+        tf.placeholder = Strings.Label.pleaseEnterSomething
         tf.autocapitalizationType = .sentences
         tf.autocorrectionType = .no
         tf.backgroundColor = .systemBackground
@@ -217,7 +217,7 @@ final class CalendarView: UIView {
     private let allDayLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "All day"
+        label.text = Strings.Label.allDay
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -234,7 +234,7 @@ final class CalendarView: UIView {
     private let startTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Start time"
+        tf.placeholder = Strings.Label.startTime
         tf.autocapitalizationType = .sentences
         tf.autocorrectionType = .no
         tf.backgroundColor = .systemBackground
@@ -248,7 +248,7 @@ final class CalendarView: UIView {
     private let endTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "End time"
+        tf.placeholder = Strings.Label.endTime
         tf.autocapitalizationType = .sentences
         tf.autocorrectionType = .no
         tf.backgroundColor = .systemBackground
@@ -280,7 +280,7 @@ final class CalendarView: UIView {
     private let descriptionLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Description"
+        label.text = Strings.Label.description
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -310,7 +310,7 @@ final class CalendarView: UIView {
     private let contentPlaceholderLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Please enter something"
+        label.text = Strings.Label.description
         label.font = UIFont.systemFont(ofSize: 16)
         label.textColor = UIColor.placeholderText
         return label

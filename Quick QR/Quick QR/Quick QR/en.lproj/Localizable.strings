@@ -1,0 +1,74 @@
+/* 
+  Localizable.strings
+  Quick QR
+
+  Created by Haider Rathore on 05/09/2025.
+  
+*/
+
+"area_code" = "Area Code";
+"search_by_city" = "Search by City";
+"copied_to_clipboard" = "Copied to clipboard";
+"search" = "Search";
+"sort_by_name" = "Sort by Name";
+"sort_by_code" = "Sort by Code";
+"title" = "Title";
+"value" = "Value";
+"bar_code_name" = "Bar Code Name";
+"enter_code" = "Enter Code";
+"enter_code" = "Enter Code";
+"bar_code" = "BarCode";
+"enter_a_title" = "Enter a title";
+"location" = "Location";
+"please_enter_something" = "Please enter something";
+"all_day" = "All day";
+"start_time" = "Start time";
+"end_time" = "End time";
+"description" = "Description";
+"please_enter_something" = "Please enter something";
+"name" = "Name";
+"enter_name" = "Enter name";
+"phone_number" = "Phone number";
+"enter_phone_number" = "Enter phone number";
+"email_address" = "Email address";
+"enter_email_address" = "Enter email address";
+"subject" = "Subject";
+"content" = "Content";
+"user_name" = "User name";
+"enter_user_name" = "Enter user name";
+"url" = "URL";
+"enter_url" = "Enter URL";
+"latitude" = "Latitude";
+"longitude" = "Longitude";
+"enter_longitude_location" = "Enter longitude of location";
+"enter_latitude_location" = "Enter latitude of location";
+"text_message" = "Text message";
+"website_url" = "Website URL";
+"whatsApp_number" = "WhatsApp number";
+"network_name_ssid" = "Network Name SSID";
+"enter_ssid" = "Enter SSID";
+"password" = "Password";
+"enter_password" = "Enter Password";
+"security_mode" = "Security Mode";
+"none" = "None";
+"share" = "Share";
+"save" = "Save";
+"create" = "Create";
+"error" = "Error";
+"failed_to_generate" = "Failed to generate code. Please check your input and try again.";
+"tel_colon" = "tel:";
+"sms_to_colon" = "SMSTO:";
+"wifi_name" = "Wi-Fi Name";
+"sms" = "SMS";
+"to_colon" = "To:";
+"text" = "Text";
+"contact" = "Contact";
+"email" = "Email";
+"website" = "Website";
+"geo_coordinates" = "Geo Coordinates";
+"calendar_event" = "Calendar Event";
+"success" = "Success";
+"image_saved_to_library" = "Image saved to your photo library";
+"ok" = "OK";
+"failed_to_save_image" = "Failed to save image";
+

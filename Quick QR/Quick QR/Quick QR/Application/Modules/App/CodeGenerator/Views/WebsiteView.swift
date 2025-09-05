@@ -42,7 +42,7 @@ final class WebsiteView: UIView {
     private let websiteLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Website URL"
+        label.text = Strings.Label.websiteUrl
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label

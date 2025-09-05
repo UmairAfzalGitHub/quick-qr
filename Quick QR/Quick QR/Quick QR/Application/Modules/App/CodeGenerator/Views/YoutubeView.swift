@@ -60,7 +60,7 @@ final class YoutubeView: UIView {
     private let urlLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "URL"
+        label.text = Strings.Label.url
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -69,7 +69,7 @@ final class YoutubeView: UIView {
     private let urlTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter URL"
+        tf.placeholder = Strings.Label.enterUrl
         tf.keyboardType = .URL
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no

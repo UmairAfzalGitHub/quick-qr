@@ -73,7 +73,7 @@ final class WhatsappView: UIView, CountriesViewControllerDelegate {
     private let urlLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "WhatsApp number"
+        label.text = Strings.Label.whatsAppNumber
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -119,7 +119,7 @@ final class WhatsappView: UIView, CountriesViewControllerDelegate {
     private let phoneNumberTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter phone number"
+        tf.placeholder = Strings.Label.enterPhoneNumber
         tf.keyboardType = .phonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no

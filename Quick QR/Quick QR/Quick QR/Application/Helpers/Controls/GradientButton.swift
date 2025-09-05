@@ -34,7 +34,7 @@ class GradientButton: UIButton {
         setTitleColor(.white, for: .normal)
         
         // Rounded corners
-        layer.cornerRadius = 25
+        layer.cornerRadius = 30
         layer.masksToBounds = false
         
         // Border

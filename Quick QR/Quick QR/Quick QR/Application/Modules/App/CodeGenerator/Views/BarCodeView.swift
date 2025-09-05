@@ -23,7 +23,7 @@ final class BarCodeView: UIView {
     private let barCodeNameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Bar Code Name"
+        label.text = Strings.Label.barCodeName
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -32,7 +32,7 @@ final class BarCodeView: UIView {
     private let barCodeTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter Code"
+        tf.placeholder = Strings.Label.enterCode
         tf.keyboardType = .namePhonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
@@ -46,7 +46,7 @@ final class BarCodeView: UIView {
     
     var type: BarCodeType = .isbn {
         didSet {
-            barCodeNameLabel.text = type.title + " BarCode"
+            barCodeNameLabel.text = type.title + " \(Strings.Label.barCode)"
             barCodeTextField.placeholder = type.placeholder
         }
     }

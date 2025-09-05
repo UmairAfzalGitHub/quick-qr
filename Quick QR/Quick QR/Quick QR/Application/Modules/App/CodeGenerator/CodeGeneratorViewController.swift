@@ -113,7 +113,7 @@ class CodeGeneratorViewController: UIViewController {
         
         // Configure action button
         actionButton.translatesAutoresizingMaskIntoConstraints = false
-        actionButton.configure(with: .primary(title: "Create", image: nil))
+        actionButton.configure(with: .primary(title: Strings.Label.create, image: nil))
         
         // Configure ad container
         adContainerView.translatesAutoresizingMaskIntoConstraints = false
@@ -221,7 +221,7 @@ class CodeGeneratorViewController: UIViewController {
         }
         
         guard let generatedImage = generatedImage else {
-            showAlert(title: "Error", message: "Failed to generate code. Please check your input and try again.")
+            showAlert(title: Strings.Label.error, message: Strings.Label.failedToGenerate)
             return
         }
         
@@ -247,7 +247,7 @@ class CodeGeneratorViewController: UIViewController {
                   !phoneNumber.isEmpty else {
                 return nil
             }
-            return CodeGeneratorManager.shared.generateQRCode(from: "tel:\(phoneNumber)")
+            return CodeGeneratorManager.shared.generateQRCode(from: "\(Strings.Label.telColon)\(phoneNumber)")
             
         case .text:
             guard let textView = textView,
@@ -259,7 +259,7 @@ class CodeGeneratorViewController: UIViewController {
             // Check if we have a phone number for SMS
             if let phoneNumber = textView.phoneNumberText, !phoneNumber.isEmpty {
                 // Format as SMS with phone number and text
-                return CodeGeneratorManager.shared.generateQRCode(from: "SMSTO:\(phoneNumber):\(text)")
+                return CodeGeneratorManager.shared.generateQRCode(from: "\(Strings.Label.smsToColon)\(phoneNumber):\(text)")
             } else {
                 // Regular text QR code
                 return CodeGeneratorManager.shared.generateQRCode(from: text)
@@ -516,45 +516,45 @@ class CodeGeneratorViewController: UIViewController {
             switch qrType {
             case .wifi:
                 if let wifiView = wifiView {
-                    title = "Wi-Fi Name"
+                    title = Strings.Label.wifiName
                     description = wifiView.getSSID() ?? ""
                 }
             case .phone:
                 if let phoneView = phoneView {
-                    title = "Phone Number"
+                    title = Strings.Label.phoneNumber
                     description = phoneView.getPhoneNumber() ?? ""
                 }
             case .text:
                 if let textView = textView {
                     if let phoneNumber = textView.phoneNumberText, !phoneNumber.isEmpty {
-                        title = "SMS"
-                        description = "To: \(phoneNumber)"
+                        title = Strings.Label.sms
+                        description = "\(Strings.Label.toColon) \(phoneNumber)"
                     } else {
-                        title = "Text"
+                        title = Strings.Label.text
                         description = String(textView.getText()?.prefix(20) ?? "") + (textView.getText()?.count ?? 0 > 20 ? "..." : "")
                     }
                 }
             case .contact:
                 if let contactsView = contactsView {
-                    title = "Contact"
+                    title = Strings.Label.contact
                     description = contactsView.getName() ?? ""
                 }
             case .email:
                 if let emailView = emailView {
-                    title = "Email"
+                    title = Strings.Label.email
                     description = emailView.getEmail() ?? ""
                 }
             case .website:
                 if let websiteView = websiteView {
-                    title = "Website"
+                    title = Strings.Label.website
                     description = websiteView.getURL() ?? ""
                 }
             case .location:
-                title = "Location"
-                description = "Geo Coordinates"
+                title = Strings.Label.location
+                description = Strings.Label.geoCoordinates
             case .events:
                 if let calendarView = calendarView {
-                    title = "Calendar Event"
+                    title = Strings.Label.calendarEvent
                     description = calendarView.getTitle() ?? ""
                 }
             }
@@ -603,14 +603,14 @@ class CodeGeneratorViewController: UIViewController {
     
     @objc private func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let error = error {
-            showErrorAlert(message: "Failed to save image: \(error.localizedDescription)")
+            showErrorAlert(message: "\(Strings.Label.failedToSaveImage): \(error.localizedDescription)")
         } else {
             let alert = UIAlertController(
-                title: "Success",
-                message: "Image saved to your photo library",
+                title: Strings.Label.success,
+                message: Strings.Label.imageSavedToLibrary,
                 preferredStyle: .alert
             )
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
             present(alert, animated: true)
         }
     }
@@ -719,11 +719,11 @@ class CodeGeneratorViewController: UIViewController {
     
     private func showErrorAlert(message: String) {
         let alert = UIAlertController(
-            title: "Error",
+            title: Strings.Label.error,
             message: message,
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
         present(alert, animated: true)
     }
     

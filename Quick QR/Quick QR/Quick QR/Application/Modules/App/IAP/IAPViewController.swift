@@ -7,6 +7,12 @@
 
 import Foundation
 import UIKit
+import StoreKit
+
+protocol IAPViewControllerDelegate {
+    func performAction()
+    func cancelAction()
+}
 
 class IAPViewController: UIViewController {
     
@@ -24,15 +30,15 @@ class IAPViewController: UIViewController {
         
         var price: String {
             switch self {
-            case .monthly: return "RS 600.00"
-            case .yearly: return "RS 600.00"
+            case .monthly: return "Loading..."
+            case .yearly: return "Loading..."
             }
         }
         
         var monthlyPrice: String? {
             switch self {
             case .monthly: return nil
-            case .yearly: return "RS 100.00"
+            case .yearly: return "Loading..."
             }
         }
         
@@ -76,6 +82,11 @@ class IAPViewController: UIViewController {
     // MARK: - Properties
     private var selectedPlan: SubscriptionPlan = .yearly
     
+    // MARK: - IAP Properties (from AIIAPViewController)
+    private var monthlyProduct: SKProduct?
+    private var yearlyProduct: SKProduct?
+    var delegate: IAPViewControllerDelegate?
+    
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -96,10 +107,20 @@ class IAPViewController: UIViewController {
     private let continueButton = GradientButton(type: .system)
     private let termsStackView = UIStackView()
     
+    // MARK: - Loading Indicator (from AIIAPViewController)
+    private lazy var loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupIAP() // Added IAP setup
+        localize() // Added localization
     }
     
     // MARK: - UI Setup
@@ -129,6 +150,13 @@ class IAPViewController: UIViewController {
         
         // Setup bottom container
         setupBottomContainer()
+        
+        // Add loading indicator
+        view.addSubview(loadingIndicator)
+        NSLayoutConstraint.activate([
+            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
     }
     
     private func setupBackgroundImage() {
@@ -271,6 +299,7 @@ class IAPViewController: UIViewController {
     private func createFeatureView(with feature: Feature) -> UIView {
         let containerView = UIView()
         containerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.clipsToBounds = false
         
         let iconView = UIImageView()
         iconView.translatesAutoresizingMaskIntoConstraints = false
@@ -351,6 +380,8 @@ class IAPViewController: UIViewController {
         let containerView = UIView()
         containerView.translatesAutoresizingMaskIntoConstraints = false
         containerView.layer.cornerRadius = 16
+        containerView.layer.borderWidth = 2
+        containerView.layer.borderColor = UIColor.gray.withAlphaComponent(0.35).cgColor
         containerView.backgroundColor = .systemGray6
         
         // Create title label
@@ -372,7 +403,7 @@ class IAPViewController: UIViewController {
         containerView.addSubview(priceLabel)
         
         var constraints = [
-            containerView.heightAnchor.constraint(equalToConstant: 70)
+            containerView.heightAnchor.constraint(equalToConstant: 80)
         ]
         
         // Add tag label if available
@@ -388,6 +419,7 @@ class IAPViewController: UIViewController {
             tagLabel.clipsToBounds = true
             
             containerView.addSubview(tagLabel)
+            containerView.bringSubviewToFront(tagLabel)
             
             constraints.append(contentsOf: [
                 tagLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: -10),
@@ -483,12 +515,14 @@ class IAPViewController: UIViewController {
         let termsButton = UIButton(type: .system)
         termsButton.translatesAutoresizingMaskIntoConstraints = false
         termsButton.setTitle("Terms of Service", for: .normal)
+        termsButton.setTitleColor(.black, for: .normal)
         termsButton.titleLabel?.font = UIFont.systemFont(ofSize: 12)
         termsButton.addTarget(self, action: #selector(termsButtonTapped), for: .touchUpInside)
         
         let privacyButton = UIButton(type: .system)
         privacyButton.translatesAutoresizingMaskIntoConstraints = false
         privacyButton.setTitle("Privacy Policy", for: .normal)
+        privacyButton.setTitleColor(.black, for: .normal)
         privacyButton.titleLabel?.font = UIFont.systemFont(ofSize: 12)
         privacyButton.addTarget(self, action: #selector(privacyButtonTapped), for: .touchUpInside)
         
@@ -496,11 +530,11 @@ class IAPViewController: UIViewController {
         separatorLabel.translatesAutoresizingMaskIntoConstraints = false
         separatorLabel.text = "|"
         separatorLabel.font = UIFont.systemFont(ofSize: 12)
-        separatorLabel.textColor = .tertiaryLabel
+        separatorLabel.textColor = .black
         
         termsStackView.translatesAutoresizingMaskIntoConstraints = false
         termsStackView.axis = .horizontal
-        termsStackView.spacing = 8
+        termsStackView.spacing = 12
         termsStackView.alignment = .center
         termsStackView.distribution = .equalSpacing
         
@@ -518,99 +552,150 @@ class IAPViewController: UIViewController {
             scrollView.bottomAnchor.constraint(equalTo: bottomContainer.topAnchor),
             
             continueButton.topAnchor.constraint(equalTo: bottomContainer.topAnchor, constant: 16),
-            continueButton.leadingAnchor.constraint(equalTo: bottomContainer.leadingAnchor, constant: 50),
-            continueButton.trailingAnchor.constraint(equalTo: bottomContainer.trailingAnchor, constant: -50),
-            continueButton.heightAnchor.constraint(equalToConstant: 54),
-            
+            continueButton.leadingAnchor.constraint(equalTo: bottomContainer.leadingAnchor, constant: 65),
+            continueButton.trailingAnchor.constraint(equalTo: bottomContainer.trailingAnchor, constant: -65),
+            continueButton.heightAnchor.constraint(equalToConstant: 60),
+        
             termsStackView.topAnchor.constraint(equalTo: continueButton.bottomAnchor, constant: 16),
             termsStackView.centerXAnchor.constraint(equalTo: bottomContainer.centerXAnchor),
             termsStackView.bottomAnchor.constraint(equalTo: bottomContainer.bottomAnchor, constant: -16)
         ])
     }
     
+    // MARK: - IAP Setup Methods (from AIIAPViewController)
+    private func setupIAP() {
+        loadingIndicator.startAnimating()
+        IAPManager.shared.fetchSubscriptions()
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleProductsFetched),
+                                               name: NSNotification.Name("ProductsFetched"),
+                                               object: nil)
+    }
+    
+    private func localize() {
+        // Add your localization strings here if needed
+        titleLabel.text = "Upgrade to Pro"
+    }
+    
+    @objc private func handleProductsFetched() {
+        let products = IAPManager.shared.getSubscriptions()
+        
+        monthlyProduct = products.first { $0.productIdentifier == SubscriptionID.monthly.rawValue }
+        yearlyProduct = products.first { $0.productIdentifier == SubscriptionID.yearly.rawValue }
+        
+        updatePlanPrices()
+        loadingIndicator.stopAnimating()
+    }
+    
+    private func updatePlanPrices() {
+        if let monthlyProduct = monthlyProduct {
+            let price = IAPManager.shared.getFormattedPrice(for: monthlyProduct)
+            updatePlanView(monthlyPlanView, with: price.formatted, monthlyPrice: nil)
+        }
+        
+        if let yearlyProduct = yearlyProduct {
+            let price = IAPManager.shared.getFormattedPrice(for: yearlyProduct)
+            let monthlyEquivalent = calculateMonthlyEquivalent(for: yearlyProduct)
+            updatePlanView(yearlyPlanView, with: price.formatted, monthlyPrice: monthlyEquivalent)
+        }
+    }
+    
+    private func calculateMonthlyEquivalent(for product: SKProduct) -> String {
+        let yearlyPrice = product.price.doubleValue
+        let monthlyEquivalent = yearlyPrice / 12.0
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = product.priceLocale
+        
+        return formatter.string(from: NSNumber(value: monthlyEquivalent)) ?? "Loading..."
+    }
+    
+    private func updatePlanView(_ planView: UIView, with price: String, monthlyPrice: String?) {
+        for subview in planView.subviews {
+            if let label = subview as? UILabel {
+                // Update main price label
+//                if label.font.pointSize == 20 && label.font.weight == .bold {
+//                    label.text = price
+//                }
+//                // Update monthly equivalent price if it exists
+//                else if monthlyPrice != nil && label.font.pointSize == 16 && label.font.weight == .medium {
+//                    label.text = monthlyPrice
+//                }
+            }
+        }
+    }
+    
     private func updatePlanSelection() {
-        // Monthly plan styling
         if selectedPlan == .monthly {
-            // Apply shadow to monthly plan
+            // Monthly plan selected
             monthlyPlanView.layer.shadowColor = UIColor.appPrimary.cgColor
             monthlyPlanView.layer.shadowOffset = CGSize(width: 0, height: 4)
             monthlyPlanView.layer.shadowRadius = 8
             monthlyPlanView.layer.shadowOpacity = 0.5
             monthlyPlanView.layer.masksToBounds = false
             
-            // Update background color
             monthlyPlanView.backgroundColor = UIColor.appPrimary
+            monthlyPlanView.layer.borderColor = UIColor.white.cgColor   // ✅ White border
             
-            // Update text colors for selected plan
             for subview in monthlyPlanView.subviews {
-                if let label = subview as? UILabel {
-                    if label.text == "Recommended" {
-                        // Keep tag label styling
-                        continue
-                    }
+                if let label = subview as? UILabel, label.text != "Recommended" {
                     label.textColor = .white
                 }
             }
             
-            // Remove shadow from yearly plan
             yearlyPlanView.layer.shadowOpacity = 0
-            
-            // Update background color
             yearlyPlanView.backgroundColor = .systemGray6
+            yearlyPlanView.layer.borderColor = UIColor.gray.withAlphaComponent(0.35).cgColor   // ✅ Gray border
             
-            // Reset text colors for non-selected plan
             for subview in yearlyPlanView.subviews {
-                if let label = subview as? UILabel {
-                    if label.text == "Popular" {
-                        // Keep tag label color
-                        continue
-                    }
+                if let label = subview as? UILabel, label.text != "Popular" {
                     label.textColor = .black
                 }
             }
+            
         } else {
-            // Remove shadow from monthly plan
-            monthlyPlanView.layer.shadowOpacity = 0
-            
-            // Update background color
-            monthlyPlanView.backgroundColor = .systemGray6
-            
-            // Reset text colors for non-selected plan
-            for subview in monthlyPlanView.subviews {
-                if let label = subview as? UILabel {
-                    if label.text == "Recommended" {
-                        // Keep tag label color
-                        continue
-                    }
-                    label.textColor = .black
-                }
-            }
-            
-            // Apply shadow to yearly plan
+            // Yearly plan selected
             yearlyPlanView.layer.shadowColor = UIColor.appPrimary.cgColor
             yearlyPlanView.layer.shadowOffset = CGSize(width: 0, height: 4)
             yearlyPlanView.layer.shadowRadius = 8
             yearlyPlanView.layer.shadowOpacity = 0.5
             yearlyPlanView.layer.masksToBounds = false
             
-            // Update background color
             yearlyPlanView.backgroundColor = UIColor.appPrimary
+            yearlyPlanView.layer.borderColor = UIColor.white.cgColor   // ✅ White border
             
-            // Update text colors for selected plan
             for subview in yearlyPlanView.subviews {
-                if let label = subview as? UILabel {
-                    if label.text == "Popular" {
-                        // Keep tag label styling
-                        continue
-                    }
+                if let label = subview as? UILabel, label.text != "Popular" {
                     label.textColor = .white
                 }
             }
+            
+            monthlyPlanView.layer.shadowOpacity = 0
+            monthlyPlanView.backgroundColor = .systemGray6
+            monthlyPlanView.layer.borderColor = UIColor.gray.withAlphaComponent(0.35).cgColor   // ✅ Gray border
+            
+            for subview in monthlyPlanView.subviews  {
+                if let label = subview as? UILabel, label.text != "Recommended" {
+                    label.textColor = .black
+                }
+            }
+        }
+    }
+
+    
+    private func handleSuccessfulPurchase(message: String) {
+        UserDefaults.standard.set(true, forKey: "isSubscribed")
+        delegate?.performAction()
+        showAlert(title: "Success", message: message) {
+            self.dismiss(animated: true, completion: nil)
         }
     }
     
     // MARK: - Actions
     @objc private func closeButtonTapped() {
+        delegate?.cancelAction()
         dismiss(animated: true)
     }
     
@@ -621,17 +706,63 @@ class IAPViewController: UIViewController {
     }
     
     @objc private func continueButtonTapped() {
-        // Handle purchase
-        print("Continue with plan: \(selectedPlan)")
+        guard let selectedProduct = selectedPlan == .monthly ? monthlyProduct : yearlyProduct else {
+            showAlert(title: "Error", message: "Unable to load subscription products. Please try again.")
+            return
+        }
+        
+        loadingIndicator.startAnimating()
+        continueButton.isEnabled = false
+        
+        IAPManager.shared.subscribe(to: selectedProduct) { [weak self] success, error in
+            DispatchQueue.main.async {
+                self?.loadingIndicator.stopAnimating()
+                self?.continueButton.isEnabled = true
+                
+                if success {
+                    self?.handleSuccessfulPurchase(message: "Thank you for subscribing!")
+                } else {
+                    let errorMessage = error ?? "Purchase failed. Please try again."
+                    self?.showAlert(title: "Purchase Failed", message: errorMessage)
+                }
+            }
+        }
+    }
+    
+    @objc private func restoreButtonTapped() {
+        loadingIndicator.startAnimating()
+        
+        IAPManager.shared.restoreSubscriptions { [weak self] success, restoredTransactions in
+            DispatchQueue.main.async {
+                self?.loadingIndicator.stopAnimating()
+                
+                if success {
+                    self?.handleSuccessfulPurchase(message: "Purchase was successfully restored")
+                } else {
+                    self?.showAlert(
+                        title: "Restore Failed",
+                        message: "No active subscriptions found for this account. Please make sure you're signed in with the correct Apple ID."
+                    )
+                }
+            }
+        }
     }
     
     @objc private func termsButtonTapped() {
-        // Open terms of service
-        print("Terms of Service tapped")
+        // Open terms of service - you can use LinkOpener if available or implement URL opening
+        if let url = URL(string: "http://termsofuse.softappstechnology.com") {
+            UIApplication.shared.open(url)
+        }
     }
     
     @objc private func privacyButtonTapped() {
-        // Open privacy policy
-        print("Privacy Policy tapped")
+        // Open privacy policy - you can use LinkOpener if available or implement URL opening
+        if let url = URL(string: "https://privacy.softappstechnology.com/") {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }

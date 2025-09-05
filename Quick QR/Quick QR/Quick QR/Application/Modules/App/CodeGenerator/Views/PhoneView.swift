@@ -47,7 +47,7 @@ final class PhoneView: UIView {
     private let phoneLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Phone Number"
+        label.text = Strings.Label.phoneNumber
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -56,7 +56,7 @@ final class PhoneView: UIView {
     private let phoneTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter phone number"
+        tf.placeholder = Strings.Label.enterPhoneNumber
         tf.keyboardType = .phonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no

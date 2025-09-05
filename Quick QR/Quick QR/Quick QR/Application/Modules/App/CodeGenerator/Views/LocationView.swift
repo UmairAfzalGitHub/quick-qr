@@ -62,7 +62,7 @@ final class LocationView: UIView {
     private let latitudeLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Latitude"
+        label.text = Strings.Label.latitude
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -71,7 +71,7 @@ final class LocationView: UIView {
     private let latitudeTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter lonngitude of location"
+        tf.placeholder = Strings.Label.enterLatitudeLocation
         tf.keyboardType = .phonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no
@@ -86,7 +86,7 @@ final class LocationView: UIView {
     private let longitudeLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Longitude"
+        label.text = Strings.Label.longitude
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textColor = .textPrimary
         return label
@@ -95,7 +95,7 @@ final class LocationView: UIView {
     private let longitudeTextField: UITextField = {
         let tf = PaddedTextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter lonngitude of location"
+        tf.placeholder = Strings.Label.longitude
         tf.keyboardType = .phonePad
         tf.autocapitalizationType = .none
         tf.autocorrectionType = .no

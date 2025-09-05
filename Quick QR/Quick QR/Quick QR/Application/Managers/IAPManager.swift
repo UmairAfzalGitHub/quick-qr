@@ -5,6 +5,7 @@ import StoreKit
 enum SubscriptionID: String {
     case weekly = "com.photo.recovery.weekly"
     case monthly = "com.photo.recovery.monthly"
+    case yearly = "com.photo.recovery.yearly"
     
     static var allIdentifiers: [String] {
         return [weekly.rawValue, monthly.rawValue]
