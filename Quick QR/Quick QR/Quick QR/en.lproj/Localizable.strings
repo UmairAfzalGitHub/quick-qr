@@ -71,4 +71,15 @@
 "image_saved_to_library" = "Image saved to your photo library";
 "ok" = "OK";
 "failed_to_save_image" = "Failed to save image";
+"number_locator" = "Number Locator";
+"smart_scan_qr_code" = "Smart Scan QR Code";
+"point_your_camera" = "Point your camera and instantly scan any QR code";
+"easily_read_barcodes" = "Easily Read Barcodes";
+"easily_scan_barcodes" = "Easily scan barcodes to get product details, compare prices, or access information.";
+"quickly_create_qr_code" = "Quickly Create QR Code";
+"generate_custom_qr" = "Generate custom QR codes for links, text, Wi-Fi, contacts, and more.";
+"quick_qr" = "Quick QR";
+"scan_instantly" = "Scan Instantly. Create Effortlessly.";
+"next" = "Next";
+
 

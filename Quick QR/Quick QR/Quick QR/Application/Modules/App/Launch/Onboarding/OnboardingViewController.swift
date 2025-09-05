@@ -18,9 +18,9 @@ class OnboardingViewController: UIViewController,
     var nativeAd: GoogleMobileAds.NativeAd?
 
     var dataSource: [OnBoarding] = [
-        OnBoarding(image: UIImage(named: "onboard1")!, heading: Strings.Label.numberLocator, description: Strings.Label.effortlessly),
-        OnBoarding(image: UIImage(named: "onboard2")!, heading: Strings.Label.numberLocator, description: Strings.Label.effortlessly),
-        OnBoarding(image: UIImage(named: "onboard3")!, heading: Strings.Label.numberLocator, description: Strings.Label.effortlessly)
+        OnBoarding(image: UIImage(named: "onboard1")!, heading: Strings.Label.smartScanQrCode, description: Strings.Label.pointYourCamera),
+        OnBoarding(image: UIImage(named: "onboard2")!, heading: Strings.Label.easilyReadBarcodes, description: Strings.Label.easilyScanBarcodes),
+        OnBoarding(image: UIImage(named: "onboard3")!, heading: Strings.Label.quicklyCreateQrCode, description: Strings.Label.generateCustomQr)
     ]
 
     override func viewDidLoad() {
@@ -78,7 +78,7 @@ class OnboardingViewController: UIViewController,
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapNextButton))
         nextButton.addGestureRecognizer(tapGestureRecognizer)
-        nextButton.configure(with: .primary(title: "Next", image: nil))
+        nextButton.configure(with: .primary(title: Strings.Label.next, image: nil))
         self.navigationController?.navigationBar.isHidden = true
     }
     

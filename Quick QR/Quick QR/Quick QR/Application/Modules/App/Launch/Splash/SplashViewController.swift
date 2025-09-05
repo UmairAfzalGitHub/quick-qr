@@ -40,7 +40,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
 
     func localize() {
         // TODO: - Localize Here
-        messageLabel.text = Strings.Label.phoneNumberLocator
+        messageLabel.text = Strings.Label.quickQR
     }
 
     func checkLanguageStatus() {

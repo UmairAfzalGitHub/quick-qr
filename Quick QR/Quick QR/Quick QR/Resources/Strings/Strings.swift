@@ -78,6 +78,15 @@ struct Strings {
         static var imageSavedToLibrary: String { "image_saved_to_library".localized() }
         static var ok: String { "ok".localized() }
         static var failedToSaveImage: String { "failed_to_save_image".localized() }
+        static var smartScanQrCode: String { "smart_scan_qr_code".localized() }
+        static var pointYourCamera: String { "point_your_camera".localized() }
+        static var easilyReadBarcodes: String { "easily_read_barcodes".localized() }
+        static var easilyScanBarcodes: String { "easily_scan_barcodes".localized() }
+        static var quicklyCreateQrCode: String { "quickly_create_qr_code".localized() }
+        static var generateCustomQr: String { "generate_custom_qr".localized() }
+        static var quickQR: String { "quick_qr".localized() }
+        static var scanInstantly: String { "scan_instantly".localized() }
+        static var next: String { "next".localized() }
 
     }
     
