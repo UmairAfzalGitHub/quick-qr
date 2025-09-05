@@ -66,24 +66,36 @@ class AdsConsentManager {
     /// Request GDPR consent (simulate showing a dialog to the user)
     private func requestConsent(completion: @escaping (Bool) -> Void) {
         DispatchQueue.main.async {
-            // Create an alert
             let alert = UIAlertController(
                 title: "GDPR Consent",
                 message: "We value your privacy. Do you consent to personalized ads as per GDPR regulations?",
                 preferredStyle: .alert
             )
-            
-            // "Accept" button
+            var completionCalled = false
+            let callCompletionOnce: (Bool) -> Void = { consent in
+                if !completionCalled {
+                    completionCalled = true
+                    completion(consent)
+                }
+            }
             alert.addAction(UIAlertAction(title: "Accept", style: .default, handler: { _ in
-                completion(true) // User consented
+                callCompletionOnce(true)
             }))
-            
-            // "Decline" button
             alert.addAction(UIAlertAction(title: "Decline", style: .cancel, handler: { _ in
-                completion(false) // User declined consent
+                callCompletionOnce(false)
             }))
-            
-            // Present the alert
+            // Handle dismiss (swipe/tap outside)
+            class AlertDismissDelegateWrapper: NSObject, UIAdaptivePresentationControllerDelegate {
+                let onDismiss: () -> Void
+                init(onDismiss: @escaping () -> Void) { self.onDismiss = onDismiss }
+                func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+                    onDismiss()
+                }
+            }
+            let dismissDelegate = AlertDismissDelegateWrapper { callCompletionOnce(false) }
+            alert.presentationController?.delegate = dismissDelegate
+            // Retain the delegate for the duration of the alert
+            objc_setAssociatedObject(alert, Unmanaged.passUnretained(alert).toOpaque(), dismissDelegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
             if let topController = UIApplication.shared.topViewController {
                 topController.present(alert, animated: true, completion: nil)
             }
