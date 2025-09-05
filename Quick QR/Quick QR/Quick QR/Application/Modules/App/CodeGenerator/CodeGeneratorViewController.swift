@@ -601,11 +601,11 @@ class CodeGeneratorViewController: UIViewController {
         PhotosManager.shared.save(image: image) { result in
             switch result {
             case .success:
-                let alert = UIAlertController(title: "Success", message: "Image saved to your photo library", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                let alert = UIAlertController(title: Strings.Label.success, message: Strings.Label.imageSavedToLibrary, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
                 self.present(alert, animated: true)
             case .failure(let error):
-                self.showErrorAlert(message: "Failed to save image: \(error.localizedDescription)")
+                self.showErrorAlert(message: "\(Strings.Label.failedToSaveImage): \(error.localizedDescription)")
             }
         }
     }
@@ -614,8 +614,8 @@ class CodeGeneratorViewController: UIViewController {
         PhotosManager.shared.saveToFiles(image: image, presenter: self) { result in
         switch result {
         case .success:
-            let alert = UIAlertController(title: "Saved!", message: "Image saved to Files.", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            let alert = UIAlertController(title: "\(Strings.Label.saved)!", message: Strings.Label.imageSavedToFiles, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
             self.present(alert, animated: true)
         case .failure(let error):
             self.showErrorAlert(message: error.localizedDescription)
@@ -915,10 +915,6 @@ class CodeGeneratorViewController: UIViewController {
             barCodeView?.urlText = "PDF417 Test Data"
         case .isbn:
             barCodeView?.urlText = "9781234567897"
-        case .aztec:
-            barCodeView?.urlText = "AZTEC-TEST-12345"
-        case .dataMatrix:
-            barCodeView?.urlText = "DATAMATRIX-12345"
         }
         
         return barCodeView!

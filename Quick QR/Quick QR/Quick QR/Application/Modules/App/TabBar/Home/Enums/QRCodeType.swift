@@ -12,14 +12,14 @@ enum QRCodeType: CaseIterable, CodeTypeProtocol {
     
     var title: String {
         switch self {
-        case .wifi: return "Wi-Fi"
-        case .phone: return "Phone"
-        case .text: return "Text"
-        case .contact: return "Contact"
-        case .email: return "Email"
-        case .website: return "Website"
-        case .location: return "Location"
-        case .events: return "Events"
+        case .wifi: return Strings.Label.wifi
+        case .phone: return Strings.Label.phone
+        case .text: return Strings.Label.text
+        case .contact: return Strings.Label.contact
+        case .email: return Strings.Label.email
+        case .website: return Strings.Label.website
+        case .location: return Strings.Label.location
+        case .events: return Strings.Label.events
         }
     }
     

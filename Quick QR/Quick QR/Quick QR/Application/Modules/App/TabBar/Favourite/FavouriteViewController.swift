@@ -31,7 +31,7 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
     // MARK: - Setup
     private func setupNavigationBar() {
         // Configure navigation bar appearance
-        self.navigationItem.title = "Favorite"
+        self.navigationItem.title = Strings.Label.favorite
         
         //        // Remove extra space at the top
         navigationController?.navigationBar.isTranslucent = false
@@ -125,13 +125,13 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
                 if let qrImage = CodeGeneratorManager.shared.generateQRCode(from: item.content) {
                     resultVC.setQRCodeImage(qrImage)
                 }
-                resultVC.setTitleAndDescription(title: item.title, description: "QR Code")
+                resultVC.setTitleAndDescription(title: item.title, description: Strings.Label.qrCode)
             case .socialQRCode:
                 if let socialType = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == item.subtype.lowercased() }) {
                     if let qrImage = CodeGeneratorManager.shared.generateSocialQRCode(type: socialType, username: item.content) {
                         resultVC.setQRCodeImage(qrImage)
                     }
-                    resultVC.setTitleAndDescription(title: item.title, description: "Social QR")
+                    resultVC.setTitleAndDescription(title: item.title, description: Strings.Label.socialQR)
                 }
             case .barCode:
                 if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == item.subtype.lowercased() }) {
@@ -139,7 +139,7 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
                         resultVC.setBarCodeImage(barcodeImage)
                         resultVC.setBarCodeType(icon: barType.icon, title: barType.title)
                     }
-                    resultVC.setTitleAndDescription(title: item.title, description: "Barcode")
+                    resultVC.setTitleAndDescription(title: item.title, description: Strings.Label.barCode)
                 }
             }
             navigationController?.pushViewController(resultVC, animated: true)
@@ -210,12 +210,12 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
         imageView.tintColor = .red
         
         let titleLabel = UILabel()
-        titleLabel.text = "No Favorites Yet"
+        titleLabel.text = Strings.Label.noFavoritesYet
         titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         titleLabel.textAlignment = .center
         
         let subtitleLabel = UILabel()
-        subtitleLabel.text = "Tap the heart icon on any item to add it to favorites"
+        subtitleLabel.text = Strings.Label.tapTheHeart
         subtitleLabel.font = UIFont.systemFont(ofSize: 14)
         subtitleLabel.textColor = .systemGray
         subtitleLabel.textAlignment = .center

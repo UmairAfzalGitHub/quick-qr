@@ -87,7 +87,81 @@ struct Strings {
         static var quickQR: String { "quick_qr".localized() }
         static var scanInstantly: String { "scan_instantly".localized() }
         static var next: String { "next".localized() }
-
+        static var saved: String { "saved".localized() }
+        static var imageSavedToFiles: String { "image_saved_to_files".localized() }
+        static var saveCode: String { "save_code".localized() }
+        static var chooseWhereToSave: String { "choose_where_to_save".localized() }
+        static var saveToGallery: String { "save_to_gallery".localized() }
+        static var saveToFiles: String { "save_to_files".localized() }
+        static var cancel: String { "cancel".localized() }
+        static var noImageToSave: String { "no_image_to_save".localized() }
+        static var unlockMoreMembership: String { "unlock_more_membership".localized() }
+        static var noAdsSmoothScanning: String { "no_ads_smooth_scanning".localized() }
+        static var scanCodesInBatches: String { "scan_codes_in_batches".localized() }
+        static var upgradeToPro: String { "upgrade_to_pro".localized() }
+        static var unlockAllFeatures: String { "unlock_all_features".localized() }
+        static var scanAllType: String { "scan_all_type".localized() }
+        static var onceYouSubscribe: String { "once_you_subscribe".localized() }
+        static var perMonth: String { "per_month".localized() }
+        static var perYear: String { "per_year".localized() }
+        static var continueLabel: String { "continue".localized() }
+        static var termsOfService: String { "terms_of_service".localized() }
+        static var privacyPolicy: String { "privacy_policy".localized() }
+        static var recommended: String { "recommended".localized() }
+        static var popular: String { "popular".localized() }
+        static var monthly: String { "monthly".localized() }
+        static var yearly: String { "yearly".localized() }
+        static var unableToLoad: String { "unable_to_load".localized() }
+        static var thankyouForSubscribing: String { "thankyou_for_subscribing".localized() }
+        static var purchaseFailedTryAgain: String { "purchase_failed_try_again".localized() }
+        static var purchaseFailed: String { "purchase_failed".localized() }
+        static var purchaseSuccessfullyRestored: String { "purchase_successfully_restored".localized() }
+        static var restoreFailed: String { "restore_failed".localized() }
+        static var noActiveSubscriptions: String { "no_active_subscriptions".localized() }
+        static var selectLanguage: String { "select_language".localized() }
+        static var select: String { "select".localized() }
+        static var favorite: String { "favorite".localized() }
+        static var qrCode: String { "qr_code".localized() }
+        static var socialQR: String { "social_qr".localized() }
+        static var noFavoritesYet: String { "no_favorites_yet".localized() }
+        static var tapTheHeart: String { "tap_the_heart".localized() }
+        static var scan: String { "scan".localized() }
+        static var created: String { "created".localized() }
+        static var noHistoryYet: String { "no_history_yet".localized() }
+        static var yourGeneratedCodes: String { "your_generated_codes".localized() }
+        static var wifi: String { "wifi".localized() }
+        static var phone: String { "phone".localized() }
+        static var events: String { "events".localized() }
+        static var tikTok: String { "tikTok".localized() }
+        static var instagram: String { "instagram".localized() }
+        static var facebook: String { "facebook".localized() }
+        static var x: String { "x".localized() }
+        static var whatsApp: String { "whatsApp".localized() }
+        static var youtube: String { "youtube".localized() }
+        static var spotify: String { "spotify".localized() }
+        static var viber: String { "viber".localized() }
+        static var cameraAccessNeeded: String { "camera_access_needed".localized() }
+        static var pleaseEnableCamera: String { "please_enable_camera".localized() }
+        static var settings: String { "settings".localized() }
+        static var connect: String { "connect".localized() }
+        static var call: String { "call".localized() }
+        static var open: String { "open".localized() }
+        static var openMap: String { "open_map".localized() }
+        static var saveContact: String { "save_contact".localized() }
+        static var addToCalendar: String { "add_to_calendar".localized() }
+        static var sendSMS: String { "send_sms".localized() }
+        static var copy: String { "copy".localized() }
+        static var searchProduct: String { "search_product".localized() }
+        static var download: String { "download".localized() }
+        static var couldnotSaveQR: String { "couldnot_save_qr".localized() }
+        static var imageSavedToGallery: String { "image_saved_to_gallery".localized() }
+        static var permission_denied: String { "permission_denied".localized() }
+        static var photosAccessRestricted: String { "photos_access_restricted".localized() }
+        static var photosPermissionNotDetermined: String { "photos_permission_not_determined".localized() }
+        static var errorSavingImage: String { "error_saving_image".localized() }
+        static var calendarAccessDenied: String { "calendar_access_denied".localized() }
+        static var eventAddedToCalendar: String { "calendar_access_denied".localized() }
+        static var couldNotSaveEvent: String { "could_not_save_event".localized() }
     }
     
     struct Button {

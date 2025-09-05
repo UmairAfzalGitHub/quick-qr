@@ -13,7 +13,7 @@ class LanguageSelectionViewController: UIViewController {
     // MARK: - UI Components
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Select Language"
+        label.text = Strings.Label.selectLanguage
         label.font = UIFont.boldSystemFont(ofSize: 20)
         label.textColor = .black
         return label
@@ -21,7 +21,7 @@ class LanguageSelectionViewController: UIViewController {
     
     private let selectCTA: AppButtonView = {
         let view = AppButtonView()
-        view.configure(with: .primary(title: "Select", image: nil))
+        view.configure(with: .primary(title: Strings.Label.select, image: nil))
         return view
     }()
     

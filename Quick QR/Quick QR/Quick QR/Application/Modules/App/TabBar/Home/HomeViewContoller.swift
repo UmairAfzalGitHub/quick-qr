@@ -13,7 +13,7 @@ class HomeViewController: UIViewController {
     private let betterSegmentedControl: BetterSegmentedControl = {
         let control = BetterSegmentedControl(
             frame: CGRect.zero,
-            segments: LabelSegment.segments(withTitles: ["QR Code", "Bar Code"],
+            segments: LabelSegment.segments(withTitles: [Strings.Label.qrCode, Strings.Label.barCode],
                                             normalFont: UIFont.systemFont(ofSize: 16, weight: .semibold),
                                           normalTextColor: UIColor.systemGray,
                                             selectedFont: UIFont.systemFont(ofSize: 16, weight: .semibold),

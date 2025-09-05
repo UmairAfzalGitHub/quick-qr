@@ -16,7 +16,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     private let betterSegmentedControl: BetterSegmentedControl = {
         let control = BetterSegmentedControl(
             frame: CGRect.zero,
-            segments: LabelSegment.segments(withTitles: ["Scan", "Created"],
+            segments: LabelSegment.segments(withTitles: [Strings.Label.scan,Strings.Label.created],
                                             normalFont: UIFont.systemFont(ofSize: 16, weight: .semibold),
                                           normalTextColor: UIColor.systemGray,
                                             selectedFont: UIFont.systemFont(ofSize: 16, weight: .semibold),
@@ -143,12 +143,12 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         imageView.tintColor = .appPrimary
         
         let titleLabel = UILabel()
-        titleLabel.text = "No History Yet"
+        titleLabel.text = Strings.Label.noHistoryYet
         titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         titleLabel.textAlignment = .center
         
         let subtitleLabel = UILabel()
-        subtitleLabel.text = "Your generated codes will appear here"
+        subtitleLabel.text = Strings.Label.yourGeneratedCodes
         subtitleLabel.font = UIFont.systemFont(ofSize: 14)
         subtitleLabel.textColor = .systemGray
         subtitleLabel.textAlignment = .center
@@ -214,13 +214,13 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 if let qrImage = CodeGeneratorManager.shared.generateQRCode(from: selectedItem.content) {
                     resultVC.setQRCodeImage(qrImage)
                 }
-                resultVC.setTitleAndDescription(title: selectedItem.title, description: "QR Code")
+                resultVC.setTitleAndDescription(title: selectedItem.title, description: Strings.Label.qrCode)
             case .socialQRCode:
                 if let socialType = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == selectedItem.subtype.lowercased() }) {
                     if let qrImage = CodeGeneratorManager.shared.generateSocialQRCode(type: socialType, username: selectedItem.content) {
                         resultVC.setQRCodeImage(qrImage)
                     }
-                    resultVC.setTitleAndDescription(title: selectedItem.title, description: "Social QR")
+                    resultVC.setTitleAndDescription(title: selectedItem.title, description: Strings.Label.socialQR)
                 }
             case .barCode:
                 if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == selectedItem.subtype.lowercased() }) {
@@ -228,7 +228,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
                         resultVC.setBarCodeImage(barcodeImage)
                         resultVC.setBarCodeType(icon: barType.icon, title: barType.title)
                     }
-                    resultVC.setTitleAndDescription(title: selectedItem.title, description: "Barcode")
+                    resultVC.setTitleAndDescription(title: selectedItem.title, description: Strings.Label.barCode)
                 }
             }
             navigationController?.pushViewController(resultVC, animated: true)

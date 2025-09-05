@@ -78,11 +78,7 @@ class CodeGeneratorManager {
         
         // Configure filter based on type
         switch type {
-        case .code128, .code39, .code93, .pdf417, .aztec:
-            barcodeFilter.setValue(data, forKey: "inputMessage")
-        case .dataMatrix:
-            print("[CodeGeneratorManager] Generating Data Matrix barcode using Code128 filter")
-            // Use Code128 filter for Data Matrix
+        case .code128, .code39, .code93, .pdf417:
             barcodeFilter.setValue(data, forKey: "inputMessage")
         case .isbn:
             // For ISBN, we'll use Code128 which is more reliable for this purpose
@@ -181,8 +177,6 @@ class CodeGeneratorManager {
         case .code39: return "CICode128BarcodeGenerator" // Fallback to Code128
         case .code93: return "CICode128BarcodeGenerator" // Fallback to Code128
         case .itf: return "CICode128BarcodeGenerator" // Fallback to Code128
-        case .aztec: return "CIAztecCodeGenerator" // Aztec code generator
-        case .dataMatrix: return "CICode128BarcodeGenerator" // Use Code128 as fallback for Data Matrix
         }
     }
     

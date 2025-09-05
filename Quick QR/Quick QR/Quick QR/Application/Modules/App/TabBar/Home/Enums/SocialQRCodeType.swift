@@ -12,14 +12,14 @@ enum SocialQRCodeType: CaseIterable, CodeTypeProtocol {
     
     var title: String {
         switch self {
-        case .tiktok: return "TikTok"
-        case .instagram: return "Instagram"
-        case .facebook: return "Facebook"
-        case .x: return "X"
-        case .whatsapp: return "WhatsApp"
-        case .youtube: return "Youtube"
-        case .spotify: return "Spotify"
-        case .viber: return "Viber"
+        case .tiktok: return Strings.Label.tikTok
+        case .instagram: return Strings.Label.instagram
+        case .facebook: return Strings.Label.facebook
+        case .x: return Strings.Label.x
+        case .whatsapp: return Strings.Label.whatsApp
+        case .youtube: return Strings.Label.youtube
+        case .spotify: return Strings.Label.spotify
+        case .viber: return Strings.Label.viber
         }
     }
     

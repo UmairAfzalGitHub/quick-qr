@@ -19,7 +19,7 @@ protocol CodeTypeProtocol {
 }
 
 enum BarCodeType: CaseIterable, CodeTypeProtocol {
-    case isbn, ean8, upce, ean13, upca, code39, code93, code128, itf, pdf417, aztec, dataMatrix
+    case isbn, ean8, upce, ean13, upca, code39, code93, code128, itf, pdf417
     
     var title: String {
         switch self {
@@ -33,8 +33,6 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .code128: return "Code 128"
         case .itf: return "ITF"
         case .pdf417: return "PDF 417"
-        case .aztec: return "Aztec"
-        case .dataMatrix: return "Data Matrix"
         }
     }
     
@@ -50,7 +48,6 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .code128: return UIImage(named: "code128-icon")
         case .itf: return UIImage(named: "itf-icon")
         case .pdf417: return UIImage(named: "pdf417-icon")
-        case .aztec, .dataMatrix: return UIImage(named: "pdf417-icon") // Reusing PDF417 icon until a specific one is available
         }
     }
     
@@ -72,25 +69,21 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .code128: return "Encodes the full ASCII set [0..127]"
         case .itf: return "Enter plain text"
         case .pdf417: return "Enter plain text"
-        case .aztec: return "Enter text or data for Aztec code"
-        case .dataMatrix: return "Enter text or data for Data Matrix code"
         }
     }
     
     var metadataObjectType: AVMetadataObject.ObjectType {
           switch self {
+          case .isbn: return .ean13
           case .ean8: return .ean8
           case .upce: return .upce
           case .ean13: return .ean13
-          case .upca: return .itf14 // or .upca if available in your SDK
+          case .upca: return .itf14
           case .code39: return .code39
           case .code93: return .code93
           case .code128: return .code128
           case .itf: return .interleaved2of5
           case .pdf417: return .pdf417
-          case .aztec: return .aztec
-          case .dataMatrix: return .dataMatrix
-          case .isbn: return .ean13 // ISBN barcodes are encoded as EAN-13
           }
       }
 }

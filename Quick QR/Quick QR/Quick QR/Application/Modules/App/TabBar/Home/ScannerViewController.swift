@@ -158,12 +158,12 @@ class ScannerViewController: UIViewController {
     
     private func showPermissionAlert() {
         let alert = UIAlertController(
-            title: "Camera Access Needed",
-            message: "Please enable camera access in Settings to scan QR codes.",
+            title: Strings.Label.cameraAccessNeeded,
+            message: Strings.Label.pleaseEnableCamera,
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "Settings", style: .default, handler: { _ in
+        alert.addAction(UIAlertAction(title: Strings.Label.cancel, style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: Strings.Label.settings, style: .default, handler: { _ in
             if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(settingsURL)
             }

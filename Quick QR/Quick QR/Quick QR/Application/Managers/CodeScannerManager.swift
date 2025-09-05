@@ -368,16 +368,12 @@ extension CodeScannerManager: AVCaptureMetadataOutputObjectsDelegate {
             return ("EAN 13", BarCodeType.ean13)
         case .pdf417:
             return ("PDF 417", BarCodeType.pdf417)
-        case .aztec:
-            return ("Aztec", BarCodeType.aztec)
         case .code39:
             return ("Code 39", BarCodeType.code39)
         case .code93:
             return ("Code 93", BarCodeType.code93)
         case .code128:
             return ("Code 128", BarCodeType.code128)
-        case .dataMatrix:
-            return ("Data Matrix", BarCodeType.dataMatrix)
         case .interleaved2of5:
             return ("ITF", BarCodeType.itf)
         case .upce:

@@ -23,8 +23,8 @@ class IAPViewController: UIViewController {
         
         var title: String {
             switch self {
-            case .monthly: return "Monthly"
-            case .yearly: return "Yearly"
+            case .monthly: return Strings.Label.monthly
+            case .yearly: return Strings.Label.yearly
             }
         }
         
@@ -44,15 +44,15 @@ class IAPViewController: UIViewController {
         
         var tag: String? {
             switch self {
-            case .monthly: return "Recommended"
-            case .yearly: return "Popular"
+            case .monthly: return Strings.Label.recommended
+            case .yearly: return Strings.Label.popular
             }
         }
         
         var perMonthText: String? {
             switch self {
             case .monthly: return nil
-            case .yearly: return "per month"
+            case .yearly: return Strings.Label.perYear
             }
         }
     }
@@ -64,9 +64,9 @@ class IAPViewController: UIViewController {
         
         var title: String {
             switch self {
-            case .membershipBenefits: return "Unlock more membership benefits"
-            case .noAds: return "No ads, smooth scanning"
-            case .batchScanning: return "Scan codes in batches"
+            case .membershipBenefits: return Strings.Label.unlockMoreMembership
+            case .noAds: return Strings.Label.noAdsSmoothScanning
+            case .batchScanning: return Strings.Label.scanCodesInBatches
             }
         }
         
@@ -204,7 +204,7 @@ class IAPViewController: UIViewController {
         
         // Title
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Upgrade to pro"
+        titleLabel.text = Strings.Label.upgradeToPro
         titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
         titleLabel.textAlignment = .center
         
@@ -239,13 +239,13 @@ class IAPViewController: UIViewController {
     
     private func setupTitles() {
         mainTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        mainTitleLabel.text = "Unlock all features"
+        mainTitleLabel.text = Strings.Label.unlockAllFeatures
         mainTitleLabel.font = UIFont.systemFont(ofSize: 24, weight: .bold)
         mainTitleLabel.textColor = .appPrimary
         mainTitleLabel.textAlignment = .center
         
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.text = "Scan all type of QR Codes & bar Codes"
+        subtitleLabel.text = Strings.Label.scanAllType
         subtitleLabel.font = UIFont.systemFont(ofSize: 16)
         subtitleLabel.textColor = .customColor(fromHex: "585B67")
         subtitleLabel.textAlignment = .center
@@ -356,7 +356,7 @@ class IAPViewController: UIViewController {
         // Add subscription info label
         let subscriptionInfoLabel = UILabel()
         subscriptionInfoLabel.translatesAutoresizingMaskIntoConstraints = false
-        subscriptionInfoLabel.text = "Once you subscribe, your plan will automatically renew unless you choose to cancel."
+        subscriptionInfoLabel.text = Strings.Label.onceYouSubscribe
         subscriptionInfoLabel.font = UIFont.systemFont(ofSize: 12)
         subscriptionInfoLabel.textColor = .gray
         subscriptionInfoLabel.textAlignment = .center
@@ -466,7 +466,7 @@ class IAPViewController: UIViewController {
             // Find the per month labels
             for subview in containerView.subviews {
                 if let label = subview as? UILabel {
-                    if label.text == "per month" {
+                    if label.text == Strings.Label.perMonth {
                         NSLayoutConstraint.activate([
                             label.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
                             label.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 2)
@@ -508,20 +508,20 @@ class IAPViewController: UIViewController {
         
         // Continue button
         continueButton.translatesAutoresizingMaskIntoConstraints = false
-        continueButton.setBoldTitle("Continue")
+        continueButton.setBoldTitle(Strings.Label.continueLabel)
         continueButton.addTarget(self, action: #selector(continueButtonTapped), for: .touchUpInside)
         
         // Terms and privacy
         let termsButton = UIButton(type: .system)
         termsButton.translatesAutoresizingMaskIntoConstraints = false
-        termsButton.setTitle("Terms of Service", for: .normal)
+        termsButton.setTitle(Strings.Label.termsOfService, for: .normal)
         termsButton.setTitleColor(.black, for: .normal)
         termsButton.titleLabel?.font = UIFont.systemFont(ofSize: 12)
         termsButton.addTarget(self, action: #selector(termsButtonTapped), for: .touchUpInside)
         
         let privacyButton = UIButton(type: .system)
         privacyButton.translatesAutoresizingMaskIntoConstraints = false
-        privacyButton.setTitle("Privacy Policy", for: .normal)
+        privacyButton.setTitle(Strings.Label.privacyPolicy, for: .normal)
         privacyButton.setTitleColor(.black, for: .normal)
         privacyButton.titleLabel?.font = UIFont.systemFont(ofSize: 12)
         privacyButton.addTarget(self, action: #selector(privacyButtonTapped), for: .touchUpInside)
@@ -575,7 +575,7 @@ class IAPViewController: UIViewController {
     
     private func localize() {
         // Add your localization strings here if needed
-        titleLabel.text = "Upgrade to Pro"
+        titleLabel.text = Strings.Label.upgradeToPro
     }
     
     @objc private func handleProductsFetched() {
@@ -640,7 +640,7 @@ class IAPViewController: UIViewController {
             monthlyPlanView.layer.borderColor = UIColor.white.cgColor   // ✅ White border
             
             for subview in monthlyPlanView.subviews {
-                if let label = subview as? UILabel, label.text != "Recommended" {
+                if let label = subview as? UILabel, label.text != Strings.Label.recommended {
                     label.textColor = .white
                 }
             }
@@ -650,7 +650,7 @@ class IAPViewController: UIViewController {
             yearlyPlanView.layer.borderColor = UIColor.gray.withAlphaComponent(0.35).cgColor   // ✅ Gray border
             
             for subview in yearlyPlanView.subviews {
-                if let label = subview as? UILabel, label.text != "Popular" {
+                if let label = subview as? UILabel, label.text != Strings.Label.popular {
                     label.textColor = .black
                 }
             }
@@ -667,7 +667,7 @@ class IAPViewController: UIViewController {
             yearlyPlanView.layer.borderColor = UIColor.white.cgColor   // ✅ White border
             
             for subview in yearlyPlanView.subviews {
-                if let label = subview as? UILabel, label.text != "Popular" {
+                if let label = subview as? UILabel, label.text != Strings.Label.popular {
                     label.textColor = .white
                 }
             }
@@ -677,7 +677,7 @@ class IAPViewController: UIViewController {
             monthlyPlanView.layer.borderColor = UIColor.gray.withAlphaComponent(0.35).cgColor   // ✅ Gray border
             
             for subview in monthlyPlanView.subviews  {
-                if let label = subview as? UILabel, label.text != "Recommended" {
+                if let label = subview as? UILabel, label.text != Strings.Label.recommended {
                     label.textColor = .black
                 }
             }
@@ -688,7 +688,7 @@ class IAPViewController: UIViewController {
     private func handleSuccessfulPurchase(message: String) {
         UserDefaults.standard.set(true, forKey: "isSubscribed")
         delegate?.performAction()
-        showAlert(title: "Success", message: message) {
+        showAlert(title: Strings.Label.success, message: message) {
             self.dismiss(animated: true, completion: nil)
         }
     }
@@ -707,7 +707,7 @@ class IAPViewController: UIViewController {
     
     @objc private func continueButtonTapped() {
         guard let selectedProduct = selectedPlan == .monthly ? monthlyProduct : yearlyProduct else {
-            showAlert(title: "Error", message: "Unable to load subscription products. Please try again.")
+            showAlert(title: Strings.Label.error, message: Strings.Label.unableToLoad)
             return
         }
         
@@ -720,10 +720,10 @@ class IAPViewController: UIViewController {
                 self?.continueButton.isEnabled = true
                 
                 if success {
-                    self?.handleSuccessfulPurchase(message: "Thank you for subscribing!")
+                    self?.handleSuccessfulPurchase(message: Strings.Label.thankyouForSubscribing)
                 } else {
-                    let errorMessage = error ?? "Purchase failed. Please try again."
-                    self?.showAlert(title: "Purchase Failed", message: errorMessage)
+                    let errorMessage = error ?? Strings.Label.purchaseFailedTryAgain
+                    self?.showAlert(title: Strings.Label.purchaseFailed, message: errorMessage)
                 }
             }
         }
@@ -737,11 +737,11 @@ class IAPViewController: UIViewController {
                 self?.loadingIndicator.stopAnimating()
                 
                 if success {
-                    self?.handleSuccessfulPurchase(message: "Purchase was successfully restored")
+                    self?.handleSuccessfulPurchase(message: Strings.Label.purchaseSuccessfullyRestored)
                 } else {
                     self?.showAlert(
-                        title: "Restore Failed",
-                        message: "No active subscriptions found for this account. Please make sure you're signed in with the correct Apple ID."
+                        title: Strings.Label.restoreFailed,
+                        message: Strings.Label.noActiveSubscriptions
                     )
                 }
             }

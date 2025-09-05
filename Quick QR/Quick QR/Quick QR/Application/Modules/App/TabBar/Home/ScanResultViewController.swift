@@ -382,9 +382,9 @@ final class ScanResultViewController: UIViewController {
     
     private func setupActions() {
         // Create 3 action items (Connect, Download, Share)
-        let connect = makeAction(icon: UIImage(named: "wifi-icon")?.withRenderingMode(.alwaysTemplate), title: "Connect")
-        let download = makeAction(icon: UIImage(named: "download-result-icon"), title: "Download")
-        let share = makeAction(icon: UIImage(named: "share-result-icon"), title: "Share")
+        let connect = makeAction(icon: UIImage(named: "wifi-icon")?.withRenderingMode(.alwaysTemplate), title: Strings.Label.connect)
+        let download = makeAction(icon: UIImage(named: "download-result-icon"), title: Strings.Label.title)
+        let share = makeAction(icon: UIImage(named: "share-result-icon"), title: Strings.Label.share)
         
         actionsStack.addArrangedSubview(connect)
         actionsStack.addArrangedSubview(download)
@@ -775,52 +775,52 @@ final class ScanResultViewController: UIViewController {
         case .qrCode(let type, let data):
             switch type {
             case .wifi:
-                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "wifi-icon")?.withRenderingMode(.alwaysTemplate), title: "Connect"))
+                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "wifi-icon")?.withRenderingMode(.alwaysTemplate), title: Strings.Label.connect))
             case .phone:
                 let phoneNumber = data.replacingOccurrences(of: "tel:", with: "")
                     .replacingOccurrences(of: "telprompt:", with: "")
-                let callAction = makeAction(icon: UIImage(named: "phone-icon")?.withRenderingMode(.alwaysTemplate), title: "Call")
+                let callAction = makeAction(icon: UIImage(named: "phone-icon")?.withRenderingMode(.alwaysTemplate), title: Strings.Label.call)
                 callAction.tag = 1001 // Tag for phone action
                 actionsStack.addArrangedSubview(callAction)
             case .email:
-                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "email-icon")?.withRenderingMode(.alwaysTemplate), title: "Email"))
+                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "email-icon")?.withRenderingMode(.alwaysTemplate), title: Strings.Label.email))
             case .website:
-                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "website-icon")?.withRenderingMode(.alwaysTemplate), title: "Open"))
+                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "website-icon")?.withRenderingMode(.alwaysTemplate), title: Strings.Label.open))
             case .location:
-                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "location-icon")?.withRenderingMode(.alwaysTemplate), title: "Open Map"))
+                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "location-icon")?.withRenderingMode(.alwaysTemplate), title: Strings.Label.openMap))
             case .contact:
-                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "contact-icon")?.withRenderingMode(.alwaysTemplate), title: "Save Contact"))
+                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "contact-icon")?.withRenderingMode(.alwaysTemplate), title: Strings.Label.saveContact))
             case .events:
-                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "events-icon")?.withRenderingMode(.alwaysTemplate), title: "Add to Calendar"))
+                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "events-icon")?.withRenderingMode(.alwaysTemplate), title: Strings.Label.addToCalendar))
             case .text:
                 // Check if this is an SMS QR code
                 if data.hasPrefix("SMSTO:") || data.hasPrefix("smsto:") || data.hasPrefix("SMS:") || data.hasPrefix("sms:") {
-                    actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "message-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "message.fill"), title: "Send SMS"))
+                    actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "message-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "message.fill"), title: Strings.Label.sendSMS))
                 } else {
-                    actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "copy-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "doc.on.doc"), title: "Copy"))
+                    actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "copy-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "doc.on.doc"), title: Strings.Label.copy))
                 }
             }
             
         case .socialQR(let type, _):
             // Use the social platform's icon for the action button
             let socialIcon = type.icon?.withRenderingMode(.alwaysOriginal)
-            actionsStack.addArrangedSubview(makeAction(icon: socialIcon, title: "Open"))
+            actionsStack.addArrangedSubview(makeAction(icon: socialIcon, title: Strings.Label.open))
             
         case .barcode(let type, let data, _):
             // For product barcodes, show "Search Product"
             if [.ean8, .ean13, .upca, .upce].contains(where: { $0 == type }) {
-                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "search-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "magnifyingglass"), title: "Search Product"))
+                actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "search-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "magnifyingglass"), title: Strings.Label.searchProduct))
             } else {
-                actionsStack.addArrangedSubview(makeAction(icon: type.icon?.withRenderingMode(.alwaysTemplate), title: "Copy"))
+                actionsStack.addArrangedSubview(makeAction(icon: type.icon?.withRenderingMode(.alwaysTemplate), title: Strings.Label.copy))
             }
             
         case .unknown(_):
-            actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "copy-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "doc.on.doc"), title: "Copy"))
+            actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "copy-icon")?.withRenderingMode(.alwaysTemplate) ?? UIImage(systemName: "doc.on.doc"), title: Strings.Label.copy))
         }
         
         // Always add download and share buttons
-        actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "download-result-icon"), title: "Download"))
-        actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "share-result-icon"), title: "Share"))
+        actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "download-result-icon"), title: Strings.Label.download))
+        actionsStack.addArrangedSubview(makeAction(icon: UIImage(named: "share-result-icon"), title: Strings.Label.share))
     }
     
     // MARK: - Helper Methods
@@ -916,14 +916,14 @@ final class ScanResultViewController: UIViewController {
     /// Save QR code image to photo library
     private func saveQRCodeImage() {
         // Present action sheet for save options
-        let alert = UIAlertController(title: "Save Code", message: "Choose where to save your code image.", preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "Save to Gallery", style: .default, handler: { _ in
+        let alert = UIAlertController(title: Strings.Label.saveCode, message: Strings.Label.chooseWhereToSave, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: Strings.Label.saveToGallery, style: .default, handler: { _ in
             self.saveImageToGallery()
         }))
-        alert.addAction(UIAlertAction(title: "Save to Files", style: .default, handler: { _ in
+        alert.addAction(UIAlertAction(title: Strings.Label.saveToFiles, style: .default, handler: { _ in
             self.saveImageToFiles()
         }))
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: Strings.Label.cancel, style: .cancel))
         if let popover = alert.popoverPresentationController {
             popover.sourceView = self.qrImageView
             popover.sourceRect = self.qrImageView.bounds
@@ -933,25 +933,25 @@ final class ScanResultViewController: UIViewController {
 
     private func saveImageToGallery() {
         guard let qrImage = qrImageView.image else {
-            showToast(message: "Could not save QR code image")
+            showToast(message: Strings.Label.couldnotSaveQR)
             return
         }
         PhotosManager.shared.save(image: qrImage) { result in
             switch result {
             case .success:
-                self.showToast(message: "Image saved to gallery.")
+                self.showToast(message: Strings.Label.imageSavedToGallery)
             case .failure(let error):
                 let message: String
                 if let photosError = error as? PhotosManager.PhotosError {
                     switch photosError {
                     case .authorizationDenied:
-                        message = "Permission denied. Enable Photos access in Settings."
+                        message = Strings.Label.permission_denied
                     case .authorizationRestricted:
-                        message = "Photos access is restricted."
+                        message = Strings.Label.photosAccessRestricted
                     case .notDetermined:
-                        message = "Photos permission not determined."
+                        message = Strings.Label.photosPermissionNotDetermined
                     case .creationFailed:
-                        message = "Failed to save image."
+                        message = Strings.Label.failedToSaveImage
                     default:
                         message = error.localizedDescription
                     }
@@ -976,15 +976,15 @@ final class ScanResultViewController: UIViewController {
 
     private func saveImageToFiles() {
         guard let qrImage = qrImageView.image else {
-            showToast(message: "Could not save QR code image")
+            showToast(message: Strings.Label.couldnotSaveQR)
             return
         }
         PhotosManager.shared.saveToFiles(image: qrImage, presenter: self) { result in
             switch result {
             case .success:
-                self.showToast(message: "Image saved to Files")
+                self.showToast(message: Strings.Label.imageSavedToFiles)
             case .failure(let error):
-                self.showToast(message: "Error saving image: \(error.localizedDescription)")
+                self.showToast(message: "\(Strings.Label.errorSavingImage): \(error.localizedDescription)")
             }
         }
     }
@@ -1068,14 +1068,14 @@ final class ScanResultViewController: UIViewController {
             
             if !granted {
                 DispatchQueue.main.async {
-                    self.showToast(message: "Calendar access denied")
+                    self.showToast(message: Strings.Label.calendarAccessDenied)
                 }
                 return
             }
             
             if let error = error {
                 DispatchQueue.main.async {
-                    self.showToast(message: "Error: \(error.localizedDescription)")
+                    self.showToast(message: "\(Strings.Label.error): \(error.localizedDescription)")
                 }
                 return
             }
@@ -1124,11 +1124,11 @@ final class ScanResultViewController: UIViewController {
             do {
                 try eventStore.save(event, span: .thisEvent)
                 DispatchQueue.main.async {
-                    self.showToast(message: "Event added to calendar")
+                    self.showToast(message: Strings.Label.eventAddedToCalendar)
                 }
             } catch {
                 DispatchQueue.main.async {
-                    self.showToast(message: "Could not save event: \(error.localizedDescription)")
+                    self.showToast(message: "\(Strings.Label.couldNotSaveEvent): \(error.localizedDescription)")
                 }
             }
         }

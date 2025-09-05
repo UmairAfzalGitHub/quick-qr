@@ -106,10 +106,6 @@ class ScanDataParser {
             return .code93
         case .code128:
             return .code128
-        case .dataMatrix:
-            return .dataMatrix
-        case .aztec:
-            return .aztec
         case .interleaved2of5, .itf14:
             return .itf
         case .upce:

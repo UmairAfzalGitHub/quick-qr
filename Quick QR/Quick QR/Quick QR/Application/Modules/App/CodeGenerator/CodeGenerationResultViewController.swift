@@ -249,14 +249,14 @@ class CodeGenerationResultViewController: UIViewController {
     
     @objc private func saveButtonTapped() {
         // Present action sheet for save options
-        let alert = UIAlertController(title: "Save Code", message: "Choose where to save your code image.", preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "Save to Gallery", style: .default, handler: { _ in
+        let alert = UIAlertController(title: Strings.Label.saveCode, message: Strings.Label.chooseWhereToSave, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: Strings.Label.saveToGallery, style: .default, handler: { _ in
             self.saveImageToGallery()
         }))
-        alert.addAction(UIAlertAction(title: "Save to Files", style: .default, handler: { _ in
+        alert.addAction(UIAlertAction(title: Strings.Label.saveToFiles, style: .default, handler: { _ in
             self.saveImageToFiles()
         }))
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: Strings.Label.cancel, style: .cancel))
         if let popover = alert.popoverPresentationController {
             popover.sourceView = self.saveButton
             popover.sourceRect = self.saveButton.bounds
@@ -267,20 +267,20 @@ class CodeGenerationResultViewController: UIViewController {
     private func saveImageToGallery() {
         let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
         guard let imageToSave = image else {
-            let alert = UIAlertController(title: "Error", message: "No image to save.", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            let alert = UIAlertController(title: Strings.Label.error, message: Strings.Label.noImageToSave, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
             present(alert, animated: true)
             return
         }
         PhotosManager.shared.save(image: imageToSave) { result in
             switch result {
             case .success:
-                let alert = UIAlertController(title: "Saved!", message: "Image saved to gallery.", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                let alert = UIAlertController(title: "\(Strings.Label.saved)!", message: Strings.Label.imageSavedToLibrary, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
                 self.present(alert, animated: true)
             case .failure(let error):
-                let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                let alert = UIAlertController(title: Strings.Label.error, message: error.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
                 self.present(alert, animated: true)
             }
         }
@@ -289,8 +289,8 @@ class CodeGenerationResultViewController: UIViewController {
     private func saveImageToFiles() {
         let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
         guard let imageToSave = image else {
-            let alert = UIAlertController(title: "Error", message: "No image to save.", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            let alert = UIAlertController(title: Strings.Label.error, message: Strings.Label.noImageToSave, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
             present(alert, animated: true)
             return
         }
