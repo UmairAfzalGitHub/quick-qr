@@ -36,7 +36,7 @@ struct HistoryItem: Codable {
     }
     
     // Convert to FavoriteItem for display
-    func toFavoriteItem() -> FavoriteItem {
+    func toFavoriteItem(origin: FavoriteItem.Origin) -> FavoriteItem {
         let itemType: FavoriteItem.ItemType
         var displayContent = content
         
@@ -73,7 +73,7 @@ struct HistoryItem: Codable {
             }
         }
         
-        return FavoriteItem(type: itemType, title: title, url: displayContent, id: id, isFavorite: isFavorite)
+        return FavoriteItem(type: itemType, title: title, url: displayContent, id: id, isFavorite: isFavorite, origin: origin)
     }
 }
 
@@ -245,9 +245,9 @@ class HistoryManager {
         return false
     }
     
-    func getFavorites() -> [HistoryItem] {
-        let createdFavorites = getHistory(forScan: false).filter { $0.isFavorite }
-        let scanFavorites = getHistory(forScan: true).filter { $0.isFavorite }
+    func getFavorites() -> [FavoriteItem] {
+        let createdFavorites = getHistory(forScan: false).filter { $0.isFavorite }.map { $0.toFavoriteItem(origin: .created) }
+        let scanFavorites = getHistory(forScan: true).filter { $0.isFavorite }.map { $0.toFavoriteItem(origin: .scanned) }
         return createdFavorites + scanFavorites
     }
 }

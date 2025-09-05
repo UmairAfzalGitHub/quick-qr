@@ -108,7 +108,8 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         let historyItems = isScanSelected ? 
             HistoryManager.shared.getScanHistory() : 
             HistoryManager.shared.getCreatedHistory()
-        dataSource = historyItems.map { $0.toFavoriteItem() }
+        let origin: FavoriteItem.Origin = isScanSelected ? .scanned : .created
+        dataSource = historyItems.map { $0.toFavoriteItem(origin: origin) }
         tableView.reloadData()
         
         // Show empty state if needed
