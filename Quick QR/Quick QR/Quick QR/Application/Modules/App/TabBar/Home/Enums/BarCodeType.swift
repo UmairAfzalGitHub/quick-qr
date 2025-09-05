@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 protocol CodeTypeProtocol {
     var title: String { get }
@@ -75,4 +76,21 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
         case .dataMatrix: return "Enter text or data for Data Matrix code"
         }
     }
+    
+    var metadataObjectType: AVMetadataObject.ObjectType {
+          switch self {
+          case .ean8: return .ean8
+          case .upce: return .upce
+          case .ean13: return .ean13
+          case .upca: return .itf14 // or .upca if available in your SDK
+          case .code39: return .code39
+          case .code93: return .code93
+          case .code128: return .code128
+          case .itf: return .interleaved2of5
+          case .pdf417: return .pdf417
+          case .aztec: return .aztec
+          case .dataMatrix: return .dataMatrix
+          case .isbn: return .ean13 // ISBN barcodes are encoded as EAN-13
+          }
+      }
 }
