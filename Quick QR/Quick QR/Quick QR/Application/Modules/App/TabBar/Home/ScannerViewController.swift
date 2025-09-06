@@ -109,9 +109,9 @@ class ScannerViewController: UIViewController {
     }
     
     func hideCenterQRImageView() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             guard let self = self else { return }
-            UIView.animate(withDuration: 0.5, animations: {
+            UIView.animate(withDuration: 0.4, animations: {
                 self.qrTempImageView.alpha = 0
             }) { _ in
                 self.qrTempImageView.isHidden = true
@@ -209,7 +209,13 @@ extension ScannerViewController: CodeScannerDelegate {
     }
     
     func scannerDidUpdatePermission(granted: Bool) {
-        if !granted {
+        if granted {
+            // On first grant, start the camera shortly after to avoid starting
+            // while the capture session is still in beginConfiguration/commitConfiguration.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                self?.scannerManager.startCameraSession(true)
+            }
+        } else {
             showPermissionAlert()
         }
     }
