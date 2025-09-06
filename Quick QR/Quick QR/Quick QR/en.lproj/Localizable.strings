@@ -173,3 +173,13 @@
 "go_premium" =  "Go Premium";
 "get_ads_free_experience" =  "Get 100% Ads-Free experience";
 "upgrade_now" =  "Upgrade now";
+"isbn_validation" = "ISBN must be 10 or 13 digits. Only numeric characters are allowed. Max: 13 digits.";
+"ean_eight_validation" = "EAN-8: 7 or 8 digits required. Only numeric characters (0-9) allowed. Max: 8 digits.";
+"upc_seven_validation" = "UPC-E: 7 or 8 digits required. Only numeric characters (0-9) allowed. Max: 8 digits.";
+"ean_thirteen_validation" = "EAN-13: 12 or 13 digits required. Only numeric characters (0-9) allowed. Max: 13 digits.";
+"upc_a_validation" = "UPC-A: 11 or 12 digits required. Only numeric characters (0-9) allowed. Max: 12 digits.";
+"code_39_validation" = "Code 39: Up to 32 characters. Allowed: 0-9, A-Z, space, and -.$/+%";
+"code_93_validation" = "Code 93: Up to 32 characters. Allowed: 0-9, A-Z, space, and -.$/+%";
+"code_128_validation" = "Code 128: Up to 32 characters. All ASCII characters (0-127) allowed.";
+"itf_validation" = "ITF: Even number of digits required. Only numeric characters (0-9) allowed. Max: 32 digits.";
+"pdf_417_validation" = "PDF417: Up to 200 characters. All plain text allowed.";

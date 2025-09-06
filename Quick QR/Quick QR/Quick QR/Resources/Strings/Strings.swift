@@ -179,6 +179,16 @@ struct Strings {
         static var goPremium: String { "go_premium".localized() }
         static var getAdsFreeExperience: String { "get_ads_free_experience".localized() }
         static var upgradeNow: String { "upgrade_now".localized() }
+        static var isbnValidation: String { "isbn_validation".localized() }
+        static var eanEightValidation: String { "ean_eight_validation".localized() }
+        static var upcSevenValidation: String { "upc_seven_validation".localized() }
+        static var eanThirteenValidation: String { "ean_thirteen_validation".localized() }
+        static var upcAValidation: String { "upc_a_validation".localized() }
+        static var code39Validation: String { "code_39_validation".localized() }
+        static var code93Validation: String { "code_93_validation".localized() }
+        static var codeOneTwoEightValidation: String { "code_128_validation".localized() }
+        static var itfValidation: String { "itf_validation".localized() }
+        static var pdfFourOneSevenValidation: String { "pdf_417_validation".localized() }
     }
     
     struct Button {

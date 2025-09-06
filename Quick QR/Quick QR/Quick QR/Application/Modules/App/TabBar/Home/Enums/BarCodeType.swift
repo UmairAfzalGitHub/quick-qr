@@ -39,25 +39,25 @@ enum BarCodeType: CaseIterable, CodeTypeProtocol {
     var validationMessage: String {
         switch self {
         case .isbn:
-            return "ISBN must be 10 or 13 digits. Only numeric characters are allowed. Max: 13 digits."
+            return Strings.Label.isbnValidation
         case .ean8:
-            return "EAN-8: 7 or 8 digits required. Only numeric characters (0-9) allowed. Max: 8 digits."
+            return Strings.Label.eanEightValidation
         case .upce:
-            return "UPC-E: 7 or 8 digits required. Only numeric characters (0-9) allowed. Max: 8 digits."
+            return Strings.Label.upcSevenValidation
         case .ean13:
-            return "EAN-13: 12 or 13 digits required. Only numeric characters (0-9) allowed. Max: 13 digits."
+            return Strings.Label.eanThirteenValidation
         case .upca:
-            return "UPC-A: 11 or 12 digits required. Only numeric characters (0-9) allowed. Max: 12 digits."
+            return Strings.Label.upcAValidation
         case .code39:
-            return "Code 39: Up to 32 characters. Allowed: 0-9, A-Z, space, and -.$/+%"
+            return Strings.Label.code39Validation
         case .code93:
-            return "Code 93: Up to 32 characters. Allowed: 0-9, A-Z, space, and -.$/+%"
+            return Strings.Label.code93Validation
         case .code128:
-            return "Code 128: Up to 32 characters. All ASCII characters (0-127) allowed."
+            return Strings.Label.codeOneTwoEightValidation
         case .itf:
-            return "ITF: Even number of digits required. Only numeric characters (0-9) allowed. Max: 32 digits."
+            return Strings.Label.itfValidation
         case .pdf417:
-            return "PDF417: Up to 200 characters. All plain text allowed."
+            return Strings.Label.pdfFourOneSevenValidation
         }
     }
 
