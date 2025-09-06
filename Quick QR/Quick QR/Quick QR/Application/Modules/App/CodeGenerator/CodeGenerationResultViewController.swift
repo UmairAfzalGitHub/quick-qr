@@ -38,6 +38,9 @@ class CodeGenerationResultViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appSecondaryBackground
+        // Add heart button
+        let heartButton = UIBarButtonItem(image: UIImage(systemName: "heart"), style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        navigationItem.rightBarButtonItem = heartButton
         setupUI()
         setupConstraints()
         setupActions()
@@ -242,6 +245,17 @@ class CodeGenerationResultViewController: UIViewController {
     }
     
     // MARK: - Actions
+    @objc private func toggleFavoriteTapped() {
+        // Get the latest created history
+        let createdHistory = HistoryManager.shared.getCreatedHistory()
+        // Assume the most recent created item is the one being displayed
+        guard let latestItem = createdHistory.first else { return }
+        let itemId = latestItem.id
+        let newFavoriteStatus = HistoryManager.shared.toggleFavorite(forItemWithId: itemId)
+        let heartImageName = newFavoriteStatus ? "heart.fill" : "heart"
+        navigationItem.rightBarButtonItem?.image = UIImage(systemName: heartImageName)
+    }
+
     
     @objc private func shareButtonTapped() {
         shareAction?()
