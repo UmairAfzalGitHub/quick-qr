@@ -30,6 +30,7 @@ class ScannerViewController: UIViewController {
     private let iapImage: UIImageView = {
         let image = UIImageView()
         image.image = UIImage(named: "iap-icon")
+        image.isUserInteractionEnabled = true
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
@@ -53,7 +54,6 @@ class ScannerViewController: UIViewController {
         view.backgroundColor = .black
         setupUI()
         setupConstraints()
-        
         // Configure scanner manager
         scannerManager.delegate = self
         scannerManager.previewContainer = view
@@ -61,6 +61,8 @@ class ScannerViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
         hideCenterQRImageView()
         // Pre-configure camera but don't start yet
         scannerManager.prepareCamera()
@@ -68,6 +70,8 @@ class ScannerViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
+        self.navigationController?.setNavigationBarHidden(false, animated: false)
         // Start camera with highest priority
         scannerManager.startCameraSession(true)
     }
@@ -87,6 +91,10 @@ class ScannerViewController: UIViewController {
         // Add tap gesture recognizer for focus
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
         view.addGestureRecognizer(tapGesture)
+
+        // Add tap gesture recognizer for IAP image
+        let iapTapGesture = UITapGestureRecognizer(target: self, action: #selector(openIAPTapped))
+        iapImage.addGestureRecognizer(iapTapGesture)
     }
     
     func setupConstraints() {
@@ -168,6 +176,13 @@ class ScannerViewController: UIViewController {
             }
         }))
         present(alert, animated: true, completion: nil)
+    }
+
+    // MARK: - IAP
+    @objc private func openIAPTapped() {
+        let vc = IAPViewController()
+        vc.modalPresentationStyle = .fullScreen
+        present(vc, animated: true)
     }
 }
 

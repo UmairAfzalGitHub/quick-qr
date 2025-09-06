@@ -56,8 +56,6 @@
 "create" = "Create";
 "error" = "Error";
 "failed_to_generate" = "Failed to generate code. Please check your input and try again.";
-"tel_colon" = "tel:";
-"sms_to_colon" = "SMSTO:";
 "wifi_name" = "Wi-Fi Name";
 "sms" = "SMS";
 "to_colon" = "To:";

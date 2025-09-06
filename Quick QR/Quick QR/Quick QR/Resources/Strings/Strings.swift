@@ -63,8 +63,8 @@ struct Strings {
         static var create: String { "create".localized() }
         static var error: String { "error".localized() }
         static var failedToGenerate: String { "failed_to_generate".localized() }
-        static var telColon: String { "tel_colon".localized() }
-        static var smsToColon: String { "sms_to_colon".localized() }
+        static var telColon: String { "tel:" }
+        static var smsToColon: String { "SMSTO:" }
         static var wifiName: String { "wifi_name".localized() }
         static var sms: String { "sms".localized() }
         static var toColon: String { "to_colon".localized() }

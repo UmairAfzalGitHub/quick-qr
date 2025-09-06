@@ -593,7 +593,7 @@ final class ScanResultViewController: UIViewController {
             // Format: tel:+1234567890 or telprompt:+1234567890
             let phoneNumber = data.replacingOccurrences(of: "tel:", with: "")
                 .replacingOccurrences(of: "telprompt:", with: "")
-            rowsStack.addArrangedSubview(makeInfoRow(title: "Phone number:", value: phoneNumber, showsButton: false))
+            rowsStack.addArrangedSubview(makeInfoRow(title: "Phone number:", value: phoneNumber, showsButton: true))
             
         case .text:
             // Check if this is an SMS QR code (format: SMSTO:number:message or sms:number:message)
@@ -630,7 +630,7 @@ final class ScanResultViewController: UIViewController {
                 
                 // Always show a name row
                 if let name = nameValue, !name.isEmpty {
-                    rowsStack.addArrangedSubview(makeInfoRow(title: "Name:", value: name, showsButton: false))
+                    rowsStack.addArrangedSubview(makeInfoRow(title: "Name:", value: name, showsButton: true))
                 } else {
                     rowsStack.addArrangedSubview(makeInfoRow(title: "Name:", value: "Contact", showsButton: false))
                 }
@@ -648,7 +648,7 @@ final class ScanResultViewController: UIViewController {
                 let email = extractValue(from: data, key: "EMAIL:")
                 
                 if let name = name {
-                    rowsStack.addArrangedSubview(makeInfoRow(title: "Name:", value: name, showsButton: false))
+                    rowsStack.addArrangedSubview(makeInfoRow(title: "Name:", value: name, showsButton: true))
                 } else {
                     // Always include a name row even if we don't have a specific name
                     rowsStack.addArrangedSubview(makeInfoRow(title: "Name:", value: "Contact", showsButton: false))
@@ -752,7 +752,7 @@ final class ScanResultViewController: UIViewController {
     
     private func addInfoRowsForSocialQR(type: SocialQRCodeType, data: String) {
         // For social QR codes, show the platform and the URL/username
-        rowsStack.addArrangedSubview(makeInfoRow(title: "Platform:", value: type.title, showsButton: false))
+        rowsStack.addArrangedSubview(makeInfoRow(title: "Platform:", value: type.title, showsButton: true))
         rowsStack.addArrangedSubview(makeInfoRow(title: "URL:", value: data, showsButton: true))
         
         // Extract username if possible
@@ -764,7 +764,7 @@ final class ScanResultViewController: UIViewController {
     private func addInfoRowsForBarcode(type: BarCodeType, data: String) {
         // For barcodes, only show the value without the type label
         // This makes it look cleaner and more focused on the actual data
-        rowsStack.addArrangedSubview(makeInfoRow(title: "Value:", value: data, showsButton: false))
+        rowsStack.addArrangedSubview(makeInfoRow(title: "Value:", value: data, showsButton: true))
         
         // For specific barcode types, add additional information
         switch type {

@@ -519,6 +519,29 @@ class ScanResultManager {
         return container
     }
     
+    // Default handler to copy value and show toast
+    @objc private func defaultCopyButtonTapped(_ sender: UIButton) {
+        let value = sender.accessibilityLabel ?? ""
+        UIPasteboard.general.string = value
+        
+        // Determine a view to present the toast on
+        var hostView: UIView?
+        // Prefer window's root view if possible
+        if let window = sender.window {
+            hostView = window
+        } else {
+            // Walk up the superview chain
+            var current: UIView? = sender.superview
+            while let view = current {
+                hostView = view
+                current = view.superview
+            }
+        }
+        if let hostView = hostView {
+            showToast(message: "Copied", on: hostView)
+        }
+    }
+    
     /// Create an info row with title, value and optional copy button
     func makeInfoRow(title: String,
                      value: String,
@@ -562,8 +585,8 @@ class ScanResultManager {
             if let action = buttonAction, let target = target {
                 button.addTarget(target, action: action, for: .touchUpInside)
             } else {
-//                // Fallback to default if no selector provided
-//                button.addTarget(nil, action: #selector(ScanResultViewController.copyButtonTapped(_:)), for: .touchUpInside)
+                // Fallback to default if no selector provided: copy value and show toast
+                button.addTarget(self, action: #selector(defaultCopyButtonTapped(_:)), for: .touchUpInside)
             }
             
             // Set accessibility label for the button to identify it later
