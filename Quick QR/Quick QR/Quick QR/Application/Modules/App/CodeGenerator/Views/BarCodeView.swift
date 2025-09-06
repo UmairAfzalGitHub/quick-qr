@@ -8,6 +8,10 @@
 import UIKit
 
 final class BarCodeView: UIView {
+    // MARK: - Validation Messages
+    /// Stores validation messages for each barcode type
+    var validationMessages: [BarCodeType: String] = [:]
+
     // MARK: - Public API
     var urlText: String? {
         get { barCodeTextField.text }
@@ -43,11 +47,24 @@ final class BarCodeView: UIView {
         tf.layer.borderColor = UIColor.appBorderDark.cgColor
         return tf
     }()
-    
+
+    // Message label for validation
+    private let messageLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont.systemFont(ofSize: 13)
+        label.textColor = .black
+        label.numberOfLines = 0
+        label.isHidden = true
+        return label
+    }()
+
     var type: BarCodeType = .isbn {
         didSet {
             barCodeNameLabel.text = type.title + " \(Strings.Label.barCode)"
             barCodeTextField.placeholder = type.placeholder
+            // Show the default validation message for this type
+            showValidationMessage(type.validationMessage)
         }
     }
     
@@ -68,10 +85,12 @@ final class BarCodeView: UIView {
         
         addSubview(barCodeNameLabel)
         addSubview(barCodeTextField)
+        addSubview(messageLabel)
 
         let side: CGFloat = 0
         let fieldHeight: CGFloat = 54
         let labelFieldSpacing: CGFloat = 8
+        let messageSpacing: CGFloat = 4
         
         NSLayoutConstraint.activate([
             // longitude label
@@ -85,7 +104,24 @@ final class BarCodeView: UIView {
             barCodeTextField.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             barCodeTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
             barCodeTextField.heightAnchor.constraint(equalToConstant: fieldHeight),
+
+            // message label
+            messageLabel.topAnchor.constraint(equalTo: barCodeTextField.bottomAnchor, constant: messageSpacing),
+            messageLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side + 4),
+            messageLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side - 4)
         ])
+    }
+
+    // MARK: - Public API for Validation
+    /// Show a validation message for the current barcode type
+    func showValidationMessage(_ message: String?) {
+        if let message = message, !message.isEmpty {
+            messageLabel.text = message
+            messageLabel.isHidden = false
+        } else {
+            messageLabel.text = nil
+            messageLabel.isHidden = true
+        }
     }
 }
 
