@@ -298,6 +298,77 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func didTapOptionsButton(cell: UITableViewCell) {
-        // Handle options button tap if needed
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        
+        // Get the item from our data source
+        let item = dataSource[indexPath.row]
+        
+        // Create the menu with actions
+        let menu = UIMenu(title: "", children: [
+            UIAction(title: Strings.Label.share, image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
+                self?.shareHistoryItem(at: indexPath)
+            },
+            UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+                self?.deleteHistoryItem(at: indexPath)
+            }
+        ])
+        
+        // Present the menu
+        if let button = cell.contentView.subviews.compactMap({ $0 as? UIButton }).first(where: { $0.actions(forTarget: cell, forControlEvent: .touchUpInside)?.contains("optionsButtonTapped") ?? false }) {
+            button.menu = menu
+            button.showsMenuAsPrimaryAction = true
+            button.sendActions(for: .menuActionTriggered)
+        }
+    }
+    
+    private func shareHistoryItem(at indexPath: IndexPath) {
+        // Generate the image to share based on the history item
+        let item = dataSource[indexPath.row]
+        var imageToShare: UIImage?
+        
+        switch item.type {
+        case .qrCode(let qrType):
+            imageToShare = CodeGeneratorManager.shared.generateQRCode(from: item.url)
+        case .socialQRCode(let socialType):
+            if let socialType = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == item.title.lowercased() }) {
+                imageToShare = CodeGeneratorManager.shared.generateSocialQRCode(type: socialType, username: item.url)
+            }
+        case .barCode(let barType):
+            if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == item.title.lowercased() }) {
+                imageToShare = CodeGeneratorManager.shared.generateBarcode(content: item.url, type: barType)
+            }
+        }
+        
+        // Share the image if available
+        if let image = imageToShare {
+            let activityViewController = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+            present(activityViewController, animated: true)
+        } else {
+            // If no image, share the text content
+            let activityViewController = UIActivityViewController(activityItems: [item.url], applicationActivities: nil)
+            present(activityViewController, animated: true)
+        }
+    }
+    
+    private func deleteHistoryItem(at indexPath: IndexPath) {
+        // Get the history items
+        let historyItems = isScanSelected ? 
+            HistoryManager.shared.getScanHistory() : 
+            HistoryManager.shared.getCreatedHistory()
+        
+        // Delete the item from history manager
+        if indexPath.row < historyItems.count {
+            let itemToDelete = historyItems[indexPath.row]
+            HistoryManager.shared.deleteHistoryItem(withId: itemToDelete.id)
+            
+            // Remove from data source
+            dataSource.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            
+            // Show empty state if needed
+            if dataSource.isEmpty {
+                showEmptyState()
+            }
+        }
     }
 }
