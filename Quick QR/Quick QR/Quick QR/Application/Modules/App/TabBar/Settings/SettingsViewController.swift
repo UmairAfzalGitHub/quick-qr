@@ -189,7 +189,10 @@ class SettingsViewController: UIViewController,
         case .preferences:
             let item = PreferenceItem(rawValue: indexPath.row)!
             if item == .language {
-                // Navigate to language selection
+                let controller = LanguageSelectionViewController()
+                controller.intent = .settings
+                controller.hidesBottomBarWhenPushed = true
+                self.navigationController?.pushViewController(controller, animated: true)
             }
             
         case .other:
