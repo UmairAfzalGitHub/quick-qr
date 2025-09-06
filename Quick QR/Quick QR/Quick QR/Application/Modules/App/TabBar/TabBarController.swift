@@ -50,12 +50,12 @@ class TabBarController: UITabBarController {
         // Create view controllers
         let createVC = HomeViewController()
         createVC.view.backgroundColor = .systemBackground
-        createVC.title = "Choose Type"
+        createVC.title = Strings.Label.chooseType
         let createNavController = UINavigationController(rootViewController: createVC)
 
         let favoriteVC = FavouriteViewController()
         favoriteVC.view.backgroundColor = .systemBackground
-        favoriteVC.title = "Favorite"
+        favoriteVC.title = Strings.Label.favorite
         let favoriteNavController = UINavigationController(rootViewController: favoriteVC)
 
         let scanVC = ScannerViewController()
@@ -65,12 +65,12 @@ class TabBarController: UITabBarController {
         
         let historyVC = HistoryViewController()
         historyVC.view.backgroundColor = .systemBackground
-        historyVC.title = "History"
+        historyVC.title = Strings.Label.history
         let historyNavController = UINavigationController(rootViewController: historyVC)
 
         let settingsVC = SettingsViewController()
         settingsVC.view.backgroundColor = .systemBackground
-        settingsVC.title = "Settings"
+        settingsVC.title = Strings.Label.settings
         let settingsNavController = UINavigationController(rootViewController: settingsVC)
 
         // Configure tab bar items with larger images
@@ -84,12 +84,12 @@ class TabBarController: UITabBarController {
         let historyImage = UIImage(systemName: "clock", withConfiguration: historyConfig)
         let settingsImage = UIImage(systemName: "gear", withConfiguration: settingsConfig)
         
-        let createItem = UITabBarItem(title: "Create", image: createImage, tag: 0)
-        let favoriteItem = UITabBarItem(title: "Favorite", image: favoriteImage, tag: 1)
+        let createItem = UITabBarItem(title: Strings.Label.create, image: createImage, tag: 0)
+        let favoriteItem = UITabBarItem(title: Strings.Label.favorite, image: favoriteImage, tag: 1)
         // Center tab is invisible but takes up space
         let scanItem = UITabBarItem(title: "", image: UIImage(), tag: 2)
-        let historyItem = UITabBarItem(title: "History", image: historyImage, tag: 3)
-        let settingsItem = UITabBarItem(title: "Settings", image: settingsImage, tag: 4)
+        let historyItem = UITabBarItem(title: Strings.Label.history, image: historyImage, tag: 3)
+        let settingsItem = UITabBarItem(title: Strings.Label.settings, image: settingsImage, tag: 4)
         
         createNavController.tabBarItem = createItem
         favoriteNavController.tabBarItem = favoriteItem

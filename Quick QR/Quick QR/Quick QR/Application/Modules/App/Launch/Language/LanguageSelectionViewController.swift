@@ -36,23 +36,41 @@ class LanguageSelectionViewController: UIViewController {
     private var nativeAdView: NativeAdView!
     var nativeAd: GoogleMobileAds.NativeAd?
 
+    var selected = String()
+//    var selectedIndex = 0
+//    
     // MARK: - Data
-    struct Language {
-        let name: String
-        let flag: UIImage?
+    class Language {
+        var title: String
+        var flagImage: String = ""
+        var isSelected: Bool = false
+        let languageCode: String
+
+        init(title: String = "",
+             flagImage: String = "",
+             isSelected: Bool = false,
+             languageCode : String = ""
+        ) {
+            self.title = title
+            self.flagImage = flagImage
+            self.isSelected = isSelected
+            self.languageCode = languageCode
+        }
     }
+
     
     private var languages: [Language] = [
-        Language(name: "Arabic", flag: UIImage(named: "saudi-arabia-flag")),
-        Language(name: "Chinese", flag: UIImage(named: "china-flag")),
-        Language(name: "English", flag: UIImage(named: "uk-flag")),
-        Language(name: "French", flag: UIImage(named: "france-flag")),
-        Language(name: "Hindi", flag: UIImage(named: "india-flag")),
-        Language(name: "Indonesia", flag: UIImage(named: "indonesia-flag")),
-        Language(name: "Italian", flag: UIImage(named: "italy-flag")),
-        Language(name: "Russian", flag: UIImage(named: "russia-flag")),
-        Language(name: "Spanish", flag: UIImage(named: "spain-flag")),
-        Language(name: "Urdu", flag: UIImage(named: "pakistan-flag"))
+        Language(title: "English", flagImage: "🇺🇸", isSelected: false, languageCode: "en"),
+        Language(title: "Hindi", flagImage: "india-flag", isSelected: false, languageCode: "hi"),
+        Language(title: "Chinese", flagImage: "china-flag", isSelected: false, languageCode: "zh-Hans"),
+        Language(title: "Russian", flagImage: "russia-flag", isSelected: false, languageCode: "ru"),
+        Language(title: "Spanish", flagImage: "spain-flag", isSelected: false, languageCode: "es"),
+        Language(title: "French", flagImage: "france-flag", isSelected: false, languageCode: "fr"),
+        Language(title: "German", flagImage: "🇩🇪", isSelected: false, languageCode: "de"),
+        Language(title: "Indonesian", flagImage: "indonesia-flag", isSelected: false, languageCode: "id"),
+        Language(title: "Japanese", flagImage: "🇯🇵", isSelected: false, languageCode: "ja"),
+        Language(title: "Korean", flagImage: "🇰🇷", isSelected: false, languageCode: "ko"),
+        Language(title: "Vietnamese", flagImage: "🇻🇳", isSelected: false, languageCode: "vi"),
     ]
     
     private var selectedIndex: IndexPath?
@@ -180,6 +198,13 @@ class LanguageSelectionViewController: UIViewController {
     @objc private func didTapSelect() {
         UserDefaults.standard.set(true, forKey: "isOnboardingComplete")
 
+        if let selectedIndex = selectedIndex {   // ✅ unwrap safely
+            selectLanguage(indexNo: selectedIndex)
+        } else {
+            print("No language selected")
+            return
+        }
+        
         if AdManager.shared.splashInterstitial == true {
             if AdManager.shared.splashInterstitial {
                 AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
@@ -192,6 +217,8 @@ class LanguageSelectionViewController: UIViewController {
             let navController = TabBarController()
             UIApplication.shared.updateRootViewController(to: navController)
         }
+        
+        
     }
 }
 
@@ -223,6 +250,18 @@ extension LanguageSelectionViewController: UICollectionViewDataSource, UICollect
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = (collectionView.frame.width - 16) / 2
         return CGSize(width: width, height: 64)
+    }
+    
+    func selectLanguage(indexNo : IndexPath) {
+        let diplayLangArray = languages
+
+        print(diplayLangArray[indexNo.row].title)
+        self.selected = diplayLangArray[indexNo.row].title
+        
+        LanguageManager.storeCurrentLanguage(code: diplayLangArray[indexNo.row].languageCode)
+        UserDefaults.standard.set(diplayLangArray[indexNo.row].title, forKey: "DisplayLang")
+        UIView.appearance().semanticContentAttribute = LanguageManager.currentSemantic()
+        UINavigationBar.appearance().semanticContentAttribute = LanguageManager.currentSemantic()
     }
 }
 
@@ -293,15 +332,14 @@ class LanguageCell: UICollectionViewCell {
     }
     
     func configure(with language: LanguageSelectionViewController.Language, isSelected: Bool) {
-        flagImageView.image = language.flag
-        nameLabel.text = language.name
+        flagImageView.image = UIImage(named: language.flagImage)
+        nameLabel.text = language.title
         checkmarkImageView.isHidden = !isSelected
         
         if isSelected {
             cellContentView.layer.borderColor = UIColor.appPrimary.cgColor
             cellContentView.layer.borderWidth = 1
 
-            // Apply shadow to CELL, not inner view
             layer.shadowColor = UIColor.appPrimary.cgColor
             layer.shadowOpacity = 0.4
             layer.shadowOffset = CGSize(width: 0, height: 2)
