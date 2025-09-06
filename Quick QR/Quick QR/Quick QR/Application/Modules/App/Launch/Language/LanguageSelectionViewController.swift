@@ -8,6 +8,11 @@
 import UIKit
 import GoogleMobileAds
 
+enum LanguageIntent {
+    case onBoarding
+    case settings
+}
+
 class LanguageSelectionViewController: UIViewController {
     
     // MARK: - UI Components
@@ -29,35 +34,14 @@ class LanguageSelectionViewController: UIViewController {
     
     private let nativeAdParentView: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemOrange
+        view.backgroundColor = .white
         return view
     }()
     
     private var nativeAdView: NativeAdView!
     var nativeAd: GoogleMobileAds.NativeAd?
-
+    var intent: LanguageIntent = .onBoarding
     var selected = String()
-//    var selectedIndex = 0
-//    
-    // MARK: - Data
-    class Language {
-        var title: String
-        var flagImage: String = ""
-        var isSelected: Bool = false
-        let languageCode: String
-
-        init(title: String = "",
-             flagImage: String = "",
-             isSelected: Bool = false,
-             languageCode : String = ""
-        ) {
-            self.title = title
-            self.flagImage = flagImage
-            self.isSelected = isSelected
-            self.languageCode = languageCode
-        }
-    }
-
     
     private var languages: [Language] = [
         Language(title: "English", flagImage: "🇺🇸", isSelected: false, languageCode: "en"),
@@ -82,8 +66,15 @@ class LanguageSelectionViewController: UIViewController {
         setupCollectionView()
         setupLayout()
         
-        nativeAd = AdManager.shared.getNativeAd()
-        showGoogleNativeAd(nativeAd: nativeAd)
+        if let ad = AdManager.shared.getNativeAd() {
+            nativeAd = ad
+            showGoogleNativeAd(nativeAd: nativeAd)
+        } else {
+            AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+                self?.nativeAd = ad
+                self?.showGoogleNativeAd(nativeAd: ad)
+            }
+        }
     }
     
     // MARK: - Setup Collection View
@@ -196,8 +187,6 @@ class LanguageSelectionViewController: UIViewController {
 
 
     @objc private func didTapSelect() {
-        UserDefaults.standard.set(true, forKey: "isOnboardingComplete")
-
         if let selectedIndex = selectedIndex {   // ✅ unwrap safely
             selectLanguage(indexNo: selectedIndex)
         } else {
@@ -205,6 +194,13 @@ class LanguageSelectionViewController: UIViewController {
             return
         }
         
+        if intent == .settings {
+            self.navigationController?.popViewController(animated: true)
+            return
+        }
+        
+        UserDefaults.standard.set(true, forKey: "isOnboardingComplete")
+
         if AdManager.shared.splashInterstitial == true {
             if AdManager.shared.splashInterstitial {
                 AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
@@ -331,7 +327,7 @@ class LanguageCell: UICollectionViewCell {
         layer.masksToBounds = false
     }
     
-    func configure(with language: LanguageSelectionViewController.Language, isSelected: Bool) {
+    func configure(with language: Language, isSelected: Bool) {
         flagImageView.image = UIImage(named: language.flagImage)
         nameLabel.text = language.title
         checkmarkImageView.isHidden = !isSelected

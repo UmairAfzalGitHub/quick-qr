@@ -370,7 +370,7 @@ class ScanResultManager {
     func shareQRCode(_ image: UIImage?, from viewController: UIViewController) {
         guard let image = image else { return }
         
-        let activityViewController = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        let activityViewController = UIActivityViewController(activityItems: ["Check this out", image], applicationActivities: nil)
         viewController.present(activityViewController, animated: true)
     }
     

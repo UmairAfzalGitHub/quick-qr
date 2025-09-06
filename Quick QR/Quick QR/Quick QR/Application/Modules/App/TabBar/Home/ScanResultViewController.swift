@@ -111,6 +111,10 @@ final class ScanResultViewController: UIViewController {
         // Configure navigation bar
         navigationController?.navigationBar.tintColor = .appPrimary
         
+        // Add heart button
+        let heartButton = UIBarButtonItem(image: UIImage(systemName: "heart"), style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        navigationItem.rightBarButtonItem = heartButton
+        
         // Save scan result to history
         saveScanResultToHistory()
         
@@ -124,6 +128,17 @@ final class ScanResultViewController: UIViewController {
         AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) { ad in
             self.showGoogleNativeAd(nativeAd: ad)
         }
+    }
+
+    @objc private func toggleFavoriteTapped() {
+        // Get the latest scan history
+        let scanHistory = HistoryManager.shared.getScanHistory()
+        // Assume the most recent scan is the one being displayed
+        guard let latestItem = scanHistory.first else { return }
+        let itemId = latestItem.id
+        let newFavoriteStatus = HistoryManager.shared.toggleFavorite(forItemWithId: itemId)
+        let heartImageName = newFavoriteStatus ? "heart.fill" : "heart"
+        navigationItem.rightBarButtonItem?.image = UIImage(systemName: heartImageName)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
