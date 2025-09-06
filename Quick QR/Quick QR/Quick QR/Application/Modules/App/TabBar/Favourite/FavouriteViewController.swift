@@ -154,6 +154,7 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
                 metadataType = .qr
             }
             let scanResultVC = ScanResultViewController(scannedData: item.content, metadataObjectType: metadataType)
+            scanResultVC.intent = .history
             navigationController?.pushViewController(scanResultVC, animated: true)
         }
     }

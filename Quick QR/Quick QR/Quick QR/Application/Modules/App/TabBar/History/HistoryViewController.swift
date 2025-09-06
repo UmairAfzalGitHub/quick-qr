@@ -247,6 +247,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 metadataType = .qr
             }
             let scanResultVC = ScanResultViewController(scannedData: selectedItem.content, metadataObjectType: metadataType)
+            scanResultVC.intent = .history
             navigationController?.pushViewController(scanResultVC, animated: true)
         }
     }

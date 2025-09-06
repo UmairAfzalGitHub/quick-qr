@@ -12,6 +12,11 @@ import Foundation
 import GoogleMobileAds
 import Photos
 
+enum ScanResultIntent {
+    case scan
+    case history
+}
+
 final class ScanResultViewController: UIViewController {
     // MARK: - Properties
     private var scanResult: ScanDataParser.ScanResult?
@@ -90,6 +95,7 @@ final class ScanResultViewController: UIViewController {
     
     private var nativeAdView: NativeAdView!
     var nativeAd: GoogleMobileAds.NativeAd?
+    var intent: ScanResultIntent = .scan
     
     // MARK: - Initializers
     init(scannedData: String, metadataObjectType: AVMetadataObject.ObjectType? = nil) {
@@ -116,7 +122,9 @@ final class ScanResultViewController: UIViewController {
         navigationItem.rightBarButtonItem = heartButton
         
         // Save scan result to history
-        saveScanResultToHistory()
+        if intent != .history {
+            saveScanResultToHistory()
+        }
         
         // Setup UI components
         setupLayout()
