@@ -102,6 +102,8 @@ class IAPViewController: UIViewController {
     
     private var monthlyPlanView = UIView()
     private var yearlyPlanView = UIView()
+    private var monthlyTagLabel: UILabel?
+    private var yearlyTagLabel: UILabel?
     
     private let disclaimerLabel = UILabel()
     private let continueButton = GradientButton(type: .system)
@@ -342,10 +344,32 @@ class IAPViewController: UIViewController {
         // Create plan views
         monthlyPlanView = createPlanView(for: .monthly)
         yearlyPlanView = createPlanView(for: .yearly)
-        
+
         plansStackView.addArrangedSubview(monthlyPlanView)
         plansStackView.addArrangedSubview(yearlyPlanView)
-        
+
+        // Add tag labels as siblings, above their respective plan views
+        if let monthlyTag = createTagLabel(for: .monthly) {
+            contentView.addSubview(monthlyTag)
+            monthlyTagLabel = monthlyTag
+            NSLayoutConstraint.activate([
+                monthlyTag.topAnchor.constraint(equalTo: monthlyPlanView.topAnchor, constant: -10),
+                monthlyTag.trailingAnchor.constraint(equalTo: monthlyPlanView.trailingAnchor, constant: -20),
+                monthlyTag.widthAnchor.constraint(equalToConstant: 140),
+                monthlyTag.heightAnchor.constraint(equalToConstant: 24)
+            ])
+        }
+        if let yearlyTag = createTagLabel(for: .yearly) {
+            contentView.addSubview(yearlyTag)
+            yearlyTagLabel = yearlyTag
+            NSLayoutConstraint.activate([
+                yearlyTag.topAnchor.constraint(equalTo: yearlyPlanView.topAnchor, constant: -10),
+                yearlyTag.trailingAnchor.constraint(equalTo: yearlyPlanView.trailingAnchor, constant: -20),
+                yearlyTag.widthAnchor.constraint(equalToConstant: 80),
+                yearlyTag.heightAnchor.constraint(equalToConstant: 24)
+            ])
+        }
+
         NSLayoutConstraint.activate([
             plansStackView.topAnchor.constraint(equalTo: featureStackView.superview!.bottomAnchor, constant: 24),
             plansStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
@@ -383,14 +407,15 @@ class IAPViewController: UIViewController {
         containerView.layer.borderWidth = 2
         containerView.layer.borderColor = UIColor.gray.withAlphaComponent(0.35).cgColor
         containerView.backgroundColor = .systemGray6
-        
+        containerView.clipsToBounds = false // ensure tag can overflow
+
         // Create title label
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = plan.title
         titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
         titleLabel.textColor = .black
-        
+
         // Create price label
         let priceLabel = UILabel()
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -398,37 +423,14 @@ class IAPViewController: UIViewController {
         priceLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         priceLabel.textColor = .black
         priceLabel.textAlignment = .right
-        
+
         containerView.addSubview(titleLabel)
         containerView.addSubview(priceLabel)
-        
+
         var constraints = [
             containerView.heightAnchor.constraint(equalToConstant: 80)
         ]
-        
-        // Add tag label if available
-        if let tagText = plan.tag {
-            let tagLabel = UILabel()
-            tagLabel.translatesAutoresizingMaskIntoConstraints = false
-            tagLabel.text = tagText
-            tagLabel.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
-            tagLabel.textColor = .white
-            tagLabel.backgroundColor = plan == .monthly ? .systemGreen : .systemPink
-            tagLabel.textAlignment = .center
-            tagLabel.layer.cornerRadius = 12
-            tagLabel.clipsToBounds = true
-            
-            containerView.addSubview(tagLabel)
-            containerView.bringSubviewToFront(tagLabel)
-            
-            constraints.append(contentsOf: [
-                tagLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: -10),
-                tagLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-                tagLabel.widthAnchor.constraint(equalToConstant: plan == .monthly ? 140 : 80),
-                tagLabel.heightAnchor.constraint(equalToConstant: 24)
-            ])
-        }
-        
+
         // Add per month label if available
         if let perMonthText = plan.perMonthText, let monthlyPrice = plan.monthlyPrice {
             let perMonthLabel = UILabel()
@@ -436,33 +438,33 @@ class IAPViewController: UIViewController {
             perMonthLabel.text = perMonthText
             perMonthLabel.font = UIFont.systemFont(ofSize: 14)
             perMonthLabel.textColor = .black
-            
+
             let monthlyPriceLabel = UILabel()
             monthlyPriceLabel.translatesAutoresizingMaskIntoConstraints = false
             monthlyPriceLabel.text = monthlyPrice
             monthlyPriceLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
             monthlyPriceLabel.textColor = .black
             monthlyPriceLabel.textAlignment = .right
-            
+
             containerView.addSubview(perMonthLabel)
             containerView.addSubview(monthlyPriceLabel)
-            
+
             // Adjust container height for the additional content
             constraints.removeFirst() // Remove the original height constraint
             constraints.append(containerView.heightAnchor.constraint(equalToConstant: 90))
         }
-        
+
         // Position the labels properly
         if plan == .yearly {
             // For yearly plan with additional labels
             NSLayoutConstraint.activate([
                 titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
                 titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
-                
+
                 priceLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
                 priceLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16)
             ])
-            
+
             // Find the per month labels
             for subview in containerView.subviews {
                 if let label = subview as? UILabel {
@@ -484,21 +486,36 @@ class IAPViewController: UIViewController {
             NSLayoutConstraint.activate([
                 titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
                 titleLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-                
+
                 priceLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
                 priceLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
             ])
         }
-        
+
         NSLayoutConstraint.activate(constraints)
-        
+
         // Add tap gesture
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(planViewTapped(_:)))
         containerView.addGestureRecognizer(tapGesture)
         containerView.tag = plan.rawValue
         containerView.isUserInteractionEnabled = true
-        
+
         return containerView
+    }
+
+    private func createTagLabel(for plan: SubscriptionPlan) -> UILabel? {
+        guard let tagText = plan.tag else { return nil }
+        let tagLabel = UILabel()
+        tagLabel.translatesAutoresizingMaskIntoConstraints = false
+        tagLabel.text = tagText
+        tagLabel.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
+        tagLabel.textColor = .white
+        tagLabel.backgroundColor = plan == .monthly ? .systemGreen : .systemPink
+        tagLabel.textAlignment = .center
+        tagLabel.layer.cornerRadius = 12
+        tagLabel.clipsToBounds = true
+        tagLabel.layer.zPosition = 999 // ensure it's above
+        return tagLabel
     }
     
     private func setupBottomContainer() {

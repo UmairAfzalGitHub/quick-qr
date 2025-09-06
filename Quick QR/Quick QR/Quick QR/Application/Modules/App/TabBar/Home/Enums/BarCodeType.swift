@@ -19,6 +19,48 @@ protocol CodeTypeProtocol {
 }
 
 enum BarCodeType: CaseIterable, CodeTypeProtocol {
+    /// Maximum allowed length for each barcode type (nil means no enforced max)
+    var maxLength: Int? {
+        switch self {
+        case .isbn: return 13
+        case .ean8: return 8
+        case .upce: return 8
+        case .ean13: return 13
+        case .upca: return 12
+        case .code39: return 32 // practical UX limit
+        case .code93: return 32 // practical UX limit
+        case .code128: return 32 // practical UX limit
+        case .itf: return 32 // practical UX limit
+        case .pdf417: return 200 // practical UX limit for 2D codes
+        }
+    }
+
+    /// Validation message for each barcode type
+    var validationMessage: String {
+        switch self {
+        case .isbn:
+            return "ISBN must be 10 or 13 digits. Only numeric characters are allowed. Max: 13 digits."
+        case .ean8:
+            return "EAN-8: 7 or 8 digits required. Only numeric characters (0-9) allowed. Max: 8 digits."
+        case .upce:
+            return "UPC-E: 7 or 8 digits required. Only numeric characters (0-9) allowed. Max: 8 digits."
+        case .ean13:
+            return "EAN-13: 12 or 13 digits required. Only numeric characters (0-9) allowed. Max: 13 digits."
+        case .upca:
+            return "UPC-A: 11 or 12 digits required. Only numeric characters (0-9) allowed. Max: 12 digits."
+        case .code39:
+            return "Code 39: Up to 32 characters. Allowed: 0-9, A-Z, space, and -.$/+%"
+        case .code93:
+            return "Code 93: Up to 32 characters. Allowed: 0-9, A-Z, space, and -.$/+%"
+        case .code128:
+            return "Code 128: Up to 32 characters. All ASCII characters (0-127) allowed."
+        case .itf:
+            return "ITF: Even number of digits required. Only numeric characters (0-9) allowed. Max: 32 digits."
+        case .pdf417:
+            return "PDF417: Up to 200 characters. All plain text allowed."
+        }
+    }
+
     case isbn, ean8, upce, ean13, upca, code39, code93, code128, itf, pdf417
     
     var title: String {
