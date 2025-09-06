@@ -8,6 +8,7 @@
 import UIKit
 import IOS_Helpers
 import Foundation
+import GoogleMobileAds
 
 class CodeGeneratorViewController: UIViewController {
     
@@ -73,6 +74,9 @@ class CodeGeneratorViewController: UIViewController {
     private let replaceableContentView = UIView()
     private var placeholderHeightConstraint: NSLayoutConstraint?
     
+    private var nativeAdView: NativeAdView!
+    var nativeAd: GoogleMobileAds.NativeAd?
+
     // MARK: - Code Type
     internal var currentCodeType: CodeTypeProtocol?
     internal var buttonAction: (() -> Void)?
@@ -91,6 +95,11 @@ class CodeGeneratorViewController: UIViewController {
         // Apply prefilled content if available
         if let content = prefilledContent {
             applyPrefilledContent(content)
+        }
+        
+        AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+            self?.nativeAd = ad
+            self?.showGoogleNativeAd(nativeAd: ad)
         }
     }
     
@@ -117,7 +126,7 @@ class CodeGeneratorViewController: UIViewController {
         
         // Configure ad container
         adContainerView.translatesAutoresizingMaskIntoConstraints = false
-        adContainerView.backgroundColor = .systemGray6
+        adContainerView.backgroundColor = .white
         adContainerView.layer.cornerRadius = 8
         adContainerView.layer.borderWidth = 1
         adContainerView.layer.borderColor = UIColor.systemGray4.cgColor
@@ -734,6 +743,56 @@ class CodeGeneratorViewController: UIViewController {
         alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
         present(alert, animated: true)
     }
+    
+    private func setAdView(_ view: NativeAdView) {
+        // Remove the previous ad view
+        nativeAdView = view
+        adContainerView.addSubview(nativeAdView)
+        nativeAdView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Layout constraints for positioning the native ad view
+        let viewDictionary = ["_nativeAdView": nativeAdView!]
+        adContainerView.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "H:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+        adContainerView.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "V:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+    }
+    
+    private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
+        guard let nativeAd else { return }
+        let nibView = Bundle.main.loadNibNamed("OnBoardingNativeAdView", owner: nil, options: nil)?.first
+        guard let nativeAdView = nibView as? NativeAdView else { return }
+        setAdView(nativeAdView)
+
+        (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+        nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+
+        // Configure optional assets
+        (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
+        nativeAdView.bodyView?.isHidden = nativeAd.body == nil
+        
+        (nativeAdView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
+        nativeAdView.callToActionView?.isHidden = nativeAd.callToAction == nil
+        nativeAdView.callToActionView?.layer.cornerRadius = 12.0
+        
+        (nativeAdView.iconView as? UIImageView)?.image = nativeAd.icon?.image
+        nativeAdView.iconView?.isHidden = nativeAd.icon == nil
+        
+        (nativeAdView.advertiserView as? UILabel)?.text = nativeAd.advertiser
+        nativeAdView.advertiserView?.isHidden = nativeAd.advertiser == nil
+        
+        // Disable user interaction on call-to-action view for SDK to handle touches
+        nativeAdView.callToActionView?.isUserInteractionEnabled = false
+        
+        nativeAdView.nativeAd = nativeAd
+    }
+    
     
     // MARK: - Public Methods
     
