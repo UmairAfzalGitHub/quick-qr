@@ -8,9 +8,25 @@
 import UIKit
 
 extension UIViewController {
+    static func setGlobalBackButton() {
+        if let backImage = UIImage(named: "arrow-left") {
+            let appearance = UINavigationBar.appearance()
+            appearance.backIndicatorImage = backImage
+            appearance.backIndicatorTransitionMaskImage = backImage
+        }
+        // Hide back button text globally
+        let barButtonAppearance = UIBarButtonItem.appearance()
+        barButtonAppearance.setBackButtonTitlePositionAdjustment(UIOffset(horizontal: -1000, vertical: 0), for: .default)
+    }
+
+    /// Call this before pushing a new view controller to ensure no back button text
+    func prepareForPushWithoutBackTitle() {
+        let backItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem = backItem
+    }
     
     func presentShareSheet(with items: [Any], excludedActivityTypes: [UIActivity.ActivityType]? = nil) {
-        let activityViewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        let activityViewController = UIActivityViewController(activityItems: ["Check this out"] + items, applicationActivities: nil)
         
         activityViewController.excludedActivityTypes = excludedActivityTypes
         

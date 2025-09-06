@@ -625,7 +625,7 @@ class CodeGeneratorViewController: UIViewController {
     
     private func shareImage(_ image: UIImage) {
         let activityViewController = UIActivityViewController(
-            activityItems: [image],
+            activityItems: ["Check this out", image],
             applicationActivities: nil
         )
         present(activityViewController, animated: true)

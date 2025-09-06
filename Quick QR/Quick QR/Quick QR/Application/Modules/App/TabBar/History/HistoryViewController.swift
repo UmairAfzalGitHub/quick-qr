@@ -341,11 +341,11 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         // Share the image if available
         if let image = imageToShare {
-            let activityViewController = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+            let activityViewController = UIActivityViewController(activityItems: ["Check this out", image], applicationActivities: nil)
             present(activityViewController, animated: true)
         } else {
             // If no image, share the text content
-            let activityViewController = UIActivityViewController(activityItems: [item.url], applicationActivities: nil)
+            let activityViewController = UIActivityViewController(activityItems: ["Check this out", item.url], applicationActivities: nil)
             present(activityViewController, animated: true)
         }
     }

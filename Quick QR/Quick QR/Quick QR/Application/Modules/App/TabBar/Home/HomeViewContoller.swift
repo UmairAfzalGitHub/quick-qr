@@ -171,6 +171,7 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         }
         
         controller.hidesBottomBarWhenPushed = true
+        self.prepareForPushWithoutBackTitle()
         self.navigationController?.pushViewController(controller, animated: true)
     }
     
