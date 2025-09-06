@@ -71,13 +71,13 @@ class ScannerViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        self.navigationController?.setNavigationBarHidden(false, animated: false)
         // Start camera with highest priority
         scannerManager.startCameraSession(true)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: false)
         // Completely stop camera when leaving to avoid privacy indicator
         scannerManager.stopCameraSession()
     }

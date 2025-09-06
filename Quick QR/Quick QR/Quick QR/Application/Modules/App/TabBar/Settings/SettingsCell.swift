@@ -54,6 +54,7 @@ class SettingsCell: UITableViewCell {
         // Title
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = UIFont.systemFont(ofSize: 16)
+        titleLabel.textColor = .textPrimary
         contentView.addSubview(titleLabel)
         
         // Switch
