@@ -187,7 +187,7 @@ class LanguageSelectionViewController: UIViewController {
 
 
     @objc private func didTapSelect() {
-        if let selectedIndex = selectedIndex {   // ✅ unwrap safely
+        if let selectedIndex = selectedIndex {
             selectLanguage(indexNo: selectedIndex)
         } else {
             print("No language selected")
@@ -195,7 +195,9 @@ class LanguageSelectionViewController: UIViewController {
         }
         
         if intent == .settings {
-            self.navigationController?.popViewController(animated: true)
+            let tabVC = TabBarController()
+            tabVC.selectedIndex = 4
+            UIApplication.shared.updateRootViewController(to: tabVC)
             return
         }
         

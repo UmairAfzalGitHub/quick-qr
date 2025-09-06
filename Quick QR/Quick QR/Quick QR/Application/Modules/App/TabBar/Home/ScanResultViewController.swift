@@ -118,7 +118,7 @@ final class ScanResultViewController: UIViewController {
         navigationController?.navigationBar.tintColor = .appPrimary
         
         // Add heart button
-        let heartButton = UIBarButtonItem(image: UIImage(named: "heart-empty"), style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        let heartButton = UIBarButtonItem(image: UIImage(named: "heart-empty")?.withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(toggleFavoriteTapped))
         navigationItem.rightBarButtonItem = heartButton
         
         // Save scan result to history
@@ -146,7 +146,7 @@ final class ScanResultViewController: UIViewController {
         let itemId = latestItem.id
         let newFavoriteStatus = HistoryManager.shared.toggleFavorite(forItemWithId: itemId)
         let heartImageName = newFavoriteStatus ? "heart-fill" : "heart-empty"
-        navigationItem.rightBarButtonItem?.image = UIImage(named: heartImageName)?.withRenderingMode(.alwaysTemplate)
+        navigationItem.rightBarButtonItem?.image = UIImage(named: heartImageName)?.withRenderingMode(.alwaysOriginal)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -336,7 +336,7 @@ final class ScanResultViewController: UIViewController {
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
             // Place scrollView above the adContainer
-            scrollView.bottomAnchor.constraint(equalTo: adContainer.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: adContainer.topAnchor, constant: -8),
             
             contentStack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16),
             contentStack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16),

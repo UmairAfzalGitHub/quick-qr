@@ -71,14 +71,13 @@ class FavoriteCell: UITableViewCell {
         
         // Favorite button
         favoriteButton.translatesAutoresizingMaskIntoConstraints = false
-        favoriteButton.setImage(UIImage(named: "heart-empty"), for: .normal)
-        favoriteButton.tintColor = .systemGray
+        favoriteButton.setImage(UIImage(named: "heart-empty")?.withRenderingMode(.alwaysOriginal), for: .normal)
         favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
         contentView.addSubview(favoriteButton)
         
         // Options button (three dots)
         optionsButton.translatesAutoresizingMaskIntoConstraints = false
-        optionsButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
+        optionsButton.setImage(UIImage(named: "option-icon"), for: .normal)
         optionsButton.tintColor = UIColor.customColor(fromHex: "1B2137")
         optionsButton.addTarget(self, action: #selector(optionsButtonTapped), for: .touchUpInside)
         contentView.addSubview(optionsButton)
@@ -139,11 +138,9 @@ class FavoriteCell: UITableViewCell {
     
     private func updateFavoriteButtonAppearance() {
         if isFavorite {
-            favoriteButton.setImage(UIImage(named: "heart-fill"), for: .normal)
-            favoriteButton.tintColor = .red
+            favoriteButton.setImage(UIImage(named: "heart-fill")?.withRenderingMode(.alwaysOriginal), for: .normal)
         } else {
-            favoriteButton.setImage(UIImage(named: "heart-empty"), for: .normal)
-            favoriteButton.tintColor = .systemGray
+            favoriteButton.setImage(UIImage(named: "heart-empty")?.withRenderingMode(.alwaysOriginal), for: .normal)
         }
     }
 
