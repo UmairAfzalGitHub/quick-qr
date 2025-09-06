@@ -523,7 +523,7 @@ class ScanResultManager {
     func makeInfoRow(title: String,
                      value: String,
                      showsButton: Bool = false,
-                     buttonImage: UIImage? = UIImage(systemName: "doc.on.doc"),
+                     buttonImage: UIImage? = UIImage(named: "copy-icon"),
                      buttonAction: Selector? = nil,
                      target: Any? = nil) -> UIView {
         // Container view
@@ -543,7 +543,7 @@ class ScanResultManager {
         valueLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         valueLabel.textColor = UIColor(named: "TextPrimary")
         valueLabel.numberOfLines = 0
-        valueLabel.textAlignment = .right
+        valueLabel.textAlignment = .left
         
         // Add to container
         container.addSubview(titleLabel)
@@ -557,7 +557,6 @@ class ScanResultManager {
         if showsButton {
             let button = UIButton(type: .system)
             button.setImage(buttonImage, for: .normal)
-            button.tintColor = UIColor(named: "AccentColor")
             
             // Add tap action with provided selector or default
             if let action = buttonAction, let target = target {

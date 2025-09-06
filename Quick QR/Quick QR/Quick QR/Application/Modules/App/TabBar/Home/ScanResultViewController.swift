@@ -75,7 +75,7 @@ final class ScanResultViewController: UIViewController {
     // Ad view placeholder
     private let adContainer: UIView = {
         let v = UIView()
-        v.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.4)
+        v.backgroundColor = UIColor.white.withAlphaComponent(0.4)
         v.layer.cornerRadius = 12
         v.layer.masksToBounds = true
         return v
@@ -490,7 +490,7 @@ final class ScanResultViewController: UIViewController {
     private func makeInfoRow(title: String,
                              value: String,
                              showsButton: Bool = false,
-                             buttonImage: UIImage? = UIImage(systemName: "doc.on.doc"),
+                             buttonImage: UIImage? = UIImage(named: "copy-icon"),
                              buttonAction: Selector? = nil,
                              target: Any? = nil) -> UIView {
         // Use ScanResultManager to create info row

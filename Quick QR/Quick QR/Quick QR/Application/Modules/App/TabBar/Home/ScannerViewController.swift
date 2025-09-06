@@ -53,7 +53,6 @@ class ScannerViewController: UIViewController {
         view.backgroundColor = .black
         setupUI()
         setupConstraints()
-        hideCenterQRImageView()
         
         // Configure scanner manager
         scannerManager.delegate = self
@@ -62,7 +61,7 @@ class ScannerViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        hideCenterQRImageView()
         // Pre-configure camera but don't start yet
         scannerManager.prepareCamera()
     }
