@@ -39,7 +39,7 @@ class CodeGenerationResultViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .appSecondaryBackground
         // Add heart button
-        let heartButton = UIBarButtonItem(image: UIImage(systemName: "heart"), style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        let heartButton = UIBarButtonItem(image: UIImage(named: "heart-empty"), style: .plain, target: self, action: #selector(toggleFavoriteTapped))
         navigationItem.rightBarButtonItem = heartButton
         setupUI()
         setupConstraints()
@@ -252,8 +252,8 @@ class CodeGenerationResultViewController: UIViewController {
         guard let latestItem = createdHistory.first else { return }
         let itemId = latestItem.id
         let newFavoriteStatus = HistoryManager.shared.toggleFavorite(forItemWithId: itemId)
-        let heartImageName = newFavoriteStatus ? "heart.fill" : "heart"
-        navigationItem.rightBarButtonItem?.image = UIImage(systemName: heartImageName)
+        let heartImageName = newFavoriteStatus ? "heart-fill" : "heart-empty"
+        navigationItem.rightBarButtonItem?.image = UIImage(named: heartImageName)
     }
 
     

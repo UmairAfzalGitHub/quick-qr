@@ -79,10 +79,15 @@ class TabBarController: UITabBarController {
         let historyConfig = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         let settingsConfig = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         
-        let createImage = UIImage(systemName: "plus.square", withConfiguration: createConfig)
-        let favoriteImage = UIImage(systemName: "heart", withConfiguration: favoriteConfig)
-        let historyImage = UIImage(systemName: "clock", withConfiguration: historyConfig)
-        let settingsImage = UIImage(systemName: "gear", withConfiguration: settingsConfig)
+//        let createImage = UIImage(systemName: "plus.square", withConfiguration: createConfig)
+//        let favoriteImage = UIImage(systemName: "heart", withConfiguration: favoriteConfig)
+//        let historyImage = UIImage(systemName: "clock", withConfiguration: historyConfig)
+//        let settingsImage = UIImage(systemName: "gear", withConfiguration: settingsConfig)
+        
+        let createImage   = UIImage(named: "create-tabbar-icon")?.withRenderingMode(.alwaysTemplate)
+        let favoriteImage = UIImage(named: "heart-tabbar-icon")?.withRenderingMode(.alwaysTemplate)
+        let historyImage  = UIImage(named: "history-tabbar-icon")?.withRenderingMode(.alwaysTemplate)
+        let settingsImage = UIImage(named: "settings-tabbar-icon")?.withRenderingMode(.alwaysTemplate)
         
         let createItem = UITabBarItem(title: Strings.Label.create, image: createImage, tag: 0)
         let favoriteItem = UITabBarItem(title: Strings.Label.favorite, image: favoriteImage, tag: 1)

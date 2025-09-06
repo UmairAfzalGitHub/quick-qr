@@ -272,7 +272,7 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
             emptyStateView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
         ])
         
-        let imageView = UIImageView(image: UIImage(systemName: "heart"))
+        let imageView = UIImageView(image: UIImage(named: "heart-empty"))
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .red
         

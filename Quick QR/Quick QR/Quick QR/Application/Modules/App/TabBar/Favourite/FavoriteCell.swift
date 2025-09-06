@@ -71,7 +71,7 @@ class FavoriteCell: UITableViewCell {
         
         // Favorite button
         favoriteButton.translatesAutoresizingMaskIntoConstraints = false
-        favoriteButton.setImage(UIImage(systemName: "heart"), for: .normal)
+        favoriteButton.setImage(UIImage(named: "heart-empty"), for: .normal)
         favoriteButton.tintColor = .systemGray
         favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
         contentView.addSubview(favoriteButton)
@@ -139,10 +139,10 @@ class FavoriteCell: UITableViewCell {
     
     private func updateFavoriteButtonAppearance() {
         if isFavorite {
-            favoriteButton.setImage(UIImage(systemName: "heart.fill"), for: .normal)
+            favoriteButton.setImage(UIImage(named: "heart-fill"), for: .normal)
             favoriteButton.tintColor = .red
         } else {
-            favoriteButton.setImage(UIImage(systemName: "heart"), for: .normal)
+            favoriteButton.setImage(UIImage(named: "heart-empty"), for: .normal)
             favoriteButton.tintColor = .systemGray
         }
     }
