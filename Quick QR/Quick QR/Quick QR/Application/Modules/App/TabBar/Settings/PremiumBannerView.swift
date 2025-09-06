@@ -66,14 +66,14 @@ class PremiumBannerView: UIView {
         
         // Title label
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Go Premium"
+        titleLabel.text = Strings.Label.goPremium
         titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         titleLabel.textColor = .systemOrange
         containerView.addSubview(titleLabel)
 
         // Subtitle label
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.text = "Get 100% Ads-Free experience"
+        subtitleLabel.text = Strings.Label.getAdsFreeExperience
         subtitleLabel.font = UIFont.systemFont(ofSize: 14)
         subtitleLabel.textColor = .customColor(fromHex: "373D50")
         containerView.addSubview(subtitleLabel)
@@ -90,7 +90,7 @@ class PremiumBannerView: UIView {
         containerView.addSubview(upgradeButton)
         
         upgradeLabel.translatesAutoresizingMaskIntoConstraints = false
-        upgradeLabel.text = "Upgrade now"
+        upgradeLabel.text = Strings.Label.upgradeNow
         upgradeLabel.font = UIFont.systemFont(ofSize: 13, weight: .medium)
         upgradeLabel.textColor = .white
         containerView.addSubview(upgradeLabel)

@@ -17,11 +17,11 @@ enum SettingsSection: Int, CaseIterable {
     var title: String {
         switch self {
         case .premium:
-            return "Premium"
+            return Strings.Label.premium
         case .preferences:
-            return "Preferences"
+            return Strings.Label.preferences
         case .other:
-            return "Other"
+            return Strings.Label.other
         }
     }
 }
@@ -34,11 +34,11 @@ enum PreferenceItem: Int, CaseIterable {
     var title: String {
         switch self {
         case .beep:
-            return "Beep Sound"
+            return Strings.Label.beepSound
         case .vibration:
-            return "Vibration"
+            return Strings.Label.vibration
         case .language:
-            return "Language"
+            return Strings.Label.lanugage
         }
     }
     
@@ -72,13 +72,13 @@ enum OtherItem: Int, CaseIterable {
     var title: String {
         switch self {
         case .shareApp:
-            return "Share App"
+            return Strings.Label.shareApp
         case .rateUs:
-            return "Rate Us"
+            return Strings.Label.rateUs
         case .feedback:
-            return "Feedback"
+            return Strings.Label.feedback
         case .privacyPolicy:
-            return "Privacy Policy"
+            return Strings.Label.privacyPolicy
         }
     }
     

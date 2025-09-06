@@ -162,6 +162,33 @@ struct Strings {
         static var calendarAccessDenied: String { "calendar_access_denied".localized() }
         static var eventAddedToCalendar: String { "calendar_access_denied".localized() }
         static var couldNotSaveEvent: String { "could_not_save_event".localized() }
+        static var chooseType: String { "choose_type".localized() }
+        static var history: String { "history".localized() }
+        static var premium: String { "premium".localized() }
+        static var preferences: String { "preferences".localized() }
+        static var other: String { "other".localized() }
+        static var beepSound: String { "beep_sound".localized() }
+        static var vibration: String { "vibration".localized() }
+        static var lanugage: String { "lanugage".localized() }
+        static var shareApp: String { "share_app".localized() }
+        static var rateUs: String { "rate_us".localized() }
+        static var feedback: String { "feedback".localized() }
+        static var chooseQrCodeType: String { "choose_qr_code_type".localized() }
+        static var chooseSocialMediaQrCodeType: String { "choose_social_media_qr_code_type".localized() }
+        static var chooseBarCodeType: String { "choose_bar_code_type".localized() }
+        static var goPremium: String { "go_premium".localized() }
+        static var getAdsFreeExperience: String { "get_ads_free_experience".localized() }
+        static var upgradeNow: String { "upgrade_now".localized() }
+        static var isbnValidation: String { "isbn_validation".localized() }
+        static var eanEightValidation: String { "ean_eight_validation".localized() }
+        static var upcSevenValidation: String { "upc_seven_validation".localized() }
+        static var eanThirteenValidation: String { "ean_thirteen_validation".localized() }
+        static var upcAValidation: String { "upc_a_validation".localized() }
+        static var code39Validation: String { "code_39_validation".localized() }
+        static var code93Validation: String { "code_93_validation".localized() }
+        static var codeOneTwoEightValidation: String { "code_128_validation".localized() }
+        static var itfValidation: String { "itf_validation".localized() }
+        static var pdfFourOneSevenValidation: String { "pdf_417_validation".localized() }
     }
     
     struct Button {

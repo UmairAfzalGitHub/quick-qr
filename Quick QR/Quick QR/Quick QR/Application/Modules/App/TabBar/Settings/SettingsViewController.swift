@@ -37,7 +37,7 @@ class SettingsViewController: UIViewController,
     // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        navigationItem.title = "Settings"
+        navigationItem.title = Strings.Label.settings
     }
     
     private func setupTableView() {

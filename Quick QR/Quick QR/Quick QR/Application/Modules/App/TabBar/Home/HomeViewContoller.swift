@@ -145,9 +145,9 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         }
         
         if isQRCodeSelected {
-            header.title = indexPath.section == 0 ? "Choose QR Code Type" : "Choose Social Media QR Code Type"
+            header.title = indexPath.section == 0 ? Strings.Label.chooseQrCodeType : Strings.Label.chooseSocialMediaQrCodeType
         } else {
-            header.title = "Choose Bar Code Type"
+            header.title = Strings.Label.chooseBarCodeType
         }
         return header
     }
