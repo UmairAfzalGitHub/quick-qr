@@ -204,9 +204,17 @@ class CodeGeneratorManager {
     
     // MARK: - Specialized QR Code Generators
     
-    func generateWifiQRCode(ssid: String, password: String, isWEP: Bool = false, size: CGSize = CGSize(width: 300, height: 300)) -> UIImage? {
-        let authType = isWEP ? "WEP" : "WPA"
-        let wifiString = "WIFI:S:\(ssid);T:\(authType);P:\(password);;"
+    func generateWifiQRCode(ssid: String, password: String, securityType: String = "WPA", size: CGSize = CGSize(width: 300, height: 300)) -> UIImage? {
+        // Format: WIFI:S:<SSID>;T:<Authentication>;P:<Password>;;
+        // For open networks, use T:nopass and omit the P: parameter
+        var wifiString = "WIFI:S:\(ssid);"
+        
+        if securityType == "nopass" {
+            wifiString += "T:nopass;;"
+        } else {
+            wifiString += "T:\(securityType);P:\(password);;"
+        }
+        
         return generateQRCode(from: wifiString, size: size)
     }
     

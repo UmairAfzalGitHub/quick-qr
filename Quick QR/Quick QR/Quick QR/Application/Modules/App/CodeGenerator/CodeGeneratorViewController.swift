@@ -244,11 +244,12 @@ class CodeGeneratorViewController: UIViewController {
         case .wifi:
             guard let wifiView = wifiView,
                   let ssid = wifiView.getSSID(),
-                  let password = wifiView.getPassword(),
                   !ssid.isEmpty else {
                 return nil
             }
-            return CodeGeneratorManager.shared.generateWifiQRCode(ssid: ssid, password: password, isWEP: wifiView.isWEP())
+            let password = wifiView.getPassword() ?? ""
+            let securityType = wifiView.getSecurityType()
+            return CodeGeneratorManager.shared.generateWifiQRCode(ssid: ssid, password: password, securityType: securityType)
             
         case .phone:
             guard let phoneView = phoneView,

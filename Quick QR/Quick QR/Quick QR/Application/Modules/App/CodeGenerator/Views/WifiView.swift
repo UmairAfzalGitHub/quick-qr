@@ -28,6 +28,21 @@ final class WifiView: UIView {
         return wepButton.backgroundColor == .appPrimary
     }
     
+    func isNone() -> Bool {
+        // Check if None button is selected
+        return noneButton.backgroundColor == .appPrimary
+    }
+    
+    func getSecurityType() -> String {
+        if isWEP() {
+            return "WEP"
+        } else if isNone() {
+            return "nopass"
+        } else {
+            return "WPA"
+        }
+    }
+    
     // MARK: - Setter Methods
     func setSSID(_ ssid: String) {
         // Remove any 'SSID:' prefix if present
@@ -313,6 +328,7 @@ final class WifiView: UIView {
             buttonsStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: side),
             buttonsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -side),
             buttonsStackView.heightAnchor.constraint(equalToConstant: 46),
+            buttonsStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20)
         ])
         
         // Add button actions
