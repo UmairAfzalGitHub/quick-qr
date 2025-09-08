@@ -250,4 +250,32 @@ class HistoryManager {
         let scanFavorites = getHistory(forScan: true).filter { $0.isFavorite }.map { $0.toFavoriteItem(origin: .scanned) }
         return createdFavorites + scanFavorites
     }
+    
+    /// Checks if content already exists in favorites
+    /// - Parameter content: The content to check
+    /// - Returns: (Bool, String?) - Bool indicates if it's a favorite, String is the item ID if found
+    func isContentFavorited(_ content: String) -> (isFavorite: Bool, itemId: String?) {
+        // Check in created history
+        let createdHistory = getHistory(forScan: false)
+        if let item = createdHistory.first(where: { $0.content == content && $0.isFavorite }) {
+            return (true, item.id)
+        }
+        
+        // Check in scan history
+        let scanHistory = getHistory(forScan: true)
+        if let item = scanHistory.first(where: { $0.content == content && $0.isFavorite }) {
+            return (true, item.id)
+        }
+        
+        // Check if content exists but is not favorited
+        if let item = createdHistory.first(where: { $0.content == content }) {
+            return (false, item.id)
+        }
+        
+        if let item = scanHistory.first(where: { $0.content == content }) {
+            return (false, item.id)
+        }
+        
+        return (false, nil)
+    }
 }

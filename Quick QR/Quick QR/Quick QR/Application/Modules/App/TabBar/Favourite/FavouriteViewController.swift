@@ -126,12 +126,16 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
                     resultVC.setQRCodeImage(qrImage)
                 }
                 resultVC.setTitleAndDescription(title: item.title, description: Strings.Label.qrCode)
+                // Set the generated content and pass the item ID since it's already a favorite
+                resultVC.setGeneratedContent(item.content, existingItemId: item.id, isFavorite: true)
             case .socialQRCode:
                 if let socialType = SocialQRCodeType.allCases.first(where: { $0.title.lowercased() == item.subtype.lowercased() }) {
                     if let qrImage = CodeGeneratorManager.shared.generateSocialQRCode(type: socialType, username: item.content) {
                         resultVC.setQRCodeImage(qrImage)
                     }
                     resultVC.setTitleAndDescription(title: item.title, description: Strings.Label.socialQR)
+                    // Set the generated content and pass the item ID since it's already a favorite
+                    resultVC.setGeneratedContent(item.content, existingItemId: item.id, isFavorite: true)
                 }
             case .barCode:
                 if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == item.subtype.lowercased() }) {
@@ -140,6 +144,8 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
                         resultVC.setBarCodeType(icon: barType.icon, title: barType.title)
                     }
                     resultVC.setTitleAndDescription(title: item.title, description: Strings.Label.barCode)
+                    // Set the generated content and pass the item ID since it's already a favorite
+                    resultVC.setGeneratedContent(item.content, existingItemId: item.id, isFavorite: true)
                 }
             }
             navigationController?.pushViewController(resultVC, animated: true)
@@ -155,6 +161,8 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
             }
             let scanResultVC = ScanResultViewController(scannedData: item.content, metadataObjectType: metadataType)
             scanResultVC.intent = .history
+            // Pass the item ID and favorite status
+            scanResultVC.setExistingItemId(item.id, isFavorite: true)
             navigationController?.pushViewController(scanResultVC, animated: true)
         }
     }
