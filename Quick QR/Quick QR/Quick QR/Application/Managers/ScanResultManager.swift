@@ -190,10 +190,19 @@ class ScanResultManager {
         }
     }
     
+    // MARK: - Constants
+    private let viberAppStoreURL = "https://apps.apple.com/pk/app/rakuten-viber-messenger/id382617920"
+    
     // MARK: - URL Handling
     
     /// Open a URL with proper error handling
     func openURL(_ urlString: String, completion: @escaping (Bool, String?) -> Void) {
+        // Special handling for Viber URLs
+        if urlString.lowercased().hasPrefix("viber://") {
+            handleViberURL(urlString, completion: completion)
+            return
+        }
+        
         // Make sure URL has proper scheme if it's a web URL
         var processedURLString = urlString
         if !processedURLString.lowercased().hasPrefix("http://") && 
@@ -215,6 +224,44 @@ class ScanResultManager {
             })
         } else {
             completion(false, "Invalid URL format")
+        }
+    }
+    
+    /// Handle Viber URLs with App Store fallback
+    private func handleViberURL(_ urlString: String, completion: @escaping (Bool, String?) -> Void) {
+        if let url = URL(string: urlString) {
+            // Check if Viber app is installed
+            if UIApplication.shared.canOpenURL(url) {
+                // Viber is installed, open the URL
+                UIApplication.shared.open(url, options: [:], completionHandler: { success in
+                    if success {
+                        completion(true, nil)
+                    } else {
+                        // If opening Viber URL fails, try App Store
+                        self.openViberAppStore(completion: completion)
+                    }
+                })
+            } else {
+                // Viber is not installed, redirect to App Store
+                openViberAppStore(completion: completion)
+            }
+        } else {
+            completion(false, "Invalid Viber URL format")
+        }
+    }
+    
+    /// Open Viber App Store page
+    private func openViberAppStore(completion: @escaping (Bool, String?) -> Void) {
+        if let appStoreURL = URL(string: viberAppStoreURL) {
+            UIApplication.shared.open(appStoreURL, options: [:], completionHandler: { success in
+                if success {
+                    completion(true, "Redirected to Viber in App Store")
+                } else {
+                    completion(false, "Could not open App Store")
+                }
+            })
+        } else {
+            completion(false, "Could not open App Store")
         }
     }
     

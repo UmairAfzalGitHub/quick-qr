@@ -1,5 +1,5 @@
 //
-//  ContactsView.swift
+//  ViberView.swift
 //  Quick QR
 //
 //  Created by Haider Rathore on 29/08/2025.
@@ -7,18 +7,37 @@
 
 import UIKit
 
-final class ViberView: UIView {
+final class ViberView: UIView, CountriesViewControllerDelegate {
     // MARK: - Public API
     var urlText: String? {
         get { phoneNumberTextField.text }
         set { phoneNumberTextField.text = newValue }
     }
     
+    // MARK: - Constants
+    private let viberAppStoreURL = "https://apps.apple.com/pk/app/rakuten-viber-messenger/id382617920"
+    
     // MARK: - Getter Methods
     func getPhoneNumber() -> String? {
         guard let phoneNumber = phoneNumberTextField.text, !phoneNumber.isEmpty else { return nil }
         let countryCode = codeLabel.text?.trimmingCharacters(in: .whitespaces) ?? "+1"
         return countryCode + phoneNumber
+    }
+    
+    /// Get the Viber URL with fallback to App Store if app is not installed
+    func getViberURL() -> String? {
+        guard let phoneNumber = getPhoneNumber() else { return nil }
+        
+        // Format: viber://chat?number=PHONENUMBER
+        let viberURL = "viber://chat?number=\(phoneNumber)"
+        
+        // Check if Viber app is installed
+        if let url = URL(string: viberURL), UIApplication.shared.canOpenURL(url) {
+            return viberURL
+        } else {
+            // Fallback to App Store URL if Viber is not installed
+            return viberAppStoreURL
+        }
     }
     
     // MARK: - Setter Methods
@@ -60,13 +79,34 @@ final class ViberView: UIView {
     /// - Returns: True if the content was successfully parsed, false otherwise
     @discardableResult
     func parseAndPopulateFromContent(_ content: String) -> Bool {
+        // Handle Viber URL format
         if content.hasPrefix("viber://") {
+            // Extract phone number from Viber URL
+            if content.contains("chat?number=") {
+                let components = content.components(separatedBy: "chat?number=")
+                if components.count > 1 {
+                    populateData(phoneNumber: components[1])
+                    return true
+                }
+            }
+            
+            // Fallback for other Viber URL formats
             let phoneNumber = String(content.dropFirst(8))
             populateData(phoneNumber: phoneNumber)
-        } else {
+            return true
+        } 
+        // Handle App Store URL
+        else if content.contains("apps.apple.com") && content.contains("viber") {
+            // This is an App Store URL, we can't extract a phone number from it
+            // Just clear the field as we'll use the App Store URL as fallback only
+            phoneNumberTextField.text = ""
+            return true
+        } 
+        // Handle plain phone number
+        else {
             populateData(phoneNumber: content)
+            return true
         }
-        return true
     }
 
     // MARK: - UI Elements
@@ -104,14 +144,14 @@ final class ViberView: UIView {
         label.text = "+1"
         label.textAlignment = .center
         label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        label.textColor = UIColor.placeholderText
+        label.textColor = .black
         return label
     }()
     
     private let arrowImageView: UIImageView = {
         let image = UIImageView(image: UIImage(named: "arrow-down"))
         image.translatesAutoresizingMaskIntoConstraints = false
-        image.tintColor = .placeholderText
+        image.tintColor = .black
         image.contentMode = .scaleAspectFit
         return image
     }()
@@ -152,6 +192,11 @@ final class ViberView: UIView {
         codeSelectorView.addSubview(codeSelectorStackView)
         codeSelectorStackView.addArrangedSubview(codeLabel)
         codeSelectorStackView.addArrangedSubview(arrowImageView)
+        
+        // Add tap gesture to country code selector
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(countryCodeTapped))
+        codeSelectorView.addGestureRecognizer(tapGesture)
+        codeSelectorView.isUserInteractionEnabled = true
 
         let side: CGFloat = 0
         let fieldHeight: CGFloat = 54
@@ -180,6 +225,46 @@ final class ViberView: UIView {
             
             
         ])
+    }
+}
+
+// MARK: - Country Code Selection
+extension ViberView {
+    @objc private func countryCodeTapped() {
+        let countries = CountryRepository().getCountries()
+        let countryViewController = CountriesViewController(dataType: .countries(countries))
+        countryViewController.delegate = self
+        
+        // Find the view controller to present from
+        if let viewController = findViewController() {
+            viewController.present(countryViewController, animated: true)
+        }
+    }
+    
+    private func findViewController() -> UIViewController? {
+        var responder: UIResponder? = self
+        while let nextResponder = responder?.next {
+            if let viewController = nextResponder as? UIViewController {
+                return viewController
+            }
+            responder = nextResponder
+        }
+        return nil
+    }
+    
+    // MARK: - CountriesViewControllerDelegate
+    func didSelectCountry(country: Country) {
+        if let phoneCode = country.phoneCode {
+            codeLabel.text = phoneCode
+        }
+    }
+    
+    func didSelectCity(city: City) {
+        // Not used for this implementation
+    }
+    
+    func didSelectTimeZone(timeZone: String) {
+        // Not used for this implementation
     }
 }
 
