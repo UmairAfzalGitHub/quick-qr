@@ -84,6 +84,7 @@ class HistoryManager {
     private let userDefaults = UserDefaults.standard
     private let historyKey = "com.quickqr.history"
     private let scanHistoryKey = "com.quickqr.scanhistory"
+    private let favoritesKey = "com.quickqr.favorites"
     
     private init() {}
     
@@ -203,6 +204,10 @@ class HistoryManager {
     }
     
     func deleteHistoryItem(withId id: String, fromScan: Bool? = nil) {
+        // Check if this item is in favorites
+        let favorites = getFavoriteItems()
+        let isFavorited = favorites.contains { $0.id == id }
+        
         // If fromScan is nil, try both
         if let fromScan = fromScan {
             var history = getHistory(forScan: fromScan)
@@ -217,61 +222,144 @@ class HistoryManager {
             deleteHistoryItem(withId: id, fromScan: false)
             deleteHistoryItem(withId: id, fromScan: true)
         }
+        
+        // Important: We don't remove from favorites when deleting from history
+        // This allows favorites to persist even when removed from history
     }
     
     // MARK: - Favorite Methods
     
+    // Get favorites directly from favorites storage
+    private func getFavoriteItems() -> [HistoryItem] {
+        guard let data = userDefaults.data(forKey: favoritesKey),
+              let favorites = try? JSONDecoder().decode([HistoryItem].self, from: data) else {
+            return []
+        }
+        return favorites
+    }
+    
+    // Save favorites to separate storage
+    private func saveFavoriteItems(_ items: [HistoryItem]) {
+        if let encoded = try? JSONEncoder().encode(items) {
+            userDefaults.set(encoded, forKey: favoritesKey)
+            userDefaults.synchronize()
+        }
+    }
+    
+    // Add an item to favorites
+    private func addToFavorites(_ item: HistoryItem) {
+        var favorites = getFavoriteItems()
+        
+        // Check if this item is already in favorites
+        if !favorites.contains(where: { $0.id == item.id }) {
+            var favoriteItem = item
+            favoriteItem.isFavorite = true
+            favorites.append(favoriteItem)
+            saveFavoriteItems(favorites)
+        }
+    }
+    
+    // Remove an item from favorites
+    private func removeFromFavorites(withId id: String) {
+        var favorites = getFavoriteItems()
+        favorites.removeAll { $0.id == id }
+        saveFavoriteItems(favorites)
+    }
+    
+    // Public method to delete an item from favorites only
+    func deleteFavoriteItem(withId id: String) {
+        removeFromFavorites(withId: id)
+        
+        // Also update the flag in history items if they still exist
+        updateFavoriteFlag(id: id, isFavorite: false, forScan: false)
+        updateFavoriteFlag(id: id, isFavorite: false, forScan: true)
+    }
+    
     func toggleFavorite(forItemWithId id: String) -> Bool {
-        // Try toggling in created history
+        // First check if it's in favorites
+        let favorites = getFavoriteItems()
+        if let index = favorites.firstIndex(where: { $0.id == id }) {
+            // It's in favorites, so remove it
+            removeFromFavorites(withId: id)
+            
+            // Also update the flag in history items
+            updateFavoriteFlag(id: id, isFavorite: false, forScan: false)
+            updateFavoriteFlag(id: id, isFavorite: false, forScan: true)
+            
+            return false
+        }
+        
+        // Not in favorites, so try to add it from history
         var history = getHistory(forScan: false)
         if let index = history.firstIndex(where: { $0.id == id }) {
-            history[index].isFavorite.toggle()
-            if let encoded = try? JSONEncoder().encode(history) {
-                userDefaults.set(encoded, forKey: historyKey)
-                userDefaults.synchronize()
-            }
-            return history[index].isFavorite
+            // Add to favorites
+            addToFavorites(history[index])
+            
+            // Update flag in history
+            updateFavoriteFlag(id: id, isFavorite: true, forScan: false)
+            
+            return true
         }
-        // Try toggling in scan history
+        
+        // Try scan history
         var scanHistory = getHistory(forScan: true)
         if let index = scanHistory.firstIndex(where: { $0.id == id }) {
-            scanHistory[index].isFavorite.toggle()
-            if let encoded = try? JSONEncoder().encode(scanHistory) {
-                userDefaults.set(encoded, forKey: scanHistoryKey)
-                userDefaults.synchronize()
-            }
-            return scanHistory[index].isFavorite
+            // Add to favorites
+            addToFavorites(scanHistory[index])
+            
+            // Update flag in history
+            updateFavoriteFlag(id: id, isFavorite: true, forScan: true)
+            
+            return true
         }
+        
         return false
     }
     
+    // Helper method to update the favorite flag in history items
+    private func updateFavoriteFlag(id: String, isFavorite: Bool, forScan: Bool) {
+        let key = forScan ? scanHistoryKey : historyKey
+        var history = getHistory(forScan: forScan)
+        
+        if let index = history.firstIndex(where: { $0.id == id }) {
+            history[index].isFavorite = isFavorite
+            if let encoded = try? JSONEncoder().encode(history) {
+                userDefaults.set(encoded, forKey: key)
+                userDefaults.synchronize()
+            }
+        }
+    }
+    
     func getFavorites() -> [FavoriteItem] {
-        let createdFavorites = getHistory(forScan: false).filter { $0.isFavorite }.map { $0.toFavoriteItem(origin: .created) }
-        let scanFavorites = getHistory(forScan: true).filter { $0.isFavorite }.map { $0.toFavoriteItem(origin: .scanned) }
-        return createdFavorites + scanFavorites
+        // Get favorites directly from favorites storage
+        let favorites = getFavoriteItems()
+        
+        // Map to FavoriteItem and determine origin
+        return favorites.map { item -> FavoriteItem in
+            // Try to determine if this was from scan or created history
+            let createdHistory = getHistory(forScan: false)
+            let origin: FavoriteItem.Origin = createdHistory.contains(where: { $0.id == item.id }) ? .created : .scanned
+            return item.toFavoriteItem(origin: origin)
+        }
     }
     
     /// Checks if content already exists in favorites
     /// - Parameter content: The content to check
     /// - Returns: (Bool, String?) - Bool indicates if it's a favorite, String is the item ID if found
     func isContentFavorited(_ content: String) -> (isFavorite: Bool, itemId: String?) {
-        // Check in created history
+        // First check in favorites storage
+        let favorites = getFavoriteItems()
+        if let item = favorites.first(where: { $0.content == content }) {
+            return (true, item.id)
+        }
+        
+        // If not in favorites, check if content exists in history but is not favorited
         let createdHistory = getHistory(forScan: false)
-        if let item = createdHistory.first(where: { $0.content == content && $0.isFavorite }) {
-            return (true, item.id)
-        }
-        
-        // Check in scan history
-        let scanHistory = getHistory(forScan: true)
-        if let item = scanHistory.first(where: { $0.content == content && $0.isFavorite }) {
-            return (true, item.id)
-        }
-        
-        // Check if content exists but is not favorited
         if let item = createdHistory.first(where: { $0.content == content }) {
             return (false, item.id)
         }
         
+        let scanHistory = getHistory(forScan: true)
         if let item = scanHistory.first(where: { $0.content == content }) {
             return (false, item.id)
         }

@@ -254,8 +254,8 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
         // Get the item ID from our data source
         let itemId = favorites[indexPath.row].id
         
-        // Delete the item from history manager
-        HistoryManager.shared.deleteHistoryItem(withId: itemId)
+        // Delete the item from favorites only, not from history
+        HistoryManager.shared.deleteFavoriteItem(withId: itemId)
         
         // Remove from data source
         favorites.remove(at: indexPath.row)
