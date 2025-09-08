@@ -327,11 +327,9 @@ final class ScanResultViewController: UIViewController {
             
         case "Connect":
             if case .qrCode(.wifi, _) = scanResult {
-                let wifiInfo = ScanResultManager.shared.connectToWifi(from: data)
-                if let ssid = wifiInfo.ssid, !ssid.isEmpty {
-                    self.showToast(message: "Network information copied: \(ssid)")
-                } else {
-                    self.showToast(message: "Could not parse WiFi information")
+                // Use the proper method that handles WiFi connection with user feedback
+                ScanResultManager.shared.handleWifiConnection(from: data) { success, message in
+                    self.showToast(message: message)
                 }
             }
             

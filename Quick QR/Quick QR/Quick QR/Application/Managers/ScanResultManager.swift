@@ -461,14 +461,112 @@ class ScanResultManager {
     func handleWifiConnection(from wifiData: String, completion: @escaping (Bool, String) -> Void) {
         let wifiInfo = connectToWifi(from: wifiData)
         
-        if let ssid = wifiInfo.ssid, let password = wifiInfo.password {
-            // On iOS, we can't programmatically connect to WiFi networks
-            // Copy password to clipboard for user convenience
-            UIPasteboard.general.string = password
-            completion(true, "Network: \(ssid)\nPassword copied to clipboard")
+        if let ssid = wifiInfo.ssid {
+            // Show Apple-like WiFi connection alert
+            showWiFiConnectionAlert(ssid: ssid, password: wifiInfo.password) { success in
+                if success {
+                    completion(true, "Connecting to \(ssid)...")
+                } else {
+                    // If user cancels, we still copy the password as fallback
+                    if let password = wifiInfo.password {
+                        UIPasteboard.general.string = password
+                        completion(true, "Password for \(ssid) copied to clipboard")
+                    } else {
+                        completion(true, "WiFi details for \(ssid) displayed")
+                    }
+                }
+            }
         } else {
             completion(false, "Invalid WiFi QR code format")
         }
+    }
+    
+    /// Show a custom alert similar to Apple's Camera app WiFi connection notification
+    private func showWiFiConnectionAlert(ssid: String, password: String?, completion: @escaping (Bool) -> Void) {
+        // Get the top view controller to present the alert
+        guard let topVC = UIApplication.shared.windows.filter({$0.isKeyWindow}).first?.rootViewController?.topMostViewController() else {
+            completion(false)
+            return
+        }
+        
+        // Create custom alert controller
+        let alertController = UIAlertController(title: "Wi-Fi Network", message: ssid, preferredStyle: .actionSheet)
+        
+        // Add WiFi icon and styling
+        if let wifiImage = UIImage(systemName: "wifi") {
+            let imageView = UIImageView(image: wifiImage)
+            imageView.tintColor = .systemBlue
+            imageView.contentMode = .scaleAspectFit
+            imageView.translatesAutoresizingMaskIntoConstraints = false
+            
+            let containerView = UIView()
+            containerView.addSubview(imageView)
+            containerView.translatesAutoresizingMaskIntoConstraints = false
+            
+            NSLayoutConstraint.activate([
+                imageView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+                imageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+                imageView.widthAnchor.constraint(equalToConstant: 40),
+                imageView.heightAnchor.constraint(equalToConstant: 40),
+                containerView.heightAnchor.constraint(equalToConstant: 60)
+            ])
+            
+            alertController.view.addSubview(containerView)
+            
+            // Position container at the top of the alert
+            NSLayoutConstraint.activate([
+                containerView.topAnchor.constraint(equalTo: alertController.view.topAnchor, constant: 20),
+                containerView.leadingAnchor.constraint(equalTo: alertController.view.leadingAnchor),
+                containerView.trailingAnchor.constraint(equalTo: alertController.view.trailingAnchor)
+            ])
+            
+            // Adjust content insets
+            let margins = alertController.view.layoutMargins
+            alertController.view.layoutMargins = UIEdgeInsets(top: margins.top + 60, left: margins.left, bottom: margins.bottom, right: margins.right)
+        }
+        
+        // Add "Join This Network" action
+        alertController.addAction(UIAlertAction(title: "Join This Network", style: .default, handler: { _ in
+            // Open WiFi settings directly
+            // Copy password to clipboard for convenience
+            if let pwd = password {
+                UIPasteboard.general.string = pwd
+            }
+            
+            // Try opening WiFi settings directly using different URL schemes
+            let wifiSettingsURLs = [
+                "App-Prefs:root=WIFI",                // iOS 10 and earlier
+                "prefs:root=WIFI",                    // iOS 11+
+                "App-prefs:root=WIFI",               // Alternative format
+                "app-settings:root=WIFI"              // Another alternative
+            ]
+            
+            var opened = false
+            for urlString in wifiSettingsURLs {
+                if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
+                    UIApplication.shared.open(url)
+                    opened = true
+                    break
+                }
+            }
+            
+            // If none of the WiFi URLs worked, fall back to the general Settings app
+            if !opened {
+                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsURL)
+                }
+            }
+            
+            completion(true)
+        }))
+        
+        // Add Cancel action
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+            completion(false)
+        }))
+        
+        // Present the alert
+        topVC.present(alertController, animated: true)
     }
     
     // MARK: - UI Helpers
@@ -672,5 +770,25 @@ class ScanResultManager {
                 toastContainer.removeFromSuperview()
             })
         })
+    }
+}
+
+// MARK: - UIViewController Extension
+extension UIViewController {
+    /// Get the top most view controller
+    func topMostViewController() -> UIViewController {
+        if let presented = presentedViewController {
+            return presented.topMostViewController()
+        }
+        
+        if let navigation = self as? UINavigationController {
+            return navigation.visibleViewController?.topMostViewController() ?? navigation
+        }
+        
+        if let tab = self as? UITabBarController {
+            return tab.selectedViewController?.topMostViewController() ?? tab
+        }
+        
+        return self
     }
 }
