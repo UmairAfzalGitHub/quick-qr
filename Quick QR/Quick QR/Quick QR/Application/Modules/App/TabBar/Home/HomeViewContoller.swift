@@ -6,6 +6,7 @@
 
 import UIKit
 import BetterSegmentedControl
+import GoogleMobileAds
 
 // MARK: - HomeViewController
 class HomeViewController: UIViewController {
@@ -30,6 +31,14 @@ class HomeViewController: UIViewController {
     }()
     
     private var collectionView: UICollectionView!
+    private let nativeAdParentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        return view
+    }()
+    
+    private var nativeAdView: NativeAdView!
+    var nativeAd: GoogleMobileAds.NativeAd?
     
     // Track current segment state
     private var isQRCodeSelected: Bool {
@@ -41,6 +50,20 @@ class HomeViewController: UIViewController {
         view.backgroundColor = .white
         setupUI()
         setupNavigationBar()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if let ad = AdManager.shared.getNativeAd() {
+            nativeAd = ad
+            showGoogleNativeAd(nativeAd: nativeAd)
+        } else {
+            AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+                self?.nativeAd = ad
+                self?.showGoogleNativeAd(nativeAd: ad)
+            }
+        }
     }
     
     private func setupNavigationBar() {
@@ -85,12 +108,21 @@ class HomeViewController: UIViewController {
         collectionView.delegate = self
         
         view.addSubview(collectionView)
+        view.addSubview(nativeAdParentView)
+        
+        nativeAdParentView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: betterSegmentedControl.bottomAnchor, constant: 20),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            
+            collectionView.bottomAnchor.constraint(equalTo: nativeAdParentView.topAnchor, constant: -10),
+            
+            nativeAdParentView.heightAnchor.constraint(equalToConstant: 240),
+            nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
         ])
     }
     
@@ -172,7 +204,9 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         
         controller.hidesBottomBarWhenPushed = true
         self.prepareForPushWithoutBackTitle()
-        self.navigationController?.pushViewController(controller, animated: true)
+        AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial, from: self) {
+            self.navigationController?.pushViewController(controller, animated: true)
+        }
     }
     
     // Adjust cell size to fit 4 per row
@@ -184,4 +218,62 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         let width = availableWidth / 4
         return CGSize(width: width, height: 90) // 60 box + 6 gap + label
     }
+    
+    // MARK: - Private Methods:
+
+    private func setAdView(_ view: NativeAdView) {
+        // Remove the previous ad view
+        if nativeAdView != nil {
+            nativeAdView.removeFromSuperview()
+        }
+
+        nativeAdView = view
+        nativeAdView.tag = 2500
+        nativeAdParentView.addSubview(nativeAdView)
+        nativeAdView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Layout constraints for positioning the native ad view
+        let viewDictionary = ["_nativeAdView": nativeAdView!]
+        nativeAdParentView.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "H:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+        nativeAdParentView.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "V:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+    }
+    
+    private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
+        guard let nativeAd else { return }
+        let nibView = Bundle.main.loadNibNamed("OnBoardingNativeAdView", owner: nil, options: nil)?.first
+        guard let nativeAdView = nibView as? NativeAdView else { return }
+        setAdView(nativeAdView)
+
+        (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+        nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+
+        // Configure optional assets
+        (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
+        nativeAdView.bodyView?.isHidden = nativeAd.body == nil
+        
+        (nativeAdView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
+        nativeAdView.callToActionView?.isHidden = nativeAd.callToAction == nil
+        nativeAdView.callToActionView?.layer.cornerRadius = 12.0
+        
+        (nativeAdView.iconView as? UIImageView)?.image = nativeAd.icon?.image
+//        nativeAdView.iconView?.isHidden = nativeAd.icon == nil
+        
+        (nativeAdView.advertiserView as? UILabel)?.text = nativeAd.advertiser
+//        nativeAdView.advertiserView?.isHidden = nativeAd.advertiser == nil
+        
+        // Disable user interaction on call-to-action view for SDK to handle touches
+        nativeAdView.callToActionView?.isUserInteractionEnabled = false
+        
+        nativeAdView.nativeAd = nativeAd
+    }
+
+
 }

@@ -10,6 +10,7 @@ import UIKit
 import BetterSegmentedControl
 import IOS_Helpers
 import AVFoundation
+import GoogleMobileAds
 
 class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
     
@@ -42,6 +43,16 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     private var scanDataSource: [HistoryItem] = []
     private var createdDataSource: [HistoryItem] = []
 
+    private var collectionView: UICollectionView!
+    private let nativeAdParentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        return view
+    }()
+    
+    private var nativeAdView: NativeAdView!
+    var nativeAd: GoogleMobileAds.NativeAd?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -56,6 +67,16 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         loadHistory()
         // Update clear button visibility based on data
         navigationItem.rightBarButtonItem?.isEnabled = !dataSource.isEmpty
+        
+        if let ad = AdManager.shared.getNativeAd() {
+            nativeAd = ad
+            showGoogleNativeAd(nativeAd: nativeAd)
+        } else {
+            AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+                self?.nativeAd = ad
+                self?.showGoogleNativeAd(nativeAd: ad)
+            }
+        }
     }
     
     private func setupUI() {
@@ -92,12 +113,19 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         // Add table view to view hierarchy
         view.addSubview(tableView)
+        view.addSubview(nativeAdParentView)
+        nativeAdParentView.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: betterSegmentedControl.bottomAnchor, constant: 20),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: nativeAdParentView.topAnchor, constant: -10),
+
+            nativeAdParentView.heightAnchor.constraint(equalToConstant: 240),
+            nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
         ])
         
         // Setup empty state view
@@ -231,7 +259,10 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
                     resultVC.setTitleAndDescription(title: selectedItem.title, description: Strings.Label.barCode)
                 }
             }
-            navigationController?.pushViewController(resultVC, animated: true)
+            
+            AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial, from: self) {
+                self.navigationController?.pushViewController(resultVC, animated: true)
+            }
         } else {
             // Use local scanDataSource
             guard indexPath.row < scanDataSource.count else { return }
@@ -248,7 +279,9 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             let scanResultVC = ScanResultViewController(scannedData: selectedItem.content, metadataObjectType: metadataType)
             scanResultVC.intent = .history
-            navigationController?.pushViewController(scanResultVC, animated: true)
+            AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial, from: self) {
+                self.navigationController?.pushViewController(scanResultVC, animated: true)
+            }
         }
     }
     
@@ -373,5 +406,61 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 showEmptyState()
             }
         }
+    }
+    
+    // MARK: - Private Methods:
+
+    private func setAdView(_ view: NativeAdView) {
+        // Remove the previous ad view
+        if nativeAdView != nil {
+            nativeAdView.removeFromSuperview()
+        }
+
+        nativeAdView = view
+        nativeAdView.tag = 2500
+        nativeAdParentView.addSubview(nativeAdView)
+        nativeAdView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Layout constraints for positioning the native ad view
+        let viewDictionary = ["_nativeAdView": nativeAdView!]
+        nativeAdParentView.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "H:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+        nativeAdParentView.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "V:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+    }
+    
+    private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
+        guard let nativeAd else { return }
+        let nibView = Bundle.main.loadNibNamed("OnBoardingNativeAdView", owner: nil, options: nil)?.first
+        guard let nativeAdView = nibView as? NativeAdView else { return }
+        setAdView(nativeAdView)
+
+        (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+        nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+
+        // Configure optional assets
+        (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
+        nativeAdView.bodyView?.isHidden = nativeAd.body == nil
+        
+        (nativeAdView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
+        nativeAdView.callToActionView?.isHidden = nativeAd.callToAction == nil
+        nativeAdView.callToActionView?.layer.cornerRadius = 12.0
+        
+        (nativeAdView.iconView as? UIImageView)?.image = nativeAd.icon?.image
+//        nativeAdView.iconView?.isHidden = nativeAd.icon == nil
+        
+        (nativeAdView.advertiserView as? UILabel)?.text = nativeAd.advertiser
+//        nativeAdView.advertiserView?.isHidden = nativeAd.advertiser == nil
+        
+        // Disable user interaction on call-to-action view for SDK to handle touches
+        nativeAdView.callToActionView?.isUserInteractionEnabled = false
+        
+        nativeAdView.nativeAd = nativeAd
     }
 }
