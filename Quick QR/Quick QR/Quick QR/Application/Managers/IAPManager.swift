@@ -5,7 +5,7 @@ import StoreKit
 enum SubscriptionID: String {
     case weekly = "com.weekly.premium"
     case monthly = "com.monthly.premium"
-    case yearly = "com.photo.recovery.yearly"
+    case yearly = "com.yearly.premium"
     
     static var allIdentifiers: [String] {
         return [weekly.rawValue, monthly.rawValue]
@@ -73,7 +73,8 @@ class IAPManager: NSObject {
     func fetchSubscriptions() {
         let productIDs = Set([
             SubscriptionID.weekly.rawValue,
-            SubscriptionID.monthly.rawValue
+            SubscriptionID.monthly.rawValue,
+            SubscriptionID.yearly.rawValue
         ])
         
         print("IAP - Products \(productIDs)")

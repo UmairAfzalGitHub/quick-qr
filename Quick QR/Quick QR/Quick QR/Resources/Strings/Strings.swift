@@ -109,6 +109,7 @@ struct Strings {
         static var privacyPolicy: String { "privacy_policy".localized() }
         static var recommended: String { "recommended".localized() }
         static var popular: String { "popular".localized() }
+        static var weekly: String { "weekly".localized() }
         static var monthly: String { "monthly".localized() }
         static var yearly: String { "yearly".localized() }
         static var unableToLoad: String { "unable_to_load".localized() }
@@ -189,6 +190,9 @@ struct Strings {
         static var codeOneTwoEightValidation: String { "code_128_validation".localized() }
         static var itfValidation: String { "itf_validation".localized() }
         static var pdfFourOneSevenValidation: String { "pdf_417_validation".localized() }
+        static var perfectForShortTerm: String { "perfect_for_short_term".localized() }
+        static var saveFiftyPercentVs: String { "save_fifty_percent_vs".localized() }
+        static var perDay: String { "per_day".localized() }
     }
     
     struct Button {
