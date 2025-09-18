@@ -97,12 +97,37 @@ final class ScanResultViewController: UIViewController {
     var nativeAd: GoogleMobileAds.NativeAd?
     var intent: ScanResultIntent = .scan
     
+    // Store the ID of an existing history item if found
+    private var existingItemId: String?
+    
     // MARK: - Initializers
     init(scannedData: String, metadataObjectType: AVMetadataObject.ObjectType? = nil) {
         super.init(nibName: nil, bundle: nil)
         self.scannedData = scannedData
         self.metadataObjectType = metadataObjectType
         self.scanResult = ScanDataParser.parse(data: scannedData, symbology: metadataObjectType)
+    }
+    
+    /// Set the existing item ID and favorite status
+    /// - Parameters:
+    ///   - itemId: The ID of the existing item
+    ///   - isFavorite: Whether the item is already favorited
+    func setExistingItemId(_ itemId: String, isFavorite: Bool) {
+        self.existingItemId = itemId
+        
+        // Update heart button with correct state
+        let heartImageName = isFavorite ? "heart-fill" : "heart-empty"
+        let heartImage = UIImage(named: heartImageName)?.withRenderingMode(.alwaysOriginal)
+        
+        // Create a button with the heart image
+        let heartButton = UIBarButtonItem(image: heartImage, style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        
+        // Set the tint color to red if favorited
+        if isFavorite {
+            heartButton.tintColor = .systemRed
+        }
+        
+        navigationItem.rightBarButtonItem = heartButton
     }
     
     required init?(coder: NSCoder) {
@@ -117,9 +142,26 @@ final class ScanResultViewController: UIViewController {
         // Configure navigation bar
         navigationController?.navigationBar.tintColor = .appPrimary
         
-        // Add heart button
-        let heartButton = UIBarButtonItem(image: UIImage(named: "heart-empty")?.withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        // Check if this content is already favorited
+        let data = ScanResultManager.shared.getRawData(from: scanResult) ?? scannedData
+        let favoriteStatus = HistoryManager.shared.isContentFavorited(data)
+        
+        // Add heart button with correct initial state
+        let heartImageName = favoriteStatus.isFavorite ? "heart-fill" : "heart-empty"
+        let heartImage = UIImage(named: heartImageName)?.withRenderingMode(.alwaysOriginal)
+        let heartButton = UIBarButtonItem(image: heartImage, style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        
+        // Set the tint color to red if favorited
+        if favoriteStatus.isFavorite {
+            heartButton.tintColor = .systemRed
+        }
+        
         navigationItem.rightBarButtonItem = heartButton
+        
+        // Store the item ID if it exists
+        if let itemId = favoriteStatus.itemId {
+            self.existingItemId = itemId
+        }
         
         // Save scan result to history
         if intent != .history {
@@ -139,14 +181,33 @@ final class ScanResultViewController: UIViewController {
     }
 
     @objc private func toggleFavoriteTapped() {
-        // Get the latest scan history
-        let scanHistory = HistoryManager.shared.getScanHistory()
-        // Assume the most recent scan is the one being displayed
-        guard let latestItem = scanHistory.first else { return }
-        let itemId = latestItem.id
+        var itemId: String
+        
+        if let existingId = existingItemId {
+            // Use the existing item ID if we found one
+            itemId = existingId
+        } else {
+            // Otherwise get the latest scan history item
+            let scanHistory = HistoryManager.shared.getScanHistory()
+            guard let latestItem = scanHistory.first else { return }
+            itemId = latestItem.id
+            // Store this ID for future use
+            existingItemId = itemId
+        }
+        
         let newFavoriteStatus = HistoryManager.shared.toggleFavorite(forItemWithId: itemId)
         let heartImageName = newFavoriteStatus ? "heart-fill" : "heart-empty"
-        navigationItem.rightBarButtonItem?.image = UIImage(named: heartImageName)?.withRenderingMode(.alwaysOriginal)
+        let heartImage = UIImage(named: heartImageName)?.withRenderingMode(.alwaysOriginal)
+        
+        // Create a new button with the updated heart image
+        let heartButton = UIBarButtonItem(image: heartImage, style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        
+        // Set the tint color to red if favorited
+        if newFavoriteStatus {
+            heartButton.tintColor = .systemRed
+        }
+        
+        navigationItem.rightBarButtonItem = heartButton
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -266,11 +327,9 @@ final class ScanResultViewController: UIViewController {
             
         case "Connect":
             if case .qrCode(.wifi, _) = scanResult {
-                let wifiInfo = ScanResultManager.shared.connectToWifi(from: data)
-                if let ssid = wifiInfo.ssid, !ssid.isEmpty {
-                    self.showToast(message: "Network information copied: \(ssid)")
-                } else {
-                    self.showToast(message: "Could not parse WiFi information")
+                // Use the proper method that handles WiFi connection with user feedback
+                ScanResultManager.shared.handleWifiConnection(from: data) { success, message in
+                    self.showToast(message: message)
                 }
             }
             

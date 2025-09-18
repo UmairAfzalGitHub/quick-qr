@@ -360,6 +360,8 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Delete the item from history manager
         if indexPath.row < historyItems.count {
             let itemToDelete = historyItems[indexPath.row]
+            
+            // This will delete from history but keep in favorites if it's favorited
             HistoryManager.shared.deleteHistoryItem(withId: itemToDelete.id)
             
             // Remove from data source

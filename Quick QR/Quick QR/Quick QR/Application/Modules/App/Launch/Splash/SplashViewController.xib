@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -12,6 +12,8 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SplashViewController" customModule="Quick_QR" customModuleProvider="target">
             <connections>
+                <outlet property="bannerView" destination="es3-1B-0Jn" id="BK8-N7-twI"/>
+                <outlet property="bannerViewHeightConstraint" destination="sMD-xY-j34" id="oXy-dT-Pdv"/>
                 <outlet property="messageLabel" destination="UEN-AY-1rd" id="iSb-Bw-lfz"/>
                 <outlet property="progressBar" destination="KUQ-8G-PzH" id="d6L-kV-BON"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
@@ -44,10 +46,17 @@
                     <nil key="highlightedColor"/>
                 </label>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KUQ-8G-PzH" customClass="AnimatedProgressBar" customModule="Quick_QR" customModuleProvider="target">
-                    <rect key="frame" x="40" y="772" width="313" height="6"/>
+                    <rect key="frame" x="40" y="698" width="313" height="6"/>
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="6" id="vdU-HA-Jgy"/>
+                    </constraints>
+                </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="es3-1B-0Jn" customClass="GADBannerView">
+                    <rect key="frame" x="0.0" y="724" width="393" height="60"/>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="60" id="sMD-xY-j34"/>
                     </constraints>
                 </view>
             </subviews>
@@ -62,13 +71,16 @@
                 <constraint firstAttribute="bottom" secondItem="gYP-h9-izM" secondAttribute="bottom" id="9Ig-ad-HA1"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="KUQ-8G-PzH" secondAttribute="trailing" constant="40" id="Biy-KH-lSJ"/>
                 <constraint firstItem="XzO-aN-XWZ" firstAttribute="centerX" secondItem="fnl-2z-Ty3" secondAttribute="centerX" id="GrV-gx-h4p"/>
+                <constraint firstItem="es3-1B-0Jn" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="Uoo-me-JPw"/>
+                <constraint firstItem="es3-1B-0Jn" firstAttribute="top" secondItem="KUQ-8G-PzH" secondAttribute="bottom" constant="20" id="VA2-91-TcU"/>
                 <constraint firstItem="UEN-AY-1rd" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="50" id="Y41-1H-6tt"/>
                 <constraint firstItem="cTq-vK-Hwa" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="alG-aF-izR"/>
-                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="KUQ-8G-PzH" secondAttribute="bottom" constant="40" id="hEy-Nx-iYs"/>
+                <constraint firstAttribute="trailing" secondItem="es3-1B-0Jn" secondAttribute="trailing" id="epK-c6-oLd"/>
                 <constraint firstItem="XzO-aN-XWZ" firstAttribute="width" secondItem="i5M-Pr-FkT" secondAttribute="width" multiplier="0.52" id="hYl-Q3-38B"/>
                 <constraint firstItem="KUQ-8G-PzH" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="40" id="kPV-zg-zQu"/>
                 <constraint firstItem="XzO-aN-XWZ" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" constant="-60" id="pL0-zi-07u"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="gYP-h9-izM" secondAttribute="trailing" id="rJa-z1-V9k"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="es3-1B-0Jn" secondAttribute="bottom" id="xai-ag-GBl"/>
             </constraints>
             <point key="canvasLocation" x="139.69465648854961" y="19.718309859154932"/>
         </view>

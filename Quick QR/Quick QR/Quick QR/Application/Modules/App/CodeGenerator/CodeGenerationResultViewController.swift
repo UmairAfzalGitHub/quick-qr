@@ -34,13 +34,39 @@ class CodeGenerationResultViewController: UIViewController {
     
     private var saveAction: (() -> Void)?
     private var shareAction: (() -> Void)?
+    private var existingItemId: String?
+    private var generatedContent: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appSecondaryBackground
-        // Add heart button
-        let heartButton = UIBarButtonItem(image: UIImage(named: "heart-empty"), style: .plain, target: self, action: #selector(toggleFavoriteTapped))
-        navigationItem.rightBarButtonItem = heartButton
+        
+        // Check if this content already exists and is favorited
+        if let content = generatedContent {
+            let favoriteStatus = HistoryManager.shared.isContentFavorited(content)
+            
+            // Add heart button with correct initial state
+            let heartImageName = favoriteStatus.isFavorite ? "heart-fill" : "heart-empty"
+            let heartImage = UIImage(named: heartImageName)
+            let heartButton = UIBarButtonItem(image: heartImage, style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+            
+            // Set the tint color to red if favorited
+            if favoriteStatus.isFavorite {
+                heartButton.tintColor = .systemRed
+            }
+            
+            navigationItem.rightBarButtonItem = heartButton
+            
+            // Store the item ID if it exists
+            if let itemId = favoriteStatus.itemId {
+                self.existingItemId = itemId
+            }
+        } else {
+            // Default heart button if no content yet
+            let heartButton = UIBarButtonItem(image: UIImage(named: "heart-empty"), style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+            navigationItem.rightBarButtonItem = heartButton
+        }
+        
         setupUI()
         setupConstraints()
         setupActions()
@@ -244,16 +270,88 @@ class CodeGenerationResultViewController: UIViewController {
         shareAction = action
     }
     
+    /// Set the generated content for favorite status checking
+    /// - Parameters:
+    ///   - content: The generated content
+    ///   - existingItemId: Optional existing item ID (if known)
+    ///   - isFavorite: Whether the item is already favorited (if known)
+    func setGeneratedContent(_ content: String, existingItemId: String? = nil, isFavorite: Bool? = nil) {
+        self.generatedContent = content
+        
+        if let itemId = existingItemId {
+            // Use the provided item ID and favorite status
+            self.existingItemId = itemId
+            
+            // Update heart button based on provided favorite status
+            if let isFavorite = isFavorite {
+                let heartImageName = isFavorite ? "heart-fill" : "heart-empty"
+                let heartImage = UIImage(named: heartImageName)
+                
+                // Create a new button with the updated heart image
+                let heartButton = UIBarButtonItem(image: heartImage, style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+                
+                // Set the tint color to red if favorited
+                if isFavorite {
+                    heartButton.tintColor = .systemRed
+                }
+                
+                navigationItem.rightBarButtonItem = heartButton
+                return
+            }
+        }
+        
+        // If no explicit ID/status provided, check if content exists in favorites
+        let favoriteStatus = HistoryManager.shared.isContentFavorited(content)
+        
+        // Update heart button with correct state
+        let heartImageName = favoriteStatus.isFavorite ? "heart-fill" : "heart-empty"
+        let heartImage = UIImage(named: heartImageName)
+        
+        // Create a new button with the updated heart image
+        let heartButton = UIBarButtonItem(image: heartImage, style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        
+        // Set the tint color to red if favorited
+        if favoriteStatus.isFavorite {
+            heartButton.tintColor = .systemRed
+        }
+        
+        navigationItem.rightBarButtonItem = heartButton
+        
+        // Store the item ID if it exists
+        if let itemId = favoriteStatus.itemId {
+            self.existingItemId = itemId
+        }
+    }
+    
     // MARK: - Actions
     @objc private func toggleFavoriteTapped() {
-        // Get the latest created history
-        let createdHistory = HistoryManager.shared.getCreatedHistory()
-        // Assume the most recent created item is the one being displayed
-        guard let latestItem = createdHistory.first else { return }
-        let itemId = latestItem.id
+        var itemId: String
+        
+        if let existingId = existingItemId {
+            // Use the existing item ID if we found one
+            itemId = existingId
+        } else {
+            // Otherwise get the latest created history item
+            let createdHistory = HistoryManager.shared.getCreatedHistory()
+            guard let latestItem = createdHistory.first else { return }
+            itemId = latestItem.id
+            // Store this ID for future use
+            existingItemId = itemId
+        }
+        
         let newFavoriteStatus = HistoryManager.shared.toggleFavorite(forItemWithId: itemId)
         let heartImageName = newFavoriteStatus ? "heart-fill" : "heart-empty"
-        navigationItem.rightBarButtonItem?.image = UIImage(named: heartImageName)
+        let heartImage = UIImage(named: heartImageName)
+        
+        // Create a new button with the updated heart image
+        let heartButton = UIBarButtonItem(image: heartImage, style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        
+        // Set the tint color to red if favorited
+        if newFavoriteStatus {
+            heartButton.tintColor = .systemRed
+        }
+        
+        navigationItem.rightBarButtonItem = heartButton
     }
 
     
