@@ -8,6 +8,8 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
         
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var progressBar: AnimatedProgressBar!
+    @IBOutlet weak var bannerView: BannerView!
+    @IBOutlet weak var bannerViewHeightConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,7 +42,14 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
 
     override func viewWillAppear(_ animated: Bool) {
         super.setupBanner(adId: AdMobConfig.banner)
+        super.bannerAdView = self.bannerView
         super.viewWillAppear(animated)
+        
+        IAPManager.shared.checkSubscriptionStatus { isSubscribed in
+            self.bannerView.isHidden = isSubscribed
+            self.bannerViewHeightConstraint.constant = isSubscribed ? 0 : 60
+        }
+
         localize()
     }
 
@@ -92,10 +101,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
                 navigateToTabBar(isLoaded ?? false)
             }
         } else {
-            let controller = OnboardingViewController()
-            let navController = UINavigationController(rootViewController: controller)
-            navController.isNavigationBarHidden = true
-            UIApplication.shared.updateRootViewController(to: navController)
+            UIApplication.shared.updateRootViewController(to: LanguageSelectionViewController())
         }
     }
     

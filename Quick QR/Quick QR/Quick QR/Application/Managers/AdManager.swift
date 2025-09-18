@@ -319,14 +319,28 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     func preloadNativeAds() {
         let adsToLoad = maxNativeAds - nativeAdPool.count
         guard adsToLoad > 0, let root = UIApplication.shared.sceneWindow?.rootViewController else { return }
-        for _ in 0..<adsToLoad {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {[weak self] in
-                self?.loadNativeAd(adId: AdMobConfig.native, from: root) {[weak self] ad in
+        
+        // Load ads sequentially with increasing delays to prevent overwhelming the ad network
+        for index in 0..<adsToLoad {
+            // Use increasing delay for each ad (2 seconds between each request)
+            let delay = 2.0 * Double(index + 1)
+            print("📱 Scheduling native ad load #\(index+1) with delay: \(delay) seconds")
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                guard let self = self else { return }
+                guard nativeAdPool.count < maxNativeAds else {
+                    return
+                }
+                print("📱 Loading native ad #\(index+1) after delay")
+                self.loadNativeAd(adId: AdMobConfig.native, from: root) { [weak self] ad in
                     if let ad = ad {
                         self?.nativeAdPool.append(ad)
+                        print("✅ Added native ad #\(index+1) to pool. Pool size: \(self?.nativeAdPool.count ?? 0)")
+                    } else {
+                        print("❌ Failed to load native ad #\(index+1)")
                     }
                 }
-            })
+            }
         }
     }
 

@@ -206,17 +206,20 @@ class LanguageSelectionViewController: UIViewController {
         if AdManager.shared.splashInterstitial == true {
             if AdManager.shared.splashInterstitial {
                 AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
-            }
-            AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
-                let navController = TabBarController()
-                UIApplication.shared.updateRootViewController(to: navController)
+                AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {[weak self] in
+                    self?.navigateToOnBoarding()
+                }
             }
         } else {
-            let navController = TabBarController()
-            UIApplication.shared.updateRootViewController(to: navController)
+            navigateToOnBoarding()
         }
-        
-        
+    }
+    
+    func navigateToOnBoarding() {
+        let controller = OnboardingViewController()
+        let navController = UINavigationController(rootViewController: controller)
+        navController.isNavigationBarHidden = true
+        UIApplication.shared.updateRootViewController(to: navController)
     }
 }
 
