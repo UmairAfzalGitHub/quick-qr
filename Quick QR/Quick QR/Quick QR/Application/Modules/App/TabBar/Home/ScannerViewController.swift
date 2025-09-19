@@ -71,8 +71,11 @@ class ScannerViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        // Start camera with highest priority
-        scannerManager.startCameraSession(true)
+        // Add a delay before starting camera session to avoid configuration conflicts
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            // Start camera with highest priority after a delay
+            self?.scannerManager.startCameraSession(true)
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {

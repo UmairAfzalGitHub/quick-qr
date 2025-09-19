@@ -88,8 +88,14 @@ class OnboardingViewController: UIViewController,
     }
     
     func finishOnboarding() {
-        let navController = TabBarController()
-        UIApplication.shared.updateRootViewController(to: navController)
+        let nextController = TabBarController()
+        // Set the default selected index based on whether the app is running on a simulator
+        #if targetEnvironment(simulator)
+            nextController.selectedIndex = 0  // Create tab for simulator
+        #else
+            nextController.selectedIndex = 2  // Scan tab for real device
+        #endif
+        UIApplication.shared.updateRootViewController(to: nextController)
     }
     
     private func loadNativeAd(completion: ((GoogleMobileAds.NativeAd?) -> Void)?) {

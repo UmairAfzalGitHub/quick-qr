@@ -68,7 +68,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Update clear button visibility based on data
         navigationItem.rightBarButtonItem?.isEnabled = !dataSource.isEmpty
         
-        if let ad = AdManager.shared.getNativeAd() {
+        if let ad = AdManager.shared.getNativeAd(stopPrefetch: true) {
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
         } else {

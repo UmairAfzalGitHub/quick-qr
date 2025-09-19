@@ -29,9 +29,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
             DispatchQueue.main.async {
                 AdsConsentManager.shared.checkAdsState {
                     // Only setup ads and navigate after consent is handled
-                    AdManager.shared.setupAds()
-                    AdManager.shared.preloadNativeAds()
-                    
+                    AdManager.shared.setupAds()                    
                     self.progressBar.animateIndeterminate(duration: 4.0, speed: 1.5) {
                         self.animateForTwoSeconds(preload: false)
                     }
@@ -78,6 +76,13 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
                 hasNavigated = true
                 
                 let nextController = TabBarController()
+                
+                // Set the default selected index based on whether the app is running on a simulator
+                #if targetEnvironment(simulator)
+                    nextController.selectedIndex = 0  // Create tab for simulator
+                #else
+                    nextController.selectedIndex = 2  // Scan tab for real device
+                #endif
                 
                 if withAd && AdManager.shared.splashInterstitial {
                     AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter

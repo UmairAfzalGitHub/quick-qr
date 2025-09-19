@@ -55,7 +55,7 @@ class HomeViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        if let ad = AdManager.shared.getNativeAd() {
+        if let ad = AdManager.shared.getNativeAd(stopPrefetch: true) {
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
         } else {
