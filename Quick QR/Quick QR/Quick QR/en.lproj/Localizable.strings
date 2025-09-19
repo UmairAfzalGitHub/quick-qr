@@ -101,6 +101,7 @@
 "privacy_policy" = "Privacy Policy";
 "recommended" = "Recommended";
 "popular" = "Popular";
+"weekly" = "Weekly";
 "monthly" = "Monthly";
 "yearly" = "Yearly";
 "unable_to_load" = "Unable to load subscription products. Please try again.";
@@ -181,3 +182,6 @@
 "code_128_validation" = "Code 128: Up to 32 characters. All ASCII characters (0-127) allowed.";
 "itf_validation" = "ITF: Even number of digits required. Only numeric characters (0-9) allowed. Max: 32 digits.";
 "pdf_417_validation" = "PDF417: Up to 200 characters. All plain text allowed.";
+"perfect_for_short_term" = "Perfect for Short-Term Use";
+"save_fifty_percent_vs" = "Save 50% vs weekly";
+"per_day" = "Per Day";

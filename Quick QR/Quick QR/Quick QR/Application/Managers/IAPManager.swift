@@ -3,9 +3,9 @@ import StoreKit
 
 // Subscription Product IDs
 enum SubscriptionID: String {
-    case weekly = "com.photo.recovery.weekly"
-    case monthly = "com.photo.recovery.monthly"
-    case yearly = "com.photo.recovery.yearly"
+    case weekly = "com.weekly.premium"
+    case monthly = "com.monthly.premium"
+    case yearly = "com.yearly.premium"
     
     static var allIdentifiers: [String] {
         return [weekly.rawValue, monthly.rawValue]
@@ -73,7 +73,8 @@ class IAPManager: NSObject {
     func fetchSubscriptions() {
         let productIDs = Set([
             SubscriptionID.weekly.rawValue,
-            SubscriptionID.monthly.rawValue
+            SubscriptionID.monthly.rawValue,
+            SubscriptionID.yearly.rawValue
         ])
         
         print("IAP - Products \(productIDs)")
@@ -145,7 +146,7 @@ class IAPManager: NSObject {
         
         let requestContents: [String: Any] = [
             "receipt-data": receiptString,
-            "password": "f55293fc159847dc8eccfa360865bd00", // Your shared secret here
+            "password": "af0e882817ef46658798fa47c5ed0a0d", // Your shared secret here
             "exclude-old-transactions": true
         ]
         
