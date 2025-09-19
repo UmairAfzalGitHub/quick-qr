@@ -52,7 +52,8 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     private var nativeAdView: NativeAdView!
     var nativeAd: GoogleMobileAds.NativeAd?
-    
+    var nativeAdHeightConstraint: NSLayoutConstraint!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -116,13 +117,16 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         view.addSubview(nativeAdParentView)
         nativeAdParentView.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        nativeAdHeightConstraint = nativeAdParentView.heightAnchor.constraint(equalToConstant: UIDevice().isSmallerDevice() ? 159 : 240)
+
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: betterSegmentedControl.bottomAnchor, constant: 20),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: nativeAdParentView.topAnchor, constant: -10),
 
-            nativeAdParentView.heightAnchor.constraint(equalToConstant: 240),
+            nativeAdHeightConstraint,
             nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
@@ -437,12 +441,18 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
-        let nibView = Bundle.main.loadNibNamed("OnBoardingNativeAdView", owner: nil, options: nil)?.first
+        let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
+        let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
         guard let nativeAdView = nibView as? NativeAdView else { return }
         setAdView(nativeAdView)
 
-        (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
-        nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+        if UIDevice().isSmallerDevice() {
+            nativeAdView.mediaView?.isHidden = true
+            nativeAdView.mediaView?.removeFromSuperview()
+        } else {
+            (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+            nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+        }
 
         // Configure optional assets
         (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body

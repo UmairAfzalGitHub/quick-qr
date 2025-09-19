@@ -12,7 +12,8 @@ class OnboardingViewController: UIViewController,
     @IBOutlet weak var nativeAdParentView: UIView!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var pageControlCustom: CustomPageControl!
-
+    @IBOutlet weak var nativeAdHeightConstraint: NSLayoutConstraint!
+    
     private var hasShownReviewPrompt = false
     private var nativeAdView: NativeAdView!
     var nativeAd: GoogleMobileAds.NativeAd?
@@ -85,6 +86,10 @@ class OnboardingViewController: UIViewController,
         nextButton.addGestureRecognizer(tapGestureRecognizer)
         nextButton.configure(with: .primary(title: Strings.Label.next, image: nil))
         self.navigationController?.navigationBar.isHidden = true
+        
+        if UIDevice().isSmallerDevice() {
+            nativeAdHeightConstraint.constant = 159.0
+        }
     }
     
     func finishOnboarding() {
@@ -95,6 +100,8 @@ class OnboardingViewController: UIViewController,
         #else
             nextController.selectedIndex = 2  // Scan tab for real device
         #endif
+        
+        UserDefaultManager.shared.setValue(.onBoarding(true))
         UIApplication.shared.updateRootViewController(to: nextController)
     }
     
@@ -127,13 +134,18 @@ class OnboardingViewController: UIViewController,
     
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
-        let nibView = Bundle.main.loadNibNamed("OnBoardingNativeAdView", owner: nil, options: nil)?.first
+        let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
+        let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
         guard let nativeAdView = nibView as? NativeAdView else { return }
         setAdView(nativeAdView)
 
-        (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
-        nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
-
+        if UIDevice().isSmallerDevice() {
+            nativeAdView.mediaView?.isHidden = true
+            nativeAdView.mediaView?.removeFromSuperview()
+        } else {
+            (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+            nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+        }
         // Configure optional assets
         (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
         nativeAdView.bodyView?.isHidden = nativeAd.body == nil

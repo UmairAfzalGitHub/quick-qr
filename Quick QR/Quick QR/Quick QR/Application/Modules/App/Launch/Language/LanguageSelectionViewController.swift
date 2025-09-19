@@ -39,6 +39,7 @@ class LanguageSelectionViewController: UIViewController {
     }()
     
     private var nativeAdView: NativeAdView!
+    var nativeAdHeightConstraint: NSLayoutConstraint!
     var nativeAd: GoogleMobileAds.NativeAd?
     var intent: LanguageIntent = .onBoarding
     var selected = String()
@@ -110,7 +111,7 @@ class LanguageSelectionViewController: UIViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         nativeAdParentView.translatesAutoresizingMaskIntoConstraints = false
         selectCTA.translatesAutoresizingMaskIntoConstraints = false
-        
+        nativeAdHeightConstraint = nativeAdParentView.heightAnchor.constraint(equalToConstant: UIDevice().isSmallerDevice() ? 159 : 240)
         NSLayoutConstraint.activate([
             headerStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             headerStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -124,7 +125,7 @@ class LanguageSelectionViewController: UIViewController {
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             collectionView.bottomAnchor.constraint(equalTo: nativeAdParentView.topAnchor, constant: -10),
             
-            nativeAdParentView.heightAnchor.constraint(equalToConstant: 240),
+            nativeAdHeightConstraint,
             nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
@@ -158,12 +159,18 @@ class LanguageSelectionViewController: UIViewController {
     
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
-        let nibView = Bundle.main.loadNibNamed("OnBoardingNativeAdView", owner: nil, options: nil)?.first
+        let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
+        let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
         guard let nativeAdView = nibView as? NativeAdView else { return }
         setAdView(nativeAdView)
 
-        (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
-        nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+        if UIDevice().isSmallerDevice() {
+            nativeAdView.mediaView?.isHidden = true
+            nativeAdView.mediaView?.removeFromSuperview()
+        } else {
+            (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+            nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+        }
 
         // Configure optional assets
         (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
@@ -200,8 +207,6 @@ class LanguageSelectionViewController: UIViewController {
             UIApplication.shared.updateRootViewController(to: tabVC)
             return
         }
-        
-        UserDefaults.standard.set(true, forKey: "isOnboardingComplete")
 
         if AdManager.shared.splashInterstitial == true {
             if AdManager.shared.splashInterstitial {
