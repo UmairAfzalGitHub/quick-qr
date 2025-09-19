@@ -102,7 +102,7 @@ class ScannerViewController: UIViewController {
     
     func setupConstraints() {
         NSLayoutConstraint.activate([
-            iapImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            iapImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
             iapImage.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             iapImage.heightAnchor.constraint(equalToConstant: 31),
             iapImage.widthAnchor.constraint(equalToConstant: 77),
