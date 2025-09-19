@@ -45,19 +45,18 @@ class LanguageSelectionViewController: UIViewController {
     var selected = String()
     
     private var languages: [Language] = [
-        Language(title: "English", flagImage: "🇺🇸", isSelected: false, languageCode: "en"),
-        Language(title: "Hindi", flagImage: "india-flag", isSelected: false, languageCode: "hi"),
-        Language(title: "Chinese", flagImage: "china-flag", isSelected: false, languageCode: "zh-Hans"),
-        Language(title: "Russian", flagImage: "russia-flag", isSelected: false, languageCode: "ru"),
-        Language(title: "Spanish", flagImage: "spain-flag", isSelected: false, languageCode: "es"),
-        Language(title: "French", flagImage: "france-flag", isSelected: false, languageCode: "fr"),
-        Language(title: "German", flagImage: "🇩🇪", isSelected: false, languageCode: "de"),
-        Language(title: "Indonesian", flagImage: "indonesia-flag", isSelected: false, languageCode: "id"),
-        Language(title: "Japanese", flagImage: "🇯🇵", isSelected: false, languageCode: "ja"),
-        Language(title: "Korean", flagImage: "🇰🇷", isSelected: false, languageCode: "ko"),
-        Language(title: "Vietnamese", flagImage: "🇻🇳", isSelected: false, languageCode: "vi"),
+        Language(title: "English", flagImage: "uk-flag", isSelected: false, languageCode: "en"),
+        Language(title: "Arabic (العربية)", flagImage: "saudi-flag", isSelected: false, languageCode: "ar"),
+        Language(title: "Hindi (हिन्दी)", flagImage: "india-flag", isSelected: false, languageCode: "hi"),
+        Language(title: "Chinese (中文)", flagImage: "china-flag", isSelected: false, languageCode: "zh-Hans"),
+        Language(title: "Russian (Русский)", flagImage: "russia-flag", isSelected: false, languageCode: "ru"),
+        Language(title: "French (Français)", flagImage: "french-flag", isSelected: false, languageCode: "fr"),
+        Language(title: "German (Deutsch)", flagImage: "german-flag", isSelected: false, languageCode: "de"),
+        Language(title: "Korean (한국어)", flagImage: "korean-flag", isSelected: false, languageCode: "ko"),
+        Language(title: "Italian (Italiano)", flagImage: "italy-flag", isSelected: false, languageCode: "it"),
+        Language(title: "Portuguese (Português)", flagImage: "portuguese-flag", isSelected: false, languageCode: "pt")
     ]
-    
+
     private var selectedIndex: IndexPath?
     
     // MARK: - Lifecycle
@@ -254,8 +253,8 @@ extension LanguageSelectionViewController: UICollectionViewDataSource, UICollect
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (collectionView.frame.width - 16) / 2
-        return CGSize(width: width, height: 64)
+        let width = (collectionView.frame.width - 16)
+        return CGSize(width: width, height: 68)
     }
     
     func selectLanguage(indexNo : IndexPath) {
@@ -316,10 +315,10 @@ class LanguageCell: UICollectionViewCell {
         cellContentView.addSubview(stack)
         stack.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            cellContentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 6),
-            cellContentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -6),
-            cellContentView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 6),
-            cellContentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -6),
+            cellContentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 2),
+            cellContentView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -2),
+            cellContentView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 2),
+            cellContentView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -2),
             
             stack.leadingAnchor.constraint(equalTo: cellContentView.leadingAnchor, constant: 8),
             stack.trailingAnchor.constraint(equalTo: cellContentView.trailingAnchor, constant: -8),
