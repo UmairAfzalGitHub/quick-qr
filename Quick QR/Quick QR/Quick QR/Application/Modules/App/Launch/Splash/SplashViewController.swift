@@ -57,7 +57,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
 
     func localize() {
         // TODO: - Localize Here
-        messageLabel.text = Strings.Label.quickQR
+        messageLabel.text = Strings.Label.scanInstantly
     }
 
     func checkLanguageStatus() {

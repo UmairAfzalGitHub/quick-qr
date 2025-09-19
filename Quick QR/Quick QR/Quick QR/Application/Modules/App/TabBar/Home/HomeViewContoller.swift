@@ -73,6 +73,19 @@ class HomeViewController: UIViewController {
             .foregroundColor: UIColor.textPrimary,
             .font: UIFont.systemFont(ofSize: 18, weight: .semibold)
         ]
+        
+        // Create button with image
+           let iconButton = UIButton(type: .custom)
+           iconButton.setImage(UIImage(named: "iap-icon"), for: .normal)
+//           iconButton.tintColor = .textPrimary
+//           iconButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+           
+           // Add tap action
+           iconButton.addTarget(self, action: #selector(iapIconTapped), for: .touchUpInside)
+           
+           // Put button in UIBarButtonItem
+           let rightBarButton = UIBarButtonItem(customView: iconButton)
+           navigationItem.rightBarButtonItem = rightBarButton
     }
     
     private func setupUI() {
@@ -131,6 +144,12 @@ class HomeViewController: UIViewController {
     @objc private func segmentChanged(_ sender: BetterSegmentedControl) {
         // Reload collection view when segment changes
         collectionView.reloadData()
+    }
+    
+    @objc private func iapIconTapped() {
+        let vc = IAPViewController()
+        vc.modalPresentationStyle = .fullScreen
+        present(vc, animated: true)
     }
 }
 

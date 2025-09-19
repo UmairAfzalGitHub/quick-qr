@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -40,20 +40,20 @@
                     </constraints>
                 </imageView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Scan Instantly. Create Effortlessly." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="UEN-AY-1rd">
-                    <rect key="frame" x="50" y="582.33333333333337" width="293" height="21.666666666666629"/>
+                    <rect key="frame" x="50" y="570.33333333333337" width="293" height="21.666666666666629"/>
                     <fontDescription key="fontDescription" name="HelveticaNeue-Medium" family="Helvetica Neue" pointSize="18"/>
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KUQ-8G-PzH" customClass="AnimatedProgressBar" customModule="Quick_QR" customModuleProvider="target">
-                    <rect key="frame" x="40" y="698" width="313" height="6"/>
+                    <rect key="frame" x="40" y="732" width="313" height="6"/>
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="6" id="vdU-HA-Jgy"/>
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="es3-1B-0Jn" customClass="GADBannerView">
-                    <rect key="frame" x="0.0" y="724" width="393" height="60"/>
+                    <rect key="frame" x="0.0" y="758" width="393" height="60"/>
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="60" id="sMD-xY-j34"/>
@@ -67,7 +67,7 @@
                 <constraint firstItem="gYP-h9-izM" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="27d-6W-aoY"/>
                 <constraint firstItem="gYP-h9-izM" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="6Ba-at-7es"/>
                 <constraint firstItem="cTq-vK-Hwa" firstAttribute="top" secondItem="XzO-aN-XWZ" secondAttribute="bottom" constant="20" id="6C6-k4-aQf"/>
-                <constraint firstItem="UEN-AY-1rd" firstAttribute="top" secondItem="cTq-vK-Hwa" secondAttribute="bottom" constant="12" id="8Nj-na-NBa"/>
+                <constraint firstItem="UEN-AY-1rd" firstAttribute="top" secondItem="cTq-vK-Hwa" secondAttribute="bottom" id="8Nj-na-NBa"/>
                 <constraint firstAttribute="bottom" secondItem="gYP-h9-izM" secondAttribute="bottom" id="9Ig-ad-HA1"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="KUQ-8G-PzH" secondAttribute="trailing" constant="40" id="Biy-KH-lSJ"/>
                 <constraint firstItem="XzO-aN-XWZ" firstAttribute="centerX" secondItem="fnl-2z-Ty3" secondAttribute="centerX" id="GrV-gx-h4p"/>
