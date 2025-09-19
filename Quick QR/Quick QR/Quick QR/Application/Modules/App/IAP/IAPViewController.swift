@@ -115,7 +115,9 @@ class IAPViewController: UIViewController {
     // Store references to price labels for updating
     private var weeklyPriceLabel: UILabel?
     private var monthlyPriceLabel: UILabel?
-    private var weeklyDailyEquivalentLabel: UILabel?
+    private var weeklySubtitleLabel: UILabel?
+    private var monthlySubtitleLabel: UILabel?
+    private var monthlyWeeklyEquivalentLabel: UILabel?
     
     private let disclaimerLabel = UILabel()
     private let continueButton = GradientButton(type: .system)
@@ -243,11 +245,12 @@ class IAPViewController: UIViewController {
         
         contentView.addSubview(topImageView)
         
+        var width: CGFloat = UIDevice().isSmallerDevice() ? 140 : 200
         NSLayoutConstraint.activate([
             topImageView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
             topImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            topImageView.widthAnchor.constraint(equalToConstant: 200),
-            topImageView.heightAnchor.constraint(equalToConstant: 200)
+            topImageView.widthAnchor.constraint(equalToConstant: width),
+            topImageView.heightAnchor.constraint(equalTo: topImageView.widthAnchor)
         ])
     }
     
@@ -420,12 +423,48 @@ class IAPViewController: UIViewController {
         containerView.backgroundColor = .systemGray6
         containerView.clipsToBounds = false
 
+        // Left side vertical stack (title + subtitle/additional info)
+        let leftStack = UIStackView()
+        leftStack.translatesAutoresizingMaskIntoConstraints = false
+        leftStack.axis = .vertical
+        leftStack.spacing = 4
+        leftStack.alignment = .leading
+        leftStack.distribution = .fill
+
         // Title
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = plan.title
         titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
         titleLabel.textColor = .black
+
+        // Subtitle
+        let subtitleLabel = UILabel()
+        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        if let subtitle = plan.subtitle {
+            subtitleLabel.text = subtitle
+        }
+        subtitleLabel.font = UIFont.systemFont(ofSize: 14)
+        subtitleLabel.textColor = .gray
+        subtitleLabel.numberOfLines = 0
+
+        // Store reference to subtitle labels
+        if plan == .weekly {
+            weeklySubtitleLabel = subtitleLabel
+        } else {
+            monthlySubtitleLabel = subtitleLabel
+        }
+
+        leftStack.addArrangedSubview(titleLabel)
+        leftStack.addArrangedSubview(subtitleLabel)
+
+        // Right side vertical stack (price + additional price info if needed)
+        let rightStack = UIStackView()
+        rightStack.translatesAutoresizingMaskIntoConstraints = false
+        rightStack.axis = .vertical
+        rightStack.spacing = 2
+        rightStack.alignment = .trailing
+        rightStack.distribution = .fill
 
         // Price
         let priceLabel = UILabel()
@@ -435,58 +474,42 @@ class IAPViewController: UIViewController {
         priceLabel.textColor = .black
         priceLabel.textAlignment = .right
 
-        // Store refs
+        // Store reference to price labels
         if plan == .weekly {
             weeklyPriceLabel = priceLabel
         } else {
             monthlyPriceLabel = priceLabel
         }
 
-        // Subtitle + optional daily equivalent in vertical stack
-        let infoStack = UIStackView()
-        infoStack.translatesAutoresizingMaskIntoConstraints = false
-        infoStack.axis = .vertical
-        infoStack.spacing = 2
-        infoStack.alignment = .leading
+        rightStack.addArrangedSubview(priceLabel)
 
-        if let subtitle = plan.subtitle {
-            let subtitleLabel = UILabel()
-            subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-            subtitleLabel.text = subtitle
-            subtitleLabel.font = UIFont.systemFont(ofSize: 14)
-            subtitleLabel.textColor = .gray
-            infoStack.addArrangedSubview(subtitleLabel)
-        }
-
+        // For monthly plan, add weekly equivalent below the price
         if plan == .monthly {
             let weeklyEquivalentLabel = UILabel()
             weeklyEquivalentLabel.translatesAutoresizingMaskIntoConstraints = false
-            weeklyEquivalentLabel.text = "Loading..."  // will update later
-            weeklyEquivalentLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+            weeklyEquivalentLabel.text = "Loading..."
+            weeklyEquivalentLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
             weeklyEquivalentLabel.textColor = .black
-            weeklyEquivalentLabel.textAlignment = .left
-
-            monthlyPriceLabel = priceLabel
-            weeklyDailyEquivalentLabel = weeklyEquivalentLabel
-            infoStack.addArrangedSubview(weeklyEquivalentLabel)
+            weeklyEquivalentLabel.textAlignment = .right
+            weeklyEquivalentLabel.numberOfLines = 0
+            monthlyWeeklyEquivalentLabel = weeklyEquivalentLabel
+            rightStack.addArrangedSubview(weeklyEquivalentLabel)
         }
 
-        containerView.addSubview(titleLabel)
-        containerView.addSubview(priceLabel)
-        containerView.addSubview(infoStack)
+        containerView.addSubview(leftStack)
+        containerView.addSubview(rightStack)
 
         NSLayoutConstraint.activate([
             containerView.heightAnchor.constraint(equalToConstant: 90),
 
-            titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
+            leftStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            leftStack.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            leftStack.trailingAnchor.constraint(lessThanOrEqualTo: rightStack.leadingAnchor, constant: -12),
 
-            priceLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-            priceLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
-
-            infoStack.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            infoStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
-            infoStack.trailingAnchor.constraint(lessThanOrEqualTo: priceLabel.leadingAnchor, constant: -8),
+            rightStack.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            rightStack.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+//            rightStack.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
+//            rightStack.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: -16),
         ])
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(planViewTapped(_:)))
@@ -496,7 +519,6 @@ class IAPViewController: UIViewController {
 
         return containerView
     }
-
 
     private func createTagLabel(for plan: SubscriptionPlan) -> UILabel? {
         guard let tagText = plan.tag else { return nil }
@@ -610,9 +632,9 @@ class IAPViewController: UIViewController {
             let price = IAPManager.shared.getFormattedPrice(for: monthlyProduct)
             monthlyPriceLabel?.text = price.formatted
 
-            // Show weekly equivalent inside monthly plan
+            // Show weekly equivalent for monthly plan
             let weeklyEquivalent = calculateWeeklyEquivalent(for: monthlyProduct)
-            weeklyDailyEquivalentLabel?.text = weeklyEquivalent
+            monthlyWeeklyEquivalentLabel?.text = weeklyEquivalent
         }
     }
     
@@ -624,7 +646,10 @@ class IAPViewController: UIViewController {
         formatter.numberStyle = .currency
         formatter.locale = product.priceLocale
 
-        return formatter.string(from: NSNumber(value: weeklyEquivalent)) ?? "Loading..."
+        if let formattedPrice = formatter.string(from: NSNumber(value: weeklyEquivalent)) {
+            return "\(formattedPrice) weekly"
+        }
+        return "Loading..."
     }
     
     private func updatePlanSelection() {
@@ -637,18 +662,9 @@ class IAPViewController: UIViewController {
         monthlyPlanView.backgroundColor = .systemGray6
         monthlyPlanView.layer.borderColor = UIColor.gray.withAlphaComponent(0.35).cgColor
         
-        // Reset text colors to black for all labels except tags
-        for subview in weeklyPlanView.subviews {
-            if let label = subview as? UILabel, label.text != SubscriptionPlan.weekly.tag {
-                label.textColor = .black
-            }
-        }
-        
-        for subview in monthlyPlanView.subviews {
-            if let label = subview as? UILabel, label.text != SubscriptionPlan.monthly.tag {
-                label.textColor = .black
-            }
-        }
+        // Reset text colors to black for all labels in stacks
+        updateStackViewTextColors(in: weeklyPlanView, color: .black)
+        updateStackViewTextColors(in: monthlyPlanView, color: .black)
         
         // Apply selection styling
         let selectedView = selectedPlan == .weekly ? weeklyPlanView : monthlyPlanView
@@ -663,12 +679,15 @@ class IAPViewController: UIViewController {
         selectedView.layer.borderColor = UIColor.white.cgColor
         
         // Update text colors for selected plan
-        for subview in selectedView.subviews {
-            if let label = subview as? UILabel {
-                let tagText = selectedPlan == .weekly ? SubscriptionPlan.weekly.tag : SubscriptionPlan.monthly.tag
-                if label.text != tagText {
-                    label.textColor = .white
-                }
+        updateStackViewTextColors(in: selectedView, color: .white)
+    }
+    
+    private func updateStackViewTextColors(in view: UIView, color: UIColor) {
+        for subview in view.subviews {
+            if let stackView = subview as? UIStackView {
+                updateStackViewTextColors(in: stackView, color: color)
+            } else if let label = subview as? UILabel {
+                label.textColor = color
             }
         }
     }
