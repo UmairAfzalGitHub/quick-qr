@@ -22,19 +22,19 @@ struct AdMobId {
 }
 
 struct AdMobConfig {
-#if DEBUG // Test
+//#if DEBUG // Test
     static var appOpen = AdMobId(analyticsId: .appOpenAd, adId: "ca-app-pub-3940256099942544/5575463023")
     static var interstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-3940256099942544/4411468910")
     static var native = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
     static var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
     static var rewarded = AdMobId(analyticsId: .rewardedAd, adId: "ca-app-pub-3940256099942544/1712485313")
-#else // Live
-    static var appOpen = AdMobId(analyticsId: .appOpenAd, adId: "ca-app-pub-7197936742422632/1164898117")
-    static var interstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-7197936742422632/6898502720")
-    static var native = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-7197936742422632/4272339384")
-    static var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-7197936742422632/5810720131")
-    static var rewarded = AdMobId(analyticsId: .rewardedAd, adId: "ca-app-pub-7197936742422632/5585421050")
-#endif
+//#else // Live
+//    static var appOpen = AdMobId(analyticsId: .appOpenAd, adId: "ca-app-pub-7197936742422632/1164898117")
+//    static var interstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-7197936742422632/6898502720")
+//    static var native = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-7197936742422632/4272339384")
+//    static var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-7197936742422632/5810720131")
+//    static var rewarded = AdMobId(analyticsId: .rewardedAd, adId: "ca-app-pub-7197936742422632/5585421050")
+//#endif
 }
 
 // MARK: - Ad Manager
