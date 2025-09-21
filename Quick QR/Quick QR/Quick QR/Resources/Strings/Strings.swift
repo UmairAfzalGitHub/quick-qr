@@ -193,6 +193,7 @@ struct Strings {
         static var perfectForShortTerm: String { "perfect_for_short_term".localized() }
         static var saveFiftyPercentVs: String { "save_fifty_percent_vs".localized() }
         static var perDay: String { "per_day".localized() }
+        static var done: String { "done".localized() }
     }
     
     struct Button {

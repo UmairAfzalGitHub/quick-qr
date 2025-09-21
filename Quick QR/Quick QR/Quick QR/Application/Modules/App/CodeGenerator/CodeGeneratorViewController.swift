@@ -954,28 +954,28 @@ class CodeGeneratorViewController: UIViewController {
         barCodeView?.type = type
         
         // Add test data based on barcode type
-        switch type {
-        case .code128:
-            barCodeView?.urlText = "ABC-123456789"
-        case .code39:
-            barCodeView?.urlText = "CODE-39"
-        case .code93:
-            barCodeView?.urlText = "CODE-93"
-        case .ean13:
-            barCodeView?.urlText = "5901234123457"
-        case .ean8:
-            barCodeView?.urlText = "96385074"
-        case .upca:
-            barCodeView?.urlText = "042100005264"
-        case .upce:
-            barCodeView?.urlText = "01234565"
-        case .itf:
-            barCodeView?.urlText = "1234567890"
-        case .pdf417:
-            barCodeView?.urlText = "PDF417 Test Data"
-        case .isbn:
-            barCodeView?.urlText = "9781234567897"
-        }
+//        switch type {
+//        case .code128:
+//            barCodeView?.urlText = "ABC-123456789"
+//        case .code39:
+//            barCodeView?.urlText = "CODE-39"
+//        case .code93:
+//            barCodeView?.urlText = "CODE-93"
+//        case .ean13:
+//            barCodeView?.urlText = "5901234123457"
+//        case .ean8:
+//            barCodeView?.urlText = "96385074"
+//        case .upca:
+//            barCodeView?.urlText = "042100005264"
+//        case .upce:
+//            barCodeView?.urlText = "01234565"
+//        case .itf:
+//            barCodeView?.urlText = "1234567890"
+//        case .pdf417:
+//            barCodeView?.urlText = "PDF417 Test Data"
+//        case .isbn:
+//            barCodeView?.urlText = "9781234567897"
+//        }
         
         return barCodeView!
     }

@@ -131,13 +131,12 @@ class HomeViewController: UIViewController {
             collectionView.topAnchor.constraint(equalTo: betterSegmentedControl.bottomAnchor, constant: 20),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            
             collectionView.bottomAnchor.constraint(equalTo: nativeAdParentView.topAnchor, constant: -10),
             
             nativeAdHeightConstraint,
             nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
+            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -17)
         ])
     }
     

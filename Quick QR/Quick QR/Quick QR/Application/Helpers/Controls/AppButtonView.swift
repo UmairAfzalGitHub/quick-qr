@@ -66,9 +66,9 @@ final class AppButtonView: UIView {
         shadowView.translatesAutoresizingMaskIntoConstraints = false
         shadowView.backgroundColor = .clear
         shadowView.layer.shadowColor = UIColor.appPrimary.cgColor
-        shadowView.layer.shadowOffset = CGSize(width: 0, height: 8)
-        shadowView.layer.shadowRadius = 20
-        shadowView.layer.shadowOpacity = 0.48
+//        shadowView.layer.shadowOffset = CGSize(width: 0, height: 8)
+//        shadowView.layer.shadowRadius = 20
+//        shadowView.layer.shadowOpacity = 0.48
         shadowView.layer.masksToBounds = false
         
         // Setup container view with rounded corners
