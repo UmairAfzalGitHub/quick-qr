@@ -126,8 +126,17 @@
 				en,
 				Base,
 				hi,
-				ar,
 				nl,
+				ar,
+				fr,
+				de,
+				ja,
+				ko,
+				"pt-BR",
+				ru,
+				es,
+				tr,
+				vi,
 			);
 			mainGroup = 6815AD802E3E0670008476CF;
 			minimizedProjectReferenceProxies = 1;

@@ -46,15 +46,18 @@ class LanguageSelectionViewController: UIViewController {
     
     private var languages: [Language] = [
         Language(title: "English", flagImage: "uk-flag", isSelected: false, languageCode: "en"),
-        Language(title: "Arabic (العربية)", flagImage: "saudi-flag", isSelected: false, languageCode: "ar"),
-        Language(title: "Hindi (हिन्दी)", flagImage: "india-flag", isSelected: false, languageCode: "hi"),
-        Language(title: "Chinese (中文)", flagImage: "china-flag", isSelected: false, languageCode: "zh-Hans"),
-        Language(title: "Russian (Русский)", flagImage: "russia-flag", isSelected: false, languageCode: "ru"),
+        Language(title: "Arabic (العربية)", flagImage: "arabic-flag", isSelected: false, languageCode: "ar"),
         Language(title: "French (Français)", flagImage: "french-flag", isSelected: false, languageCode: "fr"),
         Language(title: "German (Deutsch)", flagImage: "german-flag", isSelected: false, languageCode: "de"),
+        Language(title: "Dutch (Nederlands)", flagImage: "dutch-flag", isSelected: false, languageCode: "nl"),
+        Language(title: "Portuguese (Português)", flagImage: "portuguese-flag", isSelected: false, languageCode: "pt-BR"),
+        Language(title: "Hindi (हिन्दी)", flagImage: "hindi-flag", isSelected: false, languageCode: "hi"),
+        Language(title: "Russian (Русский)", flagImage: "russian-flag", isSelected: false, languageCode: "ru"),
+        Language(title: "Spanish (Español)", flagImage: "spanish-flag", isSelected: false, languageCode: "es"),
         Language(title: "Korean (한국어)", flagImage: "korean-flag", isSelected: false, languageCode: "ko"),
-        Language(title: "Italian (Italiano)", flagImage: "italy-flag", isSelected: false, languageCode: "it"),
-        Language(title: "Portuguese (Português)", flagImage: "portuguese-flag", isSelected: false, languageCode: "pt")
+        Language(title: "Japanese (日本語)", flagImage: "japanese-flag", isSelected: false, languageCode: "ja"),
+        Language(title: "Turkish (Türkçe)", flagImage: "turkish-flag", isSelected: false, languageCode: "tr"),
+        Language(title: "Vietnamese (Tiếng Việt)", flagImage: "vietnamese-flag", isSelected: false, languageCode: "vi")
     ]
 
     private var selectedIndex: IndexPath?
@@ -120,8 +123,8 @@ class LanguageSelectionViewController: UIViewController {
             selectCTA.heightAnchor.constraint(equalToConstant: 54),
             
             collectionView.topAnchor.constraint(equalTo: headerStack.bottomAnchor, constant: 20),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             collectionView.bottomAnchor.constraint(equalTo: nativeAdParentView.topAnchor, constant: -10),
             
             nativeAdHeightConstraint,

@@ -1,1 +1,88 @@
+/*
+  Localizable.strings
+  Quick QR
+
+  Created by Haider Rathore on 05/09/2025.
+  
+*/
+
+"area_code" = "क्षेत्र कोड";
+"search_by_city" = "शहर से खोजें";
+"copied_to_clipboard" = "क्लिपबोर्ड पर कॉपी किया गया";
+"search" = "खोजें";
+"sort_by_name" = "नाम से क्रमबद्ध करें";
+"sort_by_code" = "कोड से क्रमबद्ध करें";
+"title" = "शीर्षक";
+"value" = "मान";
+"bar_code_name" = "बारकोड नाम";
+"enter_code" = "कोड दर्ज करें";
+"bar_code" = "बारकोड";
+"enter_a_title" = "शीर्षक दर्ज करें";
+"location" = "स्थान";
+"please_enter_something" = "कृपया कुछ दर्ज करें";
+"all_day" = "पूरा दिन";
+"start_time" = "प्रारंभ समय";
+"end_time" = "समाप्ति समय";
+"description" = "विवरण";
+"name" = "नाम";
+"enter_name" = "नाम दर्ज करें";
+"phone_number" = "फ़ोन नंबर";
+"enter_phone_number" = "फ़ोन नंबर दर्ज करें";
+"email_address" = "ईमेल पता";
+"enter_email_address" = "ईमेल पता दर्ज करें";
+"subject" = "विषय";
+"content" = "सामग्री";
+"user_name" = "उपयोगकर्ता नाम";
+"enter_user_name" = "उपयोगकर्ता नाम दर्ज करें";
+"url" = "यूआरएल";
+"enter_url" = "यूआरएल दर्ज करें";
+"latitude" = "अक्षांश";
+"longitude" = "देशांतर";
+"enter_longitude_location" = "देशांतर दर्ज करें";
+"enter_latitude_location" = "अक्षांश दर्ज करें";
+"text_message" = "पाठ संदेश";
+"website_url" = "वेबसाइट यूआरएल";
+"whatsApp_number" = "व्हाट्सऐप नंबर";
+"network_name_ssid" = "नेटवर्क नाम (SSID)";
+"enter_ssid" = "नेटवर्क नाम दर्ज करें";
+"password" = "पासवर्ड";
+"enter_password" = "पासवर्ड दर्ज करें";
+"security_mode" = "सुरक्षा मोड";
+"none" = "कोई नहीं";
+"share" = "साझा करें";
+"save" = "सहेजें";
+"create" = "बनाएँ";
+"error" = "त्रुटि";
+"failed_to_generate" = "जनरेट करने में विफल। कृपया इनपुट जाँचें और पुनः प्रयास करें।";
+"wifi_name" = "वाई-फ़ाई नाम";
+"sms" = "एसएमएस";
+"to_colon" = "को:";
+"text" = "पाठ";
+"contact" = "संपर्क";
+"email" = "ईमेल";
+"website" = "वेबसाइट";
+"geo_coordinates" = "भौगोलिक निर्देशांक";
+"calendar_event" = "कैलेंडर इवेंट";
+"success" = "सफल";
+"image_saved_to_library" = "छवि लाइब्रेरी में सहेजी गई";
+"ok" = "ठीक है";
+"failed_to_save_image" = "छवि सहेजने में विफल";
+"number_locator" = "नंबर खोजक";
+"smart_scan_qr_code" = "स्मार्ट क्यूआर कोड स्कैनर";
+"point_your_camera" = "किसी भी क्यूआर कोड को तुरंत स्कैन करने के लिए कैमरा इंगित करें";
+"easily_read_barcodes" = "आसानी से बारकोड पढ़ें";
+"easily_scan_barcodes" = "उत्पाद विवरण देखने, कीमतों की तुलना करने या जानकारी प्राप्त करने के लिए बारकोड जल्दी स्कैन करें।";
+"quickly_create_qr_code" = "जल्दी क्यूआर कोड बनाएं";
+"generate_custom_qr" = "लिंक, टेक्स्ट, वाई-फ़ाई, संपर्क और अधिक के लिए कस्टम क्यूआर कोड बनाएं।";
+"quick_qr" = "क्विक क्यूआर";
+"scan_instantly" = "तुरंत स्कैन करें। आसानी से बनाएँ।";
+"next" = "अगला";
+"saved" = "सहेजा गया";
+"image_saved_to_files" = "छवि फ़ाइलों में सहेजी गई।";
+"save_code." = "कोड सहेजें";
+"choose_where_to_save" = "कोड छवि कहाँ सहेजनी है, चुनें।";
+"save_to_gallery" = "गैलरी में सहेजें";
+"save_to_files" = "फ़ाइलों में सहेजें";
+"cancel" = "रद्द करें";
+"no_image_to_save" = "सहेजने के लिए कोई छवि नहीं है।";
 
