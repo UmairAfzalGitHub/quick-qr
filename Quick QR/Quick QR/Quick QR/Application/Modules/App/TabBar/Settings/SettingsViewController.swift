@@ -84,11 +84,11 @@ class SettingsViewController: UIViewController,
     
     func numberOfSections(in tableView: UITableView) -> Int {
         // Show developer section only in debug mode
-        #if DEBUG
+//        #if DEBUG
             return SettingsSection.allCases.count
-        #else
-            return SettingsSection.allCases.count - 1 // Hide developer section in release builds
-        #endif
+//        #else
+//            return SettingsSection.allCases.count - 1 // Hide developer section in release builds
+//        #endif
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

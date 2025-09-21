@@ -314,10 +314,10 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
             emptyStateView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
         ])
         
-        let imageView = UIImageView(image: UIImage(named: "heart-empty"))
+        let imageView = UIImageView(image: UIImage(systemName: "heart"))
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .red
-        
+        imageView.tintColor = .appPrimary
+
         let titleLabel = UILabel()
         titleLabel.text = Strings.Label.noFavoritesYet
         titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
