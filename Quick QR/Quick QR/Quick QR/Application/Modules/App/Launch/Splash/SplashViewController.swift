@@ -87,11 +87,11 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
                 if withAd && AdManager.shared.splashInterstitial {
                     AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
                     AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
-                        UIApplication.shared.updateRootViewController(to: nextController)
+                        self.updateRootViewController(to: nextController)
                     }
                 } else {
                     // No ad to show, navigate directly
-                    UIApplication.shared.updateRootViewController(to: nextController)
+                    self.updateRootViewController(to: nextController)
                 }
             }
             
@@ -106,7 +106,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
                 navigateToTabBar(isLoaded ?? false)
             }
         } else {
-            UIApplication.shared.updateRootViewController(to: LanguageSelectionViewController())
+            updateRootViewController(to: LanguageSelectionViewController())
         }
     }
     
@@ -125,4 +125,30 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
         self.checkLanguageStatus()
 //        self.loadingAnimationView.stop() //This is important
     }
+    
+    func updateRootViewController(
+          to viewController: UIViewController,
+          animated: Bool = true
+      ) {
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+              guard let window = UIApplication.shared.sceneWindow else {
+                  print("No key window found.")
+                  return
+              }
+              
+              if animated {
+                  let snapshot = window.snapshotView(afterScreenUpdates: true)
+                  viewController.view.addSubview(snapshot ?? UIView())
+                  window.rootViewController = viewController
+                  
+                  UIView.animate(withDuration: 0.3, animations: {
+                      snapshot?.alpha = 0
+                  }, completion: { _ in
+                      snapshot?.removeFromSuperview()
+                  })
+              } else {
+                  window.rootViewController = viewController
+              }
+          })
+      }
 }
