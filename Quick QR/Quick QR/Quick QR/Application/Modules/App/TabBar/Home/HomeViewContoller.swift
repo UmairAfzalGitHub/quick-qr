@@ -83,7 +83,7 @@ class HomeViewController: UIViewController {
 //           iconButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
            
            // Add tap action
-           iconButton.addTarget(self, action: #selector(iapIconTapped), for: .touchUpInside)
+           iconButton.addTarget(self, action: #selector(showIAP), for: .touchUpInside)
            
            // Put button in UIBarButtonItem
            let rightBarButton = UIBarButtonItem(customView: iconButton)
@@ -147,7 +147,7 @@ class HomeViewController: UIViewController {
         collectionView.reloadData()
     }
     
-    @objc private func iapIconTapped() {
+    @objc private func showIAP() {
         let vc = IAPViewController()
         vc.modalPresentationStyle = .fullScreen
         present(vc, animated: true)
@@ -226,8 +226,16 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         
         controller.hidesBottomBarWhenPushed = true
         self.prepareForPushWithoutBackTitle()
-        AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial, from: self) {
-            self.navigationController?.pushViewController(controller, animated: true)
+        if IAPManager.shared.isUserSubscribed == false &&
+            HistoryManager.shared.getCreatedHistory().count > 0 {
+
+            let vc = IAPViewController()
+            vc.modalPresentationStyle = .fullScreen
+            present(vc, animated: true)
+        } else {
+            AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial, from: self) {
+                self.navigationController?.pushViewController(controller, animated: true)
+            }
         }
     }
     

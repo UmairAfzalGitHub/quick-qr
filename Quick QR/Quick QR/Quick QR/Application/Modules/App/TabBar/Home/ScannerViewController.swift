@@ -208,19 +208,27 @@ extension ScannerViewController: CodeScannerDelegate {
             print("\(title) Detected: \(value)")
         }
         
-        // Create and push the scan result view controller
-        let resultVC = ScanResultViewController(scannedData: value, metadataObjectType: type)
-        
-        // Set up a navigation controller if needed
-        if navigationController == nil {
-            // If we're not in a navigation controller, wrap in one
-            let navController = UINavigationController(rootViewController: resultVC)
-            navController.modalPresentationStyle = .fullScreen
-            present(navController, animated: true)
+        if IAPManager.shared.isUserSubscribed == false &&
+            HistoryManager.shared.getScanHistory().count > 0 {
+            let vc = IAPViewController()
+            vc.modalPresentationStyle = .fullScreen
+            present(vc, animated: true)
         } else {
-            // Push to existing navigation controller
-            navigationController?.pushViewController(resultVC, animated: true)
+            // Create and push the scan result view controller
+            let resultVC = ScanResultViewController(scannedData: value, metadataObjectType: type)
+            
+            // Set up a navigation controller if needed
+            if navigationController == nil {
+                // If we're not in a navigation controller, wrap in one
+                let navController = UINavigationController(rootViewController: resultVC)
+                navController.modalPresentationStyle = .fullScreen
+                present(navController, animated: true)
+            } else {
+                // Push to existing navigation controller
+                navigationController?.pushViewController(resultVC, animated: true)
+            }
         }
+
         
         // Pause camera feed while showing results
         // It will resume when user navigates back
