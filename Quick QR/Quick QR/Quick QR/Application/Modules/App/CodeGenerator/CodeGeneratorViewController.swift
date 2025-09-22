@@ -74,6 +74,7 @@ class CodeGeneratorViewController: UIViewController {
     private let replaceableContentView = UIView()
     private var placeholderHeightConstraint: NSLayoutConstraint?
     
+    var nativeAdHeightConstraint: NSLayoutConstraint!
     private var nativeAdView: NativeAdView!
     var nativeAd: GoogleMobileAds.NativeAd?
 
@@ -95,6 +96,16 @@ class CodeGeneratorViewController: UIViewController {
         // Apply prefilled content if available
         if let content = prefilledContent {
             applyPrefilledContent(content)
+        }
+        
+        loadNativeAdIfNeeded()
+    }
+    
+    private func loadNativeAdIfNeeded() {
+        guard !IAPManager.shared.isUserSubscribed else {
+            adContainerView.isHidden = true
+            nativeAdHeightConstraint.constant = 0
+            return
         }
         
         AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
@@ -145,14 +156,15 @@ class CodeGeneratorViewController: UIViewController {
         placeholderHeightConstraint = replaceableContentView.heightAnchor.constraint(equalToConstant: 200)
         placeholderHeightConstraint?.priority = UILayoutPriority(999)
         placeholderHeightConstraint?.isActive = true
-        
+        nativeAdHeightConstraint = adContainerView.heightAnchor.constraint(equalToConstant: UIDevice().isSmallerDevice() ? 159 : 240)
+
         NSLayoutConstraint.activate([
             // Ad Container - Fixed at bottom
-            adContainerView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 18),
-            adContainerView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -18),
-            adContainerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -18),
-            adContainerView.heightAnchor.constraint(equalToConstant: 240),
-            
+            nativeAdHeightConstraint,
+            adContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0),
+            adContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0),
+            adContainerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+
             // Action Button - Above ad with 20pt padding
             actionButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 70),
             actionButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -70),

@@ -70,6 +70,15 @@ class LanguageSelectionViewController: UIViewController {
         view.backgroundColor = .white
         setupCollectionView()
         setupLayout()
+        loadNativeAdIfNeeded()
+    }
+    
+    private func loadNativeAdIfNeeded() {
+        guard !IAPManager.shared.isUserSubscribed else {
+            nativeAdParentView.isHidden = true
+            nativeAdHeightConstraint.constant = 0
+            return
+        }
         
         if let ad = AdManager.shared.getNativeAd() {
             nativeAd = ad

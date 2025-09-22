@@ -28,6 +28,10 @@ class OnboardingViewController: UIViewController,
         super.viewDidLoad()
         setup()
         
+        loadNativeAdIfNeeded()
+    }
+    
+    private func loadNativeAdIfNeeded() {
         nativeAd = AdManager.shared.getNativeAd()
         if let googleAd = nativeAd {
             showGoogleNativeAd(nativeAd: googleAd)

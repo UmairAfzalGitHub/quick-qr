@@ -41,6 +41,16 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
         super.viewWillAppear(animated)
         loadFavorites()
         
+        loadNativeAdIfNeeded()
+    }
+    
+    private func loadNativeAdIfNeeded() {
+        guard !IAPManager.shared.isUserSubscribed else {
+            nativeAdParentView.isHidden = true
+            nativeAdHeightConstraint.constant = 0
+            return
+        }
+        
         if let ad = AdManager.shared.getNativeAd(stopPrefetch: true) {
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)

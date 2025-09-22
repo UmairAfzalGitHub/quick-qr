@@ -85,7 +85,17 @@ class CodeGenerationResultViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+
+        loadNativeAdIfNeeded()
+    }
+
+    private func loadNativeAdIfNeeded() {
+        guard !IAPManager.shared.isUserSubscribed else {
+            nativeAdParentView.isHidden = true
+            nativeAdHeightConstraint.constant = 0
+            return
+        }
+
         if let ad = AdManager.shared.getNativeAd(stopPrefetch: true) {
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
