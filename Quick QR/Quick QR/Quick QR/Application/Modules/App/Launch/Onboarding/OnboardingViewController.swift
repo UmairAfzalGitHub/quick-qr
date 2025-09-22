@@ -17,13 +17,13 @@ class OnboardingViewController: UIViewController,
     private var hasShownReviewPrompt = false
     private var nativeAdView: NativeAdView!
     var nativeAd: GoogleMobileAds.NativeAd?
-
+    
     var dataSource: [OnBoarding] = [
         OnBoarding(image: UIImage(named: "onboard1")!, heading: Strings.Label.smartScanQrCode, description: Strings.Label.pointYourCamera),
         OnBoarding(image: UIImage(named: "onboard2")!, heading: Strings.Label.easilyReadBarcodes, description: Strings.Label.easilyScanBarcodes),
         OnBoarding(image: UIImage(named: "onboard3")!, heading: Strings.Label.quicklyCreateQrCode, description: Strings.Label.generateCustomQr)
     ]
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
@@ -41,7 +41,6 @@ class OnboardingViewController: UIViewController,
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
         // Update flow layout item size to match collection view bounds
         if let flowLayout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
             flowLayout.itemSize = collectionView.bounds.size
@@ -55,11 +54,11 @@ class OnboardingViewController: UIViewController,
         pageControlCustom.numberOfPages = 3
         
         if AdManager.shared.onboardingReviewEnabled == false {
-//            dataSource.removeLast()
+            // dataSource.removeLast()
             // Update page control AFTER modifying the data source
             //pageControlCustom.numberOfPages = dataSource.count
         }
-
+        
         if AdManager.shared.splashInterstitial {
             AdManager.shared.loadInterstitialAd(id: AdMobConfig.interstitial) { isLoaded, interstitial in}
         }
@@ -81,10 +80,13 @@ class OnboardingViewController: UIViewController,
         collectionView.dataSource = self
         collectionView.isScrollEnabled = false
         collectionView.reloadData()
-
+        
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapNextButton))
         nextButton.addGestureRecognizer(tapGestureRecognizer)
-        nextButton.configure(with: .primary(title: Strings.Label.next, image: nil))
+        
+        // Update button title based on current page
+        updateButtonTitle()
+        
         self.navigationController?.navigationBar.isHidden = true
         
         if UIDevice().isSmallerDevice() {
@@ -92,22 +94,29 @@ class OnboardingViewController: UIViewController,
         }
     }
     
+    // New method to update button title based on current page
+    private func updateButtonTitle() {
+        let currentIndex = getCurrentPageIndex()
+        let isLastPage = currentIndex == dataSource.count - 1
+        let title = isLastPage ? Strings.Label.done : Strings.Label.next
+        nextButton.configure(with: .primary(title: title, image: nil))
+    }
+    
     func finishOnboarding() {
         let nextController = TabBarController()
         // Set the default selected index based on whether the app is running on a simulator
-        #if targetEnvironment(simulator)
-            nextController.selectedIndex = 0  // Create tab for simulator
-        #else
-            nextController.selectedIndex = 2  // Scan tab for real device
-        #endif
+#if targetEnvironment(simulator)
+        nextController.selectedIndex = 0 // Create tab for simulator
+#else
+        nextController.selectedIndex = 2 // Scan tab for real device
+#endif
         
         UserDefaultManager.shared.setValue(.onBoarding(true))
         UIApplication.shared.updateRootViewController(to: nextController)
     }
     
     private func loadNativeAd(completion: ((GoogleMobileAds.NativeAd?) -> Void)?) {
-        AdManager.shared.loadNativeAd(adId: AdMobConfig.native,
-                                      from: self) { googleAd in
+        AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) { googleAd in
             completion?(googleAd)
         }
     }
@@ -123,22 +132,31 @@ class OnboardingViewController: UIViewController,
         nativeAdParentView.addConstraints(
             NSLayoutConstraint.constraints(
                 withVisualFormat: "H:|[_nativeAdView]|",
-                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0),
+                metrics: nil,
+                views: viewDictionary)
         )
         nativeAdParentView.addConstraints(
             NSLayoutConstraint.constraints(
                 withVisualFormat: "V:|[_nativeAdView]|",
-                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0),
+                metrics: nil,
+                views: viewDictionary)
         )
     }
     
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
+        
         let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
         let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
-        guard let nativeAdView = nibView as? NativeAdView else { return }
+        
+        guard let nativeAdView = nibView as? NativeAdView else {
+            return
+        }
+        
         setAdView(nativeAdView)
-
+        
         if UIDevice().isSmallerDevice() {
             nativeAdView.mediaView?.isHidden = true
             nativeAdView.mediaView?.removeFromSuperview()
@@ -146,6 +164,7 @@ class OnboardingViewController: UIViewController,
             (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
             nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
         }
+        
         // Configure optional assets
         (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
         nativeAdView.bodyView?.isHidden = nativeAd.body == nil
@@ -178,16 +197,12 @@ class OnboardingViewController: UIViewController,
     
     private func getCurrentPageIndex() -> Int {
         collectionView.layoutIfNeeded()
-        
         // Calculate page width
         let pageWidth = collectionView.bounds.width
-        
         // Get current offset
         let offsetX = collectionView.contentOffset.x
-        
         // Calculate current page - use a small tolerance for floating point precision
         let currentPage = Int((offsetX + pageWidth * 0.5) / pageWidth)
-        
         // Clamp to valid range
         return max(0, min(currentPage, dataSource.count - 1))
     }
@@ -210,24 +225,29 @@ class OnboardingViewController: UIViewController,
         
         // Update page control
         pageControlCustom.currentPage = nextIndex
+        
+        // Update button title after scrolling
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.updateButtonTitle()
+        }
     }
     
     //MARK: - IBActions
     @objc func didTapNextButton() {
         let currentIndex = getCurrentPageIndex()
-
-          switch currentIndex {
-          case 0, 1:
-              if let googleAd = AdManager.shared.getNativeAd(stopPrefetch: true) {
-                  self.nativeAd = googleAd
-                  self.showGoogleNativeAd(nativeAd: googleAd)
-              }
-              self.scrollToNextItem()
-          case 2:
-              finishOnboarding()
-          default:
-              scrollToNextItem()
-          }
+        
+        switch currentIndex {
+        case 0, 1:
+            if let googleAd = AdManager.shared.getNativeAd(stopPrefetch: true) {
+                self.nativeAd = googleAd
+                self.showGoogleNativeAd(nativeAd: googleAd)
+            }
+            self.scrollToNextItem()
+        case 2:
+            finishOnboarding()
+        default:
+            scrollToNextItem()
+        }
     }
     
     @IBAction func didTapSkipButton(_ sender: Any) {
@@ -267,7 +287,12 @@ class OnboardingViewController: UIViewController,
         guard let visibleIndexPath = collectionView.indexPathForItem(at: CGPoint(x: visibleRect.midX, y: visibleRect.midY)) else {
             return
         }
+        
         pageControlCustom.currentPage = visibleIndexPath.item
-//        skipButton.isHidden = visibleIndexPath.item == dataSource.count - 1
+        
+        // Update button title when scrolling
+        updateButtonTitle()
+        
+        // skipButton.isHidden = visibleIndexPath.item == dataSource.count - 1
     }
 }

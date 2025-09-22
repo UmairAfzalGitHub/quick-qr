@@ -4,7 +4,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
-        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -61,7 +60,7 @@
                 </view>
             </subviews>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
-            <color key="backgroundColor" name="appPrimaryBackground"/>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="UEN-AY-1rd" secondAttribute="trailing" constant="50" id="1OY-gb-ckY"/>
                 <constraint firstItem="gYP-h9-izM" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="27d-6W-aoY"/>
@@ -82,6 +81,11 @@
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="gYP-h9-izM" secondAttribute="trailing" id="rJa-z1-V9k"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="es3-1B-0Jn" secondAttribute="bottom" id="xai-ag-GBl"/>
             </constraints>
+            <variation key="default">
+                <mask key="subviews">
+                    <exclude reference="gYP-h9-izM"/>
+                </mask>
+            </variation>
             <point key="canvasLocation" x="139.69465648854961" y="19.718309859154932"/>
         </view>
     </objects>
@@ -89,9 +93,6 @@
         <image name="splash-bg-gradient" width="428" height="926"/>
         <image name="splash-logo-icon" width="170" height="170"/>
         <image name="splash-text-logo" width="451" height="82"/>
-        <namedColor name="appPrimaryBackground">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
