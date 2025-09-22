@@ -7,6 +7,7 @@
 
 import UIKit
 import Photos
+import GoogleMobileAds
 
 class CodeGenerationResultViewController: UIViewController {
     
@@ -28,8 +29,18 @@ class CodeGenerationResultViewController: UIViewController {
     private let shareButton = AppButtonView()
     private let saveButton = AppButtonView()
     
-    private let adView = UIView()
+    private let nativeAdParentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        view.layer.borderColor = UIColor.customColor(fromHex: "0A3853").cgColor
+        view.layer.borderWidth = 1
+        return view
+    }()
     
+    private var nativeAdView: NativeAdView!
+    var nativeAd: GoogleMobileAds.NativeAd?
+    var nativeAdHeightConstraint: NSLayoutConstraint!
+
     // MARK: - Properties
     
     private var saveAction: (() -> Void)?
@@ -70,6 +81,20 @@ class CodeGenerationResultViewController: UIViewController {
         setupUI()
         setupConstraints()
         setupActions()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if let ad = AdManager.shared.getNativeAd(stopPrefetch: true) {
+            nativeAd = ad
+            showGoogleNativeAd(nativeAd: nativeAd)
+        } else {
+            AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+                self?.nativeAd = ad
+                self?.showGoogleNativeAd(nativeAd: ad)
+            }
+        }
     }
     
     private func setupUI() {
@@ -124,8 +149,7 @@ class CodeGenerationResultViewController: UIViewController {
         saveButton.configure(with: .secondary(title: Strings.Label.save, image: UIImage(systemName: "square.and.arrow.down")))
         saveButton.translatesAutoresizingMaskIntoConstraints = false
         
-        adView.backgroundColor = .gray
-        adView.translatesAutoresizingMaskIntoConstraints = false
+        nativeAdParentView.translatesAutoresizingMaskIntoConstraints = false
     }
     
     
@@ -143,7 +167,7 @@ class CodeGenerationResultViewController: UIViewController {
         view.addSubview(buttonsStackView)
         buttonsStackView.addArrangedSubview(shareButton)
         buttonsStackView.addArrangedSubview(saveButton)
-        view.addSubview(adView)
+        view.addSubview(nativeAdParentView)
         
         // Main container constraints
         NSLayoutConstraint.activate([
@@ -189,6 +213,8 @@ class CodeGenerationResultViewController: UIViewController {
             barCodeImageView.bottomAnchor.constraint(equalTo: barcodeView.bottomAnchor, constant: -8)
         ])
         
+        nativeAdHeightConstraint = nativeAdParentView.heightAnchor.constraint(equalToConstant: UIDevice().isSmallerDevice() ? 159 : 240)
+
         // Other UI elements constraints
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: codeContentView.bottomAnchor, constant: 16),
@@ -207,10 +233,10 @@ class CodeGenerationResultViewController: UIViewController {
             saveButton.heightAnchor.constraint(equalTo: buttonsStackView.heightAnchor),
             shareButton.heightAnchor.constraint(equalTo: buttonsStackView.heightAnchor),
             
-            adView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            adView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            adView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            adView.heightAnchor.constraint(equalToConstant: 240)
+            nativeAdHeightConstraint,
+            nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0),
+            nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0),
+            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -17)
         ])
     }
     
@@ -409,5 +435,67 @@ class CodeGenerationResultViewController: UIViewController {
         PhotosManager.shared.saveToFiles(image: imageToSave, presenter: self) { result in
             print(result)
         }
+    }
+    
+    // MARK: - Private Methods:
+
+    private func setAdView(_ view: NativeAdView) {
+        // Remove the previous ad view
+        if nativeAdView != nil {
+            nativeAdView.removeFromSuperview()
+        }
+
+        nativeAdView = view
+        nativeAdView.tag = 2500
+        nativeAdParentView.addSubview(nativeAdView)
+        nativeAdView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Layout constraints for positioning the native ad view
+        let viewDictionary = ["_nativeAdView": nativeAdView!]
+        nativeAdParentView.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "H:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+        nativeAdParentView.addConstraints(
+            NSLayoutConstraint.constraints(
+                withVisualFormat: "V:|[_nativeAdView]|",
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
+        )
+    }
+    
+    private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
+        guard let nativeAd else { return }
+        let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
+        let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
+        guard let nativeAdView = nibView as? NativeAdView else { return }
+        setAdView(nativeAdView)
+
+        if UIDevice().isSmallerDevice() {
+            nativeAdView.mediaView?.isHidden = true
+            nativeAdView.mediaView?.removeFromSuperview()
+        } else {
+            (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+            nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+        }
+
+        // Configure optional assets
+        (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
+        nativeAdView.bodyView?.isHidden = nativeAd.body == nil
+        
+        (nativeAdView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
+        nativeAdView.callToActionView?.isHidden = nativeAd.callToAction == nil
+        nativeAdView.callToActionView?.layer.cornerRadius = 12.0
+        
+        (nativeAdView.iconView as? UIImageView)?.image = nativeAd.icon?.image
+//        nativeAdView.iconView?.isHidden = nativeAd.icon == nil
+        
+        (nativeAdView.advertiserView as? UILabel)?.text = nativeAd.advertiser
+//        nativeAdView.advertiserView?.isHidden = nativeAd.advertiser == nil
+        
+        // Disable user interaction on call-to-action view for SDK to handle touches
+        nativeAdView.callToActionView?.isUserInteractionEnabled = false
+        
+        nativeAdView.nativeAd = nativeAd
     }
 }
