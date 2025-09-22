@@ -80,6 +80,7 @@ class FavoriteCell: UITableViewCell {
         optionsButton.setImage(UIImage(named: "option-icon"), for: .normal)
         optionsButton.tintColor = UIColor.customColor(fromHex: "1B2137")
         optionsButton.addTarget(self, action: #selector(optionsButtonTapped), for: .touchUpInside)
+        optionsButton.showsMenuAsPrimaryAction = true
         contentView.addSubview(optionsButton)
         
         // Layout
@@ -134,6 +135,24 @@ class FavoriteCell: UITableViewCell {
         
         // Update favorite button appearance
         updateFavoriteButtonAppearance()
+        
+        // Pre-configure the options menu
+        configureOptionsMenu()
+    }
+    
+    private func configureOptionsMenu() {
+        let menu = UIMenu(title: "", children: [
+            UIAction(title: Strings.Label.share, image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
+                guard let self = self else { return }
+                self.delegate?.didTapOptionsButton(cell: self)
+            },
+            UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+                guard let self = self else { return }
+                self.delegate?.didTapOptionsButton(cell: self)
+            }
+        ])
+        
+        optionsButton.menu = menu
     }
     
     private func updateFavoriteButtonAppearance() {
@@ -149,6 +168,8 @@ class FavoriteCell: UITableViewCell {
     }
     
     @objc private func optionsButtonTapped() {
+        // The menu will be shown automatically because showsMenuAsPrimaryAction = true
+        // We still notify the delegate for any additional handling
         delegate?.didTapOptionsButton(cell: self)
     }
 }

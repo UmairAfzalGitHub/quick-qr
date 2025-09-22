@@ -343,22 +343,24 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Get the item from our data source
         let item = dataSource[indexPath.row]
         
-        // Create the menu with actions
-        let menu = UIMenu(title: "", children: [
-            UIAction(title: Strings.Label.share, image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
-                self?.shareHistoryItem(at: indexPath)
-            },
-            UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
-                self?.deleteHistoryItem(at: indexPath)
-            }
-        ])
+        // Show action sheet to handle the menu item selection
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        // Present the menu
-        if let button = cell.contentView.subviews.compactMap({ $0 as? UIButton }).first(where: { $0.actions(forTarget: cell, forControlEvent: .touchUpInside)?.contains("optionsButtonTapped") ?? false }) {
-            button.menu = menu
-            button.showsMenuAsPrimaryAction = true
-            button.sendActions(for: .menuActionTriggered)
-        }
+        // Add share action
+        actionSheet.addAction(UIAlertAction(title: Strings.Label.share, style: .default) { [weak self] _ in
+            self?.shareHistoryItem(at: indexPath)
+        })
+        
+        // Add delete action
+        actionSheet.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            self?.deleteHistoryItem(at: indexPath)
+        })
+        
+        // Add cancel action
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        // Present the action sheet
+        present(actionSheet, animated: true)
     }
     
     private func shareHistoryItem(at indexPath: IndexPath) {
