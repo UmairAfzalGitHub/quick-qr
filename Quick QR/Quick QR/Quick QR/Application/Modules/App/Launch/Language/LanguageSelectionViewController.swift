@@ -35,6 +35,8 @@ class LanguageSelectionViewController: UIViewController {
     private let nativeAdParentView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
+        view.layer.borderColor = UIColor.customColor(fromHex: "0A3853").cgColor
+        view.layer.borderWidth = 1
         return view
     }()
     
@@ -128,8 +130,8 @@ class LanguageSelectionViewController: UIViewController {
             collectionView.bottomAnchor.constraint(equalTo: nativeAdParentView.topAnchor, constant: -10),
             
             nativeAdHeightConstraint,
-            nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0),
+            nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0),
             nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }

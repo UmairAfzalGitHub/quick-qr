@@ -21,6 +21,8 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
     private let nativeAdParentView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
+        view.layer.borderColor = UIColor.customColor(fromHex: "0A3853").cgColor
+        view.layer.borderWidth = 1
         return view
     }()
     
@@ -90,9 +92,9 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
             tableView.bottomAnchor.constraint(equalTo: nativeAdParentView.topAnchor, constant: -10),
 
             nativeAdHeightConstraint,
-            nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
+            nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0),
+            nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0),
+            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -17)
         ])
         
         // Setup empty state view

@@ -150,7 +150,9 @@ class OnboardingViewController: UIViewController,
         
         let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
         let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
-        
+        nativeAdParentView.layer.borderColor = UIColor.customColor(fromHex: "0A3853").cgColor
+        nativeAdParentView.layer.borderWidth = 1
+
         guard let nativeAdView = nibView as? NativeAdView else {
             return
         }
