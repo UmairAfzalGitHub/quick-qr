@@ -112,10 +112,7 @@ class CountriesViewController: UIViewController,
             self.filteredCities = array
         }
         
-        let doneButton = UIBarButtonItem(title: Strings.Messages.done, style: .done, target: self, action: #selector(doneButtonTapped))
-        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil) // Flexible space
-        toolbar.items = [flexibleSpace, doneButton]
-        searchBar.inputAccessoryView = toolbar
+        // Let IQKeyboardManager handle the toolbar
     }
     
     private func sortCountries(by option: CountrySortOption) {

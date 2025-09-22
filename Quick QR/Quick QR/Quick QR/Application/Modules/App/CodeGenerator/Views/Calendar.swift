@@ -356,15 +356,7 @@ final class CalendarView: UIView {
         endDatePicker.date = Calendar.current.date(byAdding: .hour, value: 1, to: now) ?? now
         updateDateFields()
         
-        // Add toolbar with Done button
-        let toolBar = UIToolbar()
-        toolBar.sizeToFit()
-        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneButtonTapped))
-        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        toolBar.setItems([flexSpace, doneButton], animated: false)
-        
-        startTextField.inputAccessoryView = toolBar
-        endTextField.inputAccessoryView = toolBar
+        // Let IQKeyboardManager handle the toolbar
         
         // Add all-day switch action
         allDaySwitch.addTarget(self, action: #selector(allDaySwitchChanged), for: .valueChanged)

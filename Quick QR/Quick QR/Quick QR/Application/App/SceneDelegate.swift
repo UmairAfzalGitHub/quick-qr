@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseCore
+import IQKeyboardManagerSwift
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -20,7 +21,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         FirebaseApp.configure()
-        
         window = UIWindow(windowScene: windowScene)
         window?.overrideUserInterfaceStyle = .light
         window?.rootViewController = SplashViewController()

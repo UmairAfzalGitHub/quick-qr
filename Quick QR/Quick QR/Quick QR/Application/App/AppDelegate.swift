@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import IQKeyboardManagerSwift
+import IQKeyboardToolbarManager
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,6 +16,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Set global back button image for all navigation bars
         UIViewController.setGlobalBackButton()
+        
+        // Configure IQKeyboardManager with correct API for version 8.0.1
+        IQKeyboardManager.shared.isEnabled = true
+        IQKeyboardManager.shared.resignOnTouchOutside = true
+        
+        // Configure IQKeyboardToolbarManager separately
+        let toolbarManager = IQKeyboardToolbarManager.shared
+        toolbarManager.isEnabled = true
         return true
     }
 
