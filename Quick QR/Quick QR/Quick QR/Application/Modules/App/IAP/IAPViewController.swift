@@ -588,13 +588,20 @@ class IAPViewController: UIViewController {
     
     // MARK: - IAP Setup Methods
     private func setupIAP() {
-        loadingIndicator.startAnimating()
-        IAPManager.shared.fetchSubscriptions()
-        
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(handleProductsFetched),
-                                               name: NSNotification.Name("ProductsFetched"),
-                                               object: nil)
+        if !IAPManager.shared.products.isEmpty {
+            handleProductsFetched()
+        } else {
+            loadingIndicator.startAnimating()
+            view.addSubview(loadingIndicator)
+            loadingIndicator.center = view.center
+            IAPManager.shared.fetchSubscriptions()
+            
+            // Observe for products
+            NotificationCenter.default.addObserver(self,
+                                                   selector: #selector(handleProductsFetched),
+                                                   name: NSNotification.Name("ProductsFetched"),
+                                                   object: nil)
+        }
     }
     
     private func localize() {
@@ -602,7 +609,7 @@ class IAPViewController: UIViewController {
     }
     
     @objc private func handleProductsFetched() {
-        let products = IAPManager.shared.getSubscriptions()
+        let products = IAPManager.shared.products
         
         // Update to match your actual product identifiers
         weeklyProduct = products.first { $0.productIdentifier == SubscriptionID.weekly.rawValue }
