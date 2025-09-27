@@ -131,7 +131,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
           animated: Bool = true
       ) {
           DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-              guard let window = UIApplication.shared.sceneWindow else {
+              guard let window = UIApplication.shared.activeWindow else {
                   print("No key window found.")
                   return
               }

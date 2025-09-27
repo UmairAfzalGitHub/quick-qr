@@ -334,7 +334,7 @@ class BaseViewController: UIViewController {
     }
     
     func showToast(message: String, duration: TimeInterval = 2.0) {
-        guard let window = UIApplication.shared.sceneWindow else { return }
+        guard let window = UIApplication.shared.activeWindow else { return }
 
         let toastLabel = UILabel()
         toastLabel.text = message

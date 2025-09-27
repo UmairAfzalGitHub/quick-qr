@@ -20,11 +20,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        FirebaseApp.configure()
         window = UIWindow(windowScene: windowScene)
         window?.overrideUserInterfaceStyle = .light
         window?.rootViewController = SplashViewController()
         window?.makeKeyAndVisible()
+        
+        isRunningGreaterThanAppStoreVersion { isGreater in
+            DispatchQueue.main.async {
+                if isGreater {
+                    print("🚨 Running a version greater than App Store (review mode)")
+                    // Hide features or enable review mode
+                    RemoteConfigManager.shared.splashInterstitialEnabled = false
+                    RemoteConfigManager.shared.maxInterstitalAdCounter = 7
+                    RemoteConfigManager.shared.adLoaderCounter = 6
+                } else {
+                    print("✅ Running App Store or lower version")
+                    // Show all features
+                }
+            }
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -55,6 +69,61 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
+    func isRunningGreaterThanAppStoreVersion(completion: @escaping (Bool) -> Void) {
+        guard let bundleID = Bundle.main.bundleIdentifier else {
+            completion(false)
+            return
+        }
+        let urlString = "https://itunes.apple.com/lookup?bundleId=\(bundleID)"
+        guard let url = URL(string: urlString) else {
+            completion(false)
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            guard let data = data, error == nil else {
+                completion(false)
+                return
+            }
+            do {
+                if let result = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let results = result["results"] as? [[String: Any]],
+                   let appStoreVersion = results.first?["version"] as? String,
+                   let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                    
+                    let isGreater = self.isCurrentVersionGreater(currentVersion: currentVersion, appStoreVersion: appStoreVersion)
+                    completion(isGreater)
+                } else {
+                    completion(false)
+                }
+            } catch {
+                completion(false)
+            }
+        }.resume()
+    }
 
+    func isCurrentVersionGreater(currentVersion: String, appStoreVersion: String) -> Bool {
+        let currentParts = currentVersion.split(separator: ".").compactMap { Int($0) }
+        let storeParts = appStoreVersion.split(separator: ".").compactMap { Int($0) }
+        let maxCount = max(currentParts.count, storeParts.count)
+        
+        for i in 0..<maxCount {
+            let current = i < currentParts.count ? currentParts[i] : 0
+            let store = i < storeParts.count ? storeParts[i] : 0
+            
+            if current > store {
+                return true   // ✅ current is newer
+            } else if current < store {
+                return false  // 🚫 current is older
+            }
+        }
+        return false // equal
+    }
 }
 
+extension UIApplication {
+    var activeWindow: UIWindow? {
+        let sceneDelegate = (connectedScenes.first as? UIWindowScene)?.delegate as? SceneDelegate
+        return sceneDelegate?.window
+    }
+}

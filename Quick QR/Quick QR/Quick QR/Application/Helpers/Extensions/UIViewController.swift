@@ -53,7 +53,7 @@ extension UIViewController {
     }
     
     static func currentRootViewController() -> UIViewController? {
-        guard let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) else {
+        guard let keyWindow = UIApplication.shared.activeWindow else {
             return nil
         }
         

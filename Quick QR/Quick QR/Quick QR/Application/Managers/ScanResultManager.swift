@@ -531,7 +531,7 @@ class ScanResultManager {
     /// Show a custom alert similar to Apple's Camera app WiFi connection notification
     private func showWiFiConnectionAlert(ssid: String, password: String?, completion: @escaping (Bool) -> Void) {
         // Get the top view controller to present the alert
-        guard let topVC = UIApplication.shared.windows.filter({$0.isKeyWindow}).first?.rootViewController?.topMostViewController() else {
+        guard let topVC = UIApplication.shared.activeWindow?.rootViewController?.topMostViewController() else {
             completion(false)
             return
         }

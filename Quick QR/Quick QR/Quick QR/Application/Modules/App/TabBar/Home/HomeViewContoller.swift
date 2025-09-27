@@ -237,7 +237,7 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         controller.hidesBottomBarWhenPushed = true
         self.prepareForPushWithoutBackTitle()
         if IAPManager.shared.isUserSubscribed == false &&
-            HistoryManager.shared.getCreatedHistory().count > 0 {
+            HistoryManager.shared.getCreatedHistory().count > 1 {
 
             let vc = IAPViewController()
             vc.modalPresentationStyle = .fullScreen

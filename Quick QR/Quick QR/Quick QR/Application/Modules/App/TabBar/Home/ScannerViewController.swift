@@ -209,7 +209,7 @@ extension ScannerViewController: CodeScannerDelegate {
         }
         
         if IAPManager.shared.isUserSubscribed == false &&
-            HistoryManager.shared.getScanHistory().count > 0 {
+            HistoryManager.shared.getScanHistory().count > 1 {
             let vc = IAPViewController()
             vc.modalPresentationStyle = .fullScreen
             present(vc, animated: true)

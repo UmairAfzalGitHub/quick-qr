@@ -8,6 +8,8 @@
 import UIKit
 import IQKeyboardManagerSwift
 import IQKeyboardToolbarManager
+import FirebaseCrashlytics
+import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -21,6 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         IQKeyboardManager.shared.isEnabled = true
         IQKeyboardManager.shared.resignOnTouchOutside = true
         
+        FirebaseApp.configure()
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+
         // Configure IQKeyboardToolbarManager separately
         let toolbarManager = IQKeyboardToolbarManager.shared
         toolbarManager.isEnabled = true
