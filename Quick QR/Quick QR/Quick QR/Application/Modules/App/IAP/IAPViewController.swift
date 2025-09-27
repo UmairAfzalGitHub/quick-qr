@@ -44,8 +44,8 @@ class IAPViewController: UIViewController {
         
         var tag: String? {
             switch self {
-            case .weekly: return Strings.Label.recommended
-            case .monthly: return Strings.Label.popular
+            case .weekly: return ""
+            case .monthly: return Strings.Label.recommended
             }
         }
         
@@ -360,27 +360,17 @@ class IAPViewController: UIViewController {
         weeklyPlanView = createPlanView(for: .weekly)
         monthlyPlanView = createPlanView(for: .monthly)
 
-        plansStackView.addArrangedSubview(weeklyPlanView)
         plansStackView.addArrangedSubview(monthlyPlanView)
+        plansStackView.addArrangedSubview(weeklyPlanView)
 
         // Add tag labels as siblings, above their respective plan views
-        if let weeklyTag = createTagLabel(for: .weekly) {
-            contentView.addSubview(weeklyTag)
-            weeklyTagLabel = weeklyTag
-            NSLayoutConstraint.activate([
-                weeklyTag.topAnchor.constraint(equalTo: weeklyPlanView.topAnchor, constant: -10),
-                weeklyTag.trailingAnchor.constraint(equalTo: weeklyPlanView.trailingAnchor, constant: -20),
-                weeklyTag.widthAnchor.constraint(equalToConstant: 140),
-                weeklyTag.heightAnchor.constraint(equalToConstant: 24)
-            ])
-        }
         if let monthlyTag = createTagLabel(for: .monthly) {
             contentView.addSubview(monthlyTag)
             monthlyTagLabel = monthlyTag
             NSLayoutConstraint.activate([
                 monthlyTag.topAnchor.constraint(equalTo: monthlyPlanView.topAnchor, constant: -10),
                 monthlyTag.trailingAnchor.constraint(equalTo: monthlyPlanView.trailingAnchor, constant: -20),
-                monthlyTag.widthAnchor.constraint(equalToConstant: 80),
+                monthlyTag.widthAnchor.constraint(equalToConstant: 140),
                 monthlyTag.heightAnchor.constraint(equalToConstant: 24)
             ])
         }
@@ -527,7 +517,7 @@ class IAPViewController: UIViewController {
         tagLabel.text = tagText
         tagLabel.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
         tagLabel.textColor = .white
-        tagLabel.backgroundColor = plan == .weekly ? .systemGreen : .systemPink
+        tagLabel.backgroundColor = .systemGreen
         tagLabel.textAlignment = .center
         tagLabel.layer.cornerRadius = 12
         tagLabel.clipsToBounds = true
