@@ -55,7 +55,7 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
         } else {
-            AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
                 self?.nativeAd = ad
                 self?.showGoogleNativeAd(nativeAd: ad)
             }
@@ -190,7 +190,7 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
                     resultVC.setGeneratedContent(item.content, existingItemId: item.id, isFavorite: true)
                 }
             }
-            AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial, from: self) {
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
                 self.navigationController?.pushViewController(resultVC, animated: true)
             }
         case .scanned:
@@ -207,7 +207,7 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
             scanResultVC.intent = .history
             // Pass the item ID and favorite status
             scanResultVC.setExistingItemId(item.id, isFavorite: true)
-            AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial, from: self) {
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
                 self.navigationController?.pushViewController(scanResultVC, animated: true)
             }
         }

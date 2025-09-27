@@ -108,7 +108,7 @@ class CodeGeneratorViewController: UIViewController {
             return
         }
         
-        AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+        AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
             self?.nativeAd = ad
             self?.showGoogleNativeAd(nativeAd: ad)
         }

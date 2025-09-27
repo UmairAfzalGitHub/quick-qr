@@ -61,7 +61,7 @@ class AreaCodeViewController: BaseViewController,
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        setupBanner(adId: AdMobConfig.banner)
+        setupBanner(adId: RemoteConfigManager.shared.banner)
         super.bannerAdView = self.bannerView
         super.viewWillAppear(animated)
         IAPManager.shared.checkSubscriptionStatus { isSubscribed in

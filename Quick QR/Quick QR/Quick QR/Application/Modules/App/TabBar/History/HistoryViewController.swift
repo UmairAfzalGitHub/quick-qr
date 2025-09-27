@@ -85,7 +85,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
         } else {
-            AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
                 self?.nativeAd = ad
                 self?.showGoogleNativeAd(nativeAd: ad)
             }
@@ -276,7 +276,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }
             
-            AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial, from: self) {
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
                 self.navigationController?.pushViewController(resultVC, animated: true)
             }
         } else {
@@ -295,7 +295,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             let scanResultVC = ScanResultViewController(scannedData: selectedItem.content, metadataObjectType: metadataType)
             scanResultVC.intent = .history
-            AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial, from: self) {
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
                 self.navigationController?.pushViewController(scanResultVC, animated: true)
             }
         }

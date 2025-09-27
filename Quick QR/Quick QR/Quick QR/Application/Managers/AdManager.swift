@@ -21,21 +21,6 @@ struct AdMobId {
     var adId: String
 }
 
-struct AdMobConfig {
-//#if DEBUG // Test
-    static var appOpen = AdMobId(analyticsId: .appOpenAd, adId: "ca-app-pub-3940256099942544/5575463023")
-    static var interstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-3940256099942544/4411468910")
-    static var native = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
-    static var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
-    static var rewarded = AdMobId(analyticsId: .rewardedAd, adId: "ca-app-pub-3940256099942544/1712485313")
-//#else // Live
-//    static var appOpen = AdMobId(analyticsId: .appOpenAd, adId: "ca-app-pub-7197936742422632/1164898117")
-//    static var interstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-7197936742422632/6898502720")
-//    static var native = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-7197936742422632/4272339384")
-//    static var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-7197936742422632/5810720131")
-//    static var rewarded = AdMobId(analyticsId: .rewardedAd, adId: "ca-app-pub-7197936742422632/5585421050")
-//#endif
-}
 
 // MARK: - Ad Manager
 class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
@@ -65,15 +50,6 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     var isShowingAd = false
     var adCounter = 0
     var adLoaderCounter = 1
-    var splashInterstitial = true
-    var onboardingReviewEnabled = false
-    var maxInterstitalAdCounter: Int = {
-#if DEBUG
-        return 2
-#else
-        return 1
-#endif
-    }()
     
     private override init() {
         super.init()
@@ -87,7 +63,7 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
         MobileAds.shared.start { [weak self] status in
             print("📱 AdMob SDK initialization completed with status: \(status)")
             self?.loadAppOpenAd()
-//            self?.loadRewardedAd(id: AdMobConfig.rewarded)
+//            self?.loadRewardedAd(id: RemoteConfigManager.shared.rewarded)
         }
     }
     
@@ -122,8 +98,8 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
 
         adCounter += 1
         print("AdCounter: \(adCounter)")
-        if adCounter ==  maxInterstitalAdCounter-adLoaderCounter {
-             loadInterstitialAd(id: AdMobConfig.interstitial)
+        if adCounter == RemoteConfigManager.shared.maxInterstitalAdCounter-adLoaderCounter {
+            loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
          }
      }
     
@@ -133,7 +109,7 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
             guard !isLoadingAppOpenAd else { return }
             isLoadingAppOpenAd = true
             
-            AppOpenAd.load(with: AdMobConfig.appOpen.adId,
+            AppOpenAd.load(with: RemoteConfigManager.shared.appOpen.adId,
                            request: Request()) { [weak self] ad, error in
                 guard let self = self else { return }
                 self.isLoadingAppOpenAd = false
@@ -231,7 +207,7 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
             return
         }
         
-        guard adCounter >= maxInterstitalAdCounter else {
+        guard adCounter >= RemoteConfigManager.shared.maxInterstitalAdCounter else {
             completion?()
             return
         }
@@ -332,7 +308,7 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
                     return
                 }
                 print("📱 Loading native ad #\(index+1) after delay")
-                self.loadNativeAd(adId: AdMobConfig.native, from: root) { [weak self] ad in
+                self.loadNativeAd(adId: RemoteConfigManager.shared.native, from: root) { [weak self] ad in
                     if let ad = ad {
                         self?.nativeAdPool.append(ad)
                         print("✅ Added native ad #\(index+1) to pool. Pool size: \(self?.nativeAdPool.count ?? 0)")

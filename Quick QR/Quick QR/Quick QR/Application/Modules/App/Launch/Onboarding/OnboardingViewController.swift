@@ -36,7 +36,7 @@ class OnboardingViewController: UIViewController,
         if let googleAd = nativeAd {
             showGoogleNativeAd(nativeAd: googleAd)
         } else {
-            AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
                 self?.nativeAd = ad
                 self?.showGoogleNativeAd(nativeAd: ad)
             }
@@ -57,14 +57,14 @@ class OnboardingViewController: UIViewController,
         // First set up the page control with the full count
         pageControlCustom.numberOfPages = 3
         
-        if AdManager.shared.onboardingReviewEnabled == false {
+        if RemoteConfigManager.shared.onboardingReviewEnabled == false {
             // dataSource.removeLast()
             // Update page control AFTER modifying the data source
             //pageControlCustom.numberOfPages = dataSource.count
         }
         
-        if AdManager.shared.splashInterstitial {
-            AdManager.shared.loadInterstitialAd(id: AdMobConfig.interstitial) { isLoaded, interstitial in}
+        if RemoteConfigManager.shared.splashInterstitialEnabled {
+            AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial) { isLoaded, interstitial in}
         }
         
         // Configure collection view layout
@@ -120,7 +120,7 @@ class OnboardingViewController: UIViewController,
     }
     
     private func loadNativeAd(completion: ((GoogleMobileAds.NativeAd?) -> Void)?) {
-        AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) { googleAd in
+        AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) { googleAd in
             completion?(googleAd)
         }
     }

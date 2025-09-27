@@ -84,7 +84,7 @@ class LanguageSelectionViewController: UIViewController {
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
         } else {
-            AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) {[weak self] ad in
+            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
                 self?.nativeAd = ad
                 self?.showGoogleNativeAd(nativeAd: ad)
             }
@@ -221,10 +221,10 @@ class LanguageSelectionViewController: UIViewController {
             return
         }
 
-        if AdManager.shared.splashInterstitial == true {
-            if AdManager.shared.splashInterstitial {
-                AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
-                AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {[weak self] in
+        if RemoteConfigManager.shared.splashInterstitialEnabled == true {
+            if RemoteConfigManager.shared.splashInterstitialEnabled {
+                AdManager.shared.adCounter = RemoteConfigManager.shared.maxInterstitalAdCounter
+                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
                     self?.navigateToOnBoarding()
                 }
             }

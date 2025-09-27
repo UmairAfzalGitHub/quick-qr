@@ -175,7 +175,7 @@ final class ScanResultViewController: UIViewController {
         setupActions()
         updateUIForScanResult()
         
-        AdManager.shared.loadNativeAd(adId: AdMobConfig.native, from: self) { ad in
+        AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) { ad in
             self.showGoogleNativeAd(nativeAd: ad)
         }
     }

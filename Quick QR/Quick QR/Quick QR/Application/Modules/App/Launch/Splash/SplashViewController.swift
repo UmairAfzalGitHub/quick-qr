@@ -39,7 +39,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        super.setupBanner(adId: AdMobConfig.banner)
+        super.setupBanner(adId: RemoteConfigManager.shared.banner)
         super.bannerAdView = self.bannerView
         super.viewWillAppear(animated)
         
@@ -84,9 +84,9 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
                     nextController.selectedIndex = 2  // Scan tab for real device
                 #endif
                 
-                if withAd && AdManager.shared.splashInterstitial {
-                    AdManager.shared.adCounter = AdManager.shared.maxInterstitalAdCounter
-                    AdManager.shared.showInterstitial(adId: AdMobConfig.interstitial) {
+                if withAd && RemoteConfigManager.shared.splashInterstitialEnabled {
+                    AdManager.shared.adCounter = RemoteConfigManager.shared.maxInterstitalAdCounter
+                    AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {
                         self.updateRootViewController(to: nextController)
                     }
                 } else {
@@ -101,7 +101,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
             }
             
             // Try to load the ad
-            AdManager.shared.loadInterstitialAd(id: AdMobConfig.interstitial) { isLoaded, interstitial in
+            AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial) { isLoaded, interstitial in
                 // If ad loaded successfully, show it and navigate
                 navigateToTabBar(isLoaded ?? false)
             }
