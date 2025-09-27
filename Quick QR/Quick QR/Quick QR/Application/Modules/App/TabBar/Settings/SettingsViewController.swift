@@ -200,18 +200,16 @@ class SettingsViewController: UIViewController,
         case .other:
             let item = OtherItem(rawValue: indexPath.row)!
             switch item {
-            case .shareApp:
-                // Share app functionality
-                break
-            case .rateUs:
-                // Rate app functionality
-                break
+//            case .shareApp:
+//                let appStoreURL = "https://apps.apple.com/pk/app/photo-recovery-smartcleaner/id6744826748"
+//                let textToShare = "QR Code scanner\n\(appStoreURL)"
+//                self.presentShareSheet(with: [textToShare])
+//            case .rateUs:
+//                LinkOpener.shared.openLink("https://doc-hosting.flycricket.io/photo-recovery-videos-recovery-privacy-policy/b1727af7-f37a-4686-b37d-f925a1e26218/privacy", from: self)
             case .feedback:
-                // Feedback functionality
-                break
+                FeedbackMailer.shared.sendFeedback(from: self)
             case .privacyPolicy:
-                // Privacy policy functionality
-                break
+                LinkOpener.shared.openLink("https://qrcodescanerreader.blogspot.com/2025/09/qr-code-scanner.html", from: self)
             }
             
         default:

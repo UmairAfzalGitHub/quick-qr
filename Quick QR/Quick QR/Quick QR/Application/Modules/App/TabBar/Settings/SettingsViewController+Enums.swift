@@ -64,17 +64,17 @@ enum PreferenceItem: Int, CaseIterable {
 }
 
 enum OtherItem: Int, CaseIterable {
-    case shareApp
-    case rateUs
+//    case shareApp
+//    case rateUs
     case feedback
     case privacyPolicy
     
     var title: String {
         switch self {
-        case .shareApp:
-            return Strings.Label.shareApp
-        case .rateUs:
-            return Strings.Label.rateUs
+//        case .shareApp:
+//            return Strings.Label.shareApp
+//        case .rateUs:
+//            return Strings.Label.rateUs
         case .feedback:
             return Strings.Label.feedback
         case .privacyPolicy:
@@ -84,10 +84,10 @@ enum OtherItem: Int, CaseIterable {
     
     var icon: UIImage? {
         switch self {
-        case .shareApp:
-            return UIImage(named: "share-settings")
-        case .rateUs:
-            return UIImage(named: "rate-settings")
+//        case .shareApp:
+//            return UIImage(named: "share-settings")
+//        case .rateUs:
+//            return UIImage(named: "rate-settings")
         case .feedback:
             return UIImage(named: "feedback-settings")
         case .privacyPolicy:

@@ -24,7 +24,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.overrideUserInterfaceStyle = .light
         window?.rootViewController = SplashViewController()
         window?.makeKeyAndVisible()
-        
+        RemoteConfigManager.shared.fetchAdmobConfig()
         isRunningGreaterThanAppStoreVersion { isGreater in
             DispatchQueue.main.async {
                 if isGreater {

@@ -45,20 +45,19 @@ class RemoteConfigManager: NSObject {
     }
     
     private func storeID() {
-        let adCounter = remoteConfig["ad_counter"].stringValue
-        let adLoaderCounter = remoteConfig["ad_loader_counter"].stringValue
+        let adCounter = remoteConfig["adcounter"].stringValue
+        let adLoaderCounter = remoteConfig["adloadercounter"].stringValue
         let splashInterstitial = remoteConfig["is_splash_ad_enabled"].boolValue
         let onboardingReviewEnabled = remoteConfig["is_onboarding_review_enabled"].boolValue
         let variant = remoteConfig["iap_screen_varient"].stringValue
 
-        let appOpenId = remoteConfig["AppOpenId"].stringValue
-        let interstitialId = remoteConfig["AppOpenId"].stringValue
-        let nativeId = remoteConfig["AppOpenId"].stringValue
-        let bannerId = remoteConfig["AppOpenId"].stringValue
-        let rewardedId = remoteConfig["AppOpenId"].stringValue
+        let appOpenId = remoteConfig["ad_id_app_open"].stringValue
+        let interstitialId = remoteConfig["ad_id_interstitial"].stringValue
+        let nativeId = remoteConfig["ad_id_native"].stringValue
+        let bannerId = remoteConfig["ad_id_banner"].stringValue
+        let rewardedId = remoteConfig["ad_id_rewarded"].stringValue
 
         self.iap_varient = variant
-        print("iap_varient", self.iap_varient ?? "--")
         self.maxInterstitalAdCounter = Int(adCounter) ?? 0
         self.adLoaderCounter = Int(adLoaderCounter) ?? 0
         self.splashInterstitialEnabled = splashInterstitial

@@ -195,7 +195,7 @@
 				DEVELOPMENT_TEAM = 46YGX3B2FK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Quick QR/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "QR Scanner";
+				INFOPLIST_KEY_CFBundleDisplayName = "QR Code scanner";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "This app requires access to your calendar to add events from QR codes.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to the camera to scan QR codes.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "This app requires access to the contacts to save new contacts.";
@@ -232,7 +232,7 @@
 				DEVELOPMENT_TEAM = 46YGX3B2FK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Quick QR/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "QR Scanner";
+				INFOPLIST_KEY_CFBundleDisplayName = "QR Code scanner";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "This app requires access to your calendar to add events from QR codes.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires access to the camera to scan QR codes.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "This app requires access to the contacts to save new contacts.";
