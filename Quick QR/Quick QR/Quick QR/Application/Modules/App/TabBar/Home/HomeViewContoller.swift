@@ -197,6 +197,10 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
             let type = BarCodeType.allCases[indexPath.item]
             cell.configure(title: type.title, icon: type.icon)
         }
+        
+        // Use the helper method that already includes subscription check
+        cell.showLockOverlay(checkIfCellRequiresLock(at: indexPath))
+        
         return cell
     }
     
@@ -219,6 +223,14 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
     // MARK: - Cell Selection
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+        
+        // Check if this cell should have a lock overlay (includes subscription check)
+        if checkIfCellRequiresLock(at: indexPath) {
+            showIAP()
+            return
+        }
+        
+        // Continue with normal flow if no lock or user is subscribed
         let controller = CodeGeneratorViewController()
 
         if isQRCodeSelected {
@@ -239,9 +251,7 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         if IAPManager.shared.isUserSubscribed == false &&
             HistoryManager.shared.getCreatedHistory().count > 1 {
 
-            let vc = IAPViewController()
-            vc.modalPresentationStyle = .fullScreen
-            present(vc, animated: true)
+            showIAP()
         } else {
             AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
                 self.navigationController?.pushViewController(controller, animated: true)
@@ -260,6 +270,27 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
     }
     
     // MARK: - Private Methods:
+    
+    private func checkIfCellRequiresLock(at indexPath: IndexPath) -> Bool {
+        // If user is already subscribed, no need to show lock
+        if IAPManager.shared.isUserSubscribed {
+            return false
+        }
+        
+        // Check if feature requires premium
+        if isQRCodeSelected {
+            if indexPath.section == 0 {
+                // For QR code section, only first 2 items are free
+                return indexPath.item >= 2
+            } else {
+                // All social QR codes require premium
+                return true
+            }
+        } else {
+            // For barcode section, only first 2 items are free
+            return indexPath.item >= 2
+        }
+    }
 
     private func setAdView(_ view: NativeAdView) {
         // Remove the previous ad view

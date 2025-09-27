@@ -59,8 +59,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
-        // Called as the scene transitions from the background to the foreground.
-        // Use this method to undo the changes made on entering the background.
+        let launchCounter = UserDefaults.standard.value(forKey: "appLaunchCounter") as? Int ?? 0
+        
+        if launchCounter > 2 {
+            AdManager.shared.showAppOpenAd()
+        } else {
+            // Mark the app as launched for future reference
+            UserDefaults.standard.set(launchCounter+1, forKey: "appLaunchCounter")
+            UserDefaults.standard.synchronize()
+        }
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {

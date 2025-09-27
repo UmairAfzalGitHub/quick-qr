@@ -34,6 +34,21 @@ class QRTypeCell: UICollectionViewCell {
         return v
     }()
     
+    private let lockOverlayView: UIView = {
+        let v = UIView()
+        v.backgroundColor = UIColor.black.withAlphaComponent(0.2)
+        v.layer.cornerRadius = 11
+        v.isHidden = true
+        return v
+    }()
+    
+    private let lockIconView: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFit
+        iv.image = UIImage(named: "crown")
+        return iv
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -41,9 +56,15 @@ class QRTypeCell: UICollectionViewCell {
         contentView.addSubview(titleLabel)
         boxView.addSubview(iconView)
         
+        // Add lock overlay
+        boxView.addSubview(lockOverlayView)
+        lockOverlayView.addSubview(lockIconView)
+        
         boxView.translatesAutoresizingMaskIntoConstraints = false
         iconView.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        lockOverlayView.translatesAutoresizingMaskIntoConstraints = false
+        lockIconView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             // Box constraints
@@ -63,7 +84,19 @@ class QRTypeCell: UICollectionViewCell {
             titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor),
             titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor),
-            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor)
+            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor),
+            
+            // Lock overlay constraints
+            lockOverlayView.topAnchor.constraint(equalTo: boxView.topAnchor),
+            lockOverlayView.leadingAnchor.constraint(equalTo: boxView.leadingAnchor),
+            lockOverlayView.trailingAnchor.constraint(equalTo: boxView.trailingAnchor),
+            lockOverlayView.bottomAnchor.constraint(equalTo: boxView.bottomAnchor),
+            
+            // Lock icon constraints
+            lockIconView.topAnchor.constraint(equalTo: lockOverlayView.topAnchor, constant: -12),
+            lockIconView.trailingAnchor.constraint(equalTo: lockOverlayView.trailingAnchor, constant: 8),
+            lockIconView.widthAnchor.constraint(equalToConstant:24),
+            lockIconView.heightAnchor.constraint(equalToConstant: 24)
         ])
     }
     
@@ -72,6 +105,10 @@ class QRTypeCell: UICollectionViewCell {
     func configure(title: String, icon: UIImage?) {
         titleLabel.text = title
         iconView.image = icon
+    }
+    
+    func showLockOverlay(_ show: Bool) {
+        lockOverlayView.isHidden = !show
     }
 }
 
