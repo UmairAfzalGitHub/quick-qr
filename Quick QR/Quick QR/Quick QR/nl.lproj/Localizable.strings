@@ -184,3 +184,6 @@
 "save_fifty_percent_vs" = "Bespaar 50% t.o.v. wekelijks";
 "per_day" = "Per dag";
 "done" = "Gereed";
+"purchase_restored_successfully" = "Aankoop succesvol hersteld!";
+"manage_subscription" = "Abonnement beheren";
+"restore" = "Herstellen";

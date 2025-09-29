@@ -184,3 +184,7 @@
 "save_fifty_percent_vs" = "Ahorra 50% vs semanal";
 "per_day" = "Por día";
 "done" = "Hecho";
+"purchase_restored_successfully" = "¡Compra restaurada con éxito!";
+"manage_subscription" = "Administrar suscripción";
+"restore" = "Restaurar";
+

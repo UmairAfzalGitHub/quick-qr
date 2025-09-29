@@ -184,3 +184,6 @@
 "save_fifty_percent_vs" = "50 % sparen gegenüber wöchentlich";
 "per_day" = "Pro Tag";
 "done" = "Fertig";
+"purchase_restored_successfully" = "Kauf erfolgreich wiederhergestellt!";
+"manage_subscription" = "Abonnement verwalten";
+"restore" = "Wiederherstellen";

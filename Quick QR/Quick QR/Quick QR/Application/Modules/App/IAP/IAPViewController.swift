@@ -99,6 +99,8 @@ class IAPViewController: UIViewController {
     private let contentView = UIView()
     private let bottomContainer = UIView()
     
+    private let restorePurchasesButton = UIButton()
+    
     private let backgroundImageView = UIImageView(image: UIImage(named: "iap-bg-gradient"))
     private let closeButton = UIButton(type: .system)
     private let titleLabel = UILabel()
@@ -172,6 +174,22 @@ class IAPViewController: UIViewController {
         NSLayoutConstraint.activate([
             loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
+        view.addSubview(restorePurchasesButton)
+        restorePurchasesButton.layer.cornerRadius = 8
+        restorePurchasesButton.setTitle(Strings.Label.restore, for: .normal)
+        restorePurchasesButton.tintColor = .white
+        restorePurchasesButton.backgroundColor = .systemBlue.withAlphaComponent(0.3)
+        restorePurchasesButton.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
+        restorePurchasesButton.translatesAutoresizingMaskIntoConstraints = false
+        restorePurchasesButton.addTarget(self, action: #selector(restoreButtonTapped), for: .touchUpInside)
+        
+        NSLayoutConstraint.activate([
+            restorePurchasesButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            restorePurchasesButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            restorePurchasesButton.heightAnchor.constraint(equalToConstant: 34),
+            restorePurchasesButton.widthAnchor.constraint(equalToConstant: 64)
         ])
     }
     
@@ -498,8 +516,6 @@ class IAPViewController: UIViewController {
 
             rightStack.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
             rightStack.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-//            rightStack.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
-//            rightStack.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: -16),
         ])
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(planViewTapped(_:)))
@@ -550,11 +566,24 @@ class IAPViewController: UIViewController {
         privacyButton.titleLabel?.font = UIFont.systemFont(ofSize: 12)
         privacyButton.addTarget(self, action: #selector(privacyButtonTapped), for: .touchUpInside)
         
+        let manageSubscriptionButton = UIButton(type: .system)
+        manageSubscriptionButton.translatesAutoresizingMaskIntoConstraints = false
+        manageSubscriptionButton.setTitle(Strings.Label.manageSubscription, for: .normal)
+        manageSubscriptionButton.setTitleColor(.black, for: .normal)
+        manageSubscriptionButton.titleLabel?.font = UIFont.systemFont(ofSize: 12)
+        manageSubscriptionButton.addTarget(self, action: #selector(manageButtonTapped), for: .touchUpInside)
+        
         let separatorLabel = UILabel()
         separatorLabel.translatesAutoresizingMaskIntoConstraints = false
         separatorLabel.text = "|"
         separatorLabel.font = UIFont.systemFont(ofSize: 12)
         separatorLabel.textColor = .black
+        
+        let separatorTwoLabel = UILabel()
+        separatorTwoLabel.translatesAutoresizingMaskIntoConstraints = false
+        separatorTwoLabel.text = "|"
+        separatorTwoLabel.font = UIFont.systemFont(ofSize: 12)
+        separatorTwoLabel.textColor = .black
         
         termsStackView.translatesAutoresizingMaskIntoConstraints = false
         termsStackView.axis = .horizontal
@@ -564,8 +593,10 @@ class IAPViewController: UIViewController {
         
         termsStackView.addArrangedSubview(termsButton)
         termsStackView.addArrangedSubview(separatorLabel)
+        termsStackView.addArrangedSubview(manageSubscriptionButton)
+        termsStackView.addArrangedSubview(separatorTwoLabel)
         termsStackView.addArrangedSubview(privacyButton)
-        
+
         bottomContainer.addSubview(continueButton)
         bottomContainer.addSubview(termsStackView)
         
@@ -753,14 +784,24 @@ class IAPViewController: UIViewController {
     }
     
     @objc private func termsButtonTapped() {
-        if let url = URL(string: "http://termsofuse.softappstechnology.com") {
+        if let url = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/") {
             UIApplication.shared.open(url)
         }
     }
     
     @objc private func privacyButtonTapped() {
-        if let url = URL(string: "https://privacy.softappstechnology.com/") {
+        if let url = URL(string: "https://qrcodescanerreader.blogspot.com/2025/09/qr-code-scanner.html") {
             UIApplication.shared.open(url)
+        }
+    }
+    
+    @objc private func manageButtonTapped() {
+        if let window = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            Task {
+                do {
+                    try await AppStore.showManageSubscriptions(in: window)
+                }
+            }
         }
     }
     

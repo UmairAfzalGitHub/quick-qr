@@ -184,3 +184,6 @@
 "save_fifty_percent_vs" = "週単位より50%お得";
 "per_day" = "日額";
 "done" = "完了";
+"purchase_restored_successfully" = "購入が正常に復元されました！";
+"manage_subscription" = "サブスクリプションを管理";
+"restore" = "復元";

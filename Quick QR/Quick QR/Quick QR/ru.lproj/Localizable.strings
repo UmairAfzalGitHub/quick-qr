@@ -184,3 +184,6 @@
 "save_fifty_percent_vs" = "Экономия 50% по сравнению с еженедельной подпиской";
 "per_day" = "В день";
 "done" = "Готово";
+"purchase_restored_successfully" = "Покупка успешно восстановлена!";
+"manage_subscription" = "Управление подпиской";
+"restore" = "Восстановить";

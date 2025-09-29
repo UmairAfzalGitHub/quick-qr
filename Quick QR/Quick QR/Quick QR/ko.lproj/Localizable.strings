@@ -184,3 +184,6 @@
 "save_fifty_percent_vs" = "주 단위 대비 50% 절약";
 "per_day" = "일별";
 "done" = "완료";
+"purchase_restored_successfully" = "구매가 성공적으로 복원되었습니다!";
+"manage_subscription" = "구독 관리";
+"restore" = "복원";
