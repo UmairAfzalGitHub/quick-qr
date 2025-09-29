@@ -32,9 +32,16 @@ class OnboardingViewController: UIViewController,
     }
     
     private func loadNativeAdIfNeeded() {
-        nativeAd = AdManager.shared.getNativeAd()
-        if let googleAd = nativeAd {
-            showGoogleNativeAd(nativeAd: googleAd)
+        nativeAdParentView.isHidden = true
+        nativeAdHeightConstraint.constant = 0
+
+        guard !IAPManager.shared.isUserSubscribed else {
+            return
+        }
+
+        if let ad = AdManager.shared.getNativeAd() {
+            nativeAd = ad
+            showGoogleNativeAd(nativeAd: nativeAd)
         } else {
             AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
                 self?.nativeAd = ad
@@ -151,7 +158,9 @@ class OnboardingViewController: UIViewController,
     
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
-        
+        nativeAdParentView.isHidden = false
+        nativeAdHeightConstraint.constant = UIDevice().isSmallerDevice() ? 159 : 240
+
         let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
         let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
         nativeAdParentView.layer.borderColor = UIColor.customColor(fromHex: "0A3853").cgColor

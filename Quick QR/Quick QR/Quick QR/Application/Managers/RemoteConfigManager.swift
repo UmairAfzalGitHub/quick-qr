@@ -9,8 +9,13 @@ class RemoteConfigManager: NSObject {
     var appOpen = AdMobId(analyticsId: .appOpenAd, adId: "ca-app-pub-3940256099942544/5575463023")
     var interstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-3940256099942544/4411468910")
     var native = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
-    var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
     var rewarded = AdMobId(analyticsId: .rewardedAd, adId: "ca-app-pub-3940256099942544/1712485313")
+
+#if DEBUG
+    var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
+#else
+    var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-9143149838002594/2390459928")
+#endif
 
     var onboardingReviewEnabled = true
     var splashInterstitialEnabled = true

@@ -90,9 +90,10 @@ class CodeGenerationResultViewController: UIViewController {
     }
 
     private func loadNativeAdIfNeeded() {
+        nativeAdParentView.isHidden = true
+        nativeAdHeightConstraint.constant = 0
+
         guard !IAPManager.shared.isUserSubscribed else {
-            nativeAdParentView.isHidden = true
-            nativeAdHeightConstraint.constant = 0
             return
         }
 
@@ -476,6 +477,9 @@ class CodeGenerationResultViewController: UIViewController {
     
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
+        nativeAdParentView.isHidden = false
+        nativeAdHeightConstraint.constant = UIDevice().isSmallerDevice() ? 159 : 240
+
         let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
         let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
         guard let nativeAdView = nibView as? NativeAdView else { return }
