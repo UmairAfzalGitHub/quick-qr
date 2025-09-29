@@ -344,7 +344,7 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
 
     func loadNativeAd(adId: AdMobId, from viewController: UIViewController,
                       completion: ((GoogleMobileAds.NativeAd?) -> Void)?) {
-        print("📱 Attempting to load Native Ad...")
+        print("📱 Attempting to load Native Ad... ID:\(adId.adId)")
         IAPManager.shared.checkSubscriptionStatus(completion: {[weak self] isSubscribed in
             guard let self, !isSubscribed else {
                 completion?(nil)
