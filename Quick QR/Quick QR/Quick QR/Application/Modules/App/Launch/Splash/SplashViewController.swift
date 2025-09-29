@@ -10,6 +10,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
     @IBOutlet weak var progressBar: AnimatedProgressBar!
     @IBOutlet weak var bannerView: BannerView!
     @IBOutlet weak var bannerViewHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var iconImage: UIImageView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,6 +54,8 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
 
     override func setup() {
         super.setup()
+        
+        iconImage.layer.cornerRadius = 30
     }
 
     func localize() {

@@ -13,6 +13,7 @@
             <connections>
                 <outlet property="bannerView" destination="es3-1B-0Jn" id="BK8-N7-twI"/>
                 <outlet property="bannerViewHeightConstraint" destination="sMD-xY-j34" id="oXy-dT-Pdv"/>
+                <outlet property="iconImage" destination="XzO-aN-XWZ" id="1mm-KW-eIN"/>
                 <outlet property="messageLabel" destination="UEN-AY-1rd" id="iSb-Bw-lfz"/>
                 <outlet property="progressBar" destination="KUQ-8G-PzH" id="d6L-kV-BON"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
@@ -32,14 +33,8 @@
                         <constraint firstAttribute="width" secondItem="XzO-aN-XWZ" secondAttribute="height" multiplier="1:1" id="1uj-mq-kOo"/>
                     </constraints>
                 </imageView>
-                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="splash-text-logo" translatesAutoresizingMaskIntoConstraints="NO" id="cTq-vK-Hwa">
-                    <rect key="frame" x="116.66666666666669" y="488.33333333333326" width="160" height="82"/>
-                    <constraints>
-                        <constraint firstAttribute="width" constant="160" id="7fu-WV-Fsk"/>
-                    </constraints>
-                </imageView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Scan Instantly. Create Effortlessly." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="UEN-AY-1rd">
-                    <rect key="frame" x="50" y="570.33333333333337" width="293" height="21.666666666666629"/>
+                    <rect key="frame" x="50" y="566" width="293" height="21.666666666666629"/>
                     <fontDescription key="fontDescription" name="HelveticaNeue-Medium" family="Helvetica Neue" pointSize="18"/>
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
@@ -58,6 +53,12 @@
                         <constraint firstAttribute="height" constant="60" id="sMD-xY-j34"/>
                     </constraints>
                 </view>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="QR Code Scanner" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="77d-Tt-MHf">
+                    <rect key="frame" x="81.333333333333329" y="500.33333333333331" width="230.33333333333337" height="33.666666666666686"/>
+                    <fontDescription key="fontDescription" type="boldSystem" pointSize="28"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
             </subviews>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -65,20 +66,20 @@
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="UEN-AY-1rd" secondAttribute="trailing" constant="50" id="1OY-gb-ckY"/>
                 <constraint firstItem="gYP-h9-izM" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="27d-6W-aoY"/>
                 <constraint firstItem="gYP-h9-izM" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="6Ba-at-7es"/>
-                <constraint firstItem="cTq-vK-Hwa" firstAttribute="top" secondItem="XzO-aN-XWZ" secondAttribute="bottom" constant="20" id="6C6-k4-aQf"/>
-                <constraint firstItem="UEN-AY-1rd" firstAttribute="top" secondItem="cTq-vK-Hwa" secondAttribute="bottom" id="8Nj-na-NBa"/>
                 <constraint firstAttribute="bottom" secondItem="gYP-h9-izM" secondAttribute="bottom" id="9Ig-ad-HA1"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="KUQ-8G-PzH" secondAttribute="trailing" constant="40" id="Biy-KH-lSJ"/>
                 <constraint firstItem="XzO-aN-XWZ" firstAttribute="centerX" secondItem="fnl-2z-Ty3" secondAttribute="centerX" id="GrV-gx-h4p"/>
                 <constraint firstItem="es3-1B-0Jn" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="Uoo-me-JPw"/>
                 <constraint firstItem="es3-1B-0Jn" firstAttribute="top" secondItem="KUQ-8G-PzH" secondAttribute="bottom" constant="20" id="VA2-91-TcU"/>
+                <constraint firstItem="UEN-AY-1rd" firstAttribute="top" secondItem="77d-Tt-MHf" secondAttribute="bottom" constant="32" id="W5c-pb-tAQ"/>
                 <constraint firstItem="UEN-AY-1rd" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="50" id="Y41-1H-6tt"/>
-                <constraint firstItem="cTq-vK-Hwa" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="alG-aF-izR"/>
                 <constraint firstAttribute="trailing" secondItem="es3-1B-0Jn" secondAttribute="trailing" id="epK-c6-oLd"/>
+                <constraint firstItem="77d-Tt-MHf" firstAttribute="top" secondItem="XzO-aN-XWZ" secondAttribute="bottom" constant="32" id="fW6-1l-6sl"/>
                 <constraint firstItem="XzO-aN-XWZ" firstAttribute="width" secondItem="i5M-Pr-FkT" secondAttribute="width" multiplier="0.52" id="hYl-Q3-38B"/>
                 <constraint firstItem="KUQ-8G-PzH" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="40" id="kPV-zg-zQu"/>
                 <constraint firstItem="XzO-aN-XWZ" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" constant="-60" id="pL0-zi-07u"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="gYP-h9-izM" secondAttribute="trailing" id="rJa-z1-V9k"/>
+                <constraint firstItem="77d-Tt-MHf" firstAttribute="centerX" secondItem="fnl-2z-Ty3" secondAttribute="centerX" id="whV-vE-htu"/>
                 <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="es3-1B-0Jn" secondAttribute="bottom" id="xai-ag-GBl"/>
             </constraints>
             <variation key="default">
@@ -91,8 +92,7 @@
     </objects>
     <resources>
         <image name="splash-bg-gradient" width="428" height="926"/>
-        <image name="splash-logo-icon" width="170" height="170"/>
-        <image name="splash-text-logo" width="451" height="82"/>
+        <image name="splash-logo-icon" width="1024" height="1024"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
