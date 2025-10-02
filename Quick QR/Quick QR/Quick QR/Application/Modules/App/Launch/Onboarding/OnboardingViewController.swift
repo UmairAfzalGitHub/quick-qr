@@ -3,10 +3,11 @@ import UIKit
 import StoreKit
 import GoogleMobileAds
 
-class OnboardingViewController: UIViewController,
+class OnboardingViewController: BaseViewController,
                                 UICollectionViewDelegate,
                                 UICollectionViewDataSource,
-                                UICollectionViewDelegateFlowLayout {
+                                UICollectionViewDelegateFlowLayout,
+                                IAPViewControllerDelegate {
     
     @IBOutlet weak var nextButton: AppButtonView!
     @IBOutlet weak var nativeAdParentView: UIView!
@@ -60,7 +61,7 @@ class OnboardingViewController: UIViewController,
     }
     
     //MARK: - Private Methods
-    func setup() {
+    override func setup() {
         // First set up the page control with the full count
         pageControlCustom.numberOfPages = 3
         
@@ -103,6 +104,11 @@ class OnboardingViewController: UIViewController,
         if UIDevice().isSmallerDevice() {
             nativeAdHeightConstraint.constant = 159.0
         }
+        
+        // load interstitial ad
+        if RemoteConfigManager.shared.showInterstitalAfterOnboarding {
+            AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
+        }
     }
     
     // New method to update button title based on current page
@@ -114,16 +120,7 @@ class OnboardingViewController: UIViewController,
     }
     
     func finishOnboarding() {
-        let nextController = TabBarController()
-        // Set the default selected index based on whether the app is running on a simulator
-#if targetEnvironment(simulator)
-        nextController.selectedIndex = 0 // Create tab for simulator
-#else
-        nextController.selectedIndex = 2 // Scan tab for real device
-#endif
-        
-        UserDefaultManager.shared.setValue(.onBoarding(true))
-        UIApplication.shared.updateRootViewController(to: nextController)
+        showIAP(delegate: self)
     }
     
     private func loadNativeAd(completion: ((GoogleMobileAds.NativeAd?) -> Void)?) {
@@ -309,5 +306,39 @@ class OnboardingViewController: UIViewController,
         updateButtonTitle()
         
         // skipButton.isHidden = visibleIndexPath.item == dataSource.count - 1
+    }
+
+    // MARK: - IAPViewControllerDelegate
+
+    func cancelAction() {
+        showInterstitialIfNeeded()
+    }
+
+    func performAction() {
+        showInterstitialIfNeeded()
+    }
+
+    func showInterstitialIfNeeded() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+            if RemoteConfigManager.shared.showInterstitalAfterOnboarding {
+                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+                    self?.movetoNextScreen()
+                }
+            } else {
+                self.movetoNextScreen()
+            }
+        })
+    }
+
+    func movetoNextScreen() {
+        let nextController = TabBarController()
+        // Set the default selected index based on whether the app is running on a simulator
+#if targetEnvironment(simulator)
+        nextController.selectedIndex = 0 // Create tab for simulator
+#else
+        nextController.selectedIndex = 2 // Scan tab for real device
+#endif
+        UserDefaultManager.shared.setValue(.onBoarding(true))
+        UIApplication.shared.updateRootViewController(to: nextController)
     }
 }

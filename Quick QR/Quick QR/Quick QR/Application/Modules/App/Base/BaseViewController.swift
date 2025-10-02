@@ -86,9 +86,9 @@ class BaseViewController: UIViewController {
 //        ])
     }
     
-    func showIAP() {
+    func showIAP(delegate: IAPViewControllerDelegate? = nil) {
         let iapVarientA = IAPViewController()
-//        iapVarientA.delegate = self
+        iapVarientA.delegate = delegate
         iapVC = iapVarientA
 
         iapVC?.modalPresentationStyle = .fullScreen
