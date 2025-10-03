@@ -20,6 +20,7 @@ class RemoteConfigManager: NSObject {
     var onboardingReviewEnabled = true
     var splashInterstitialEnabled = true
     var showInterstitalAfterOnboarding: Bool = false
+    var showScannerNativeAtBottom: Bool = true
     var adLoaderCounter = 1
     var iap_varient: String = "A"
     var maxInterstitalAdCounter: Int = {
@@ -57,19 +58,22 @@ class RemoteConfigManager: NSObject {
         let onboardingReviewEnabled = remoteConfig["is_onboarding_review_enabled"].boolValue
         let variant = remoteConfig["iap_screen_varient"].stringValue
         let interstitialAfterOnboarding = remoteConfig["show_interstitial_after_onboarding"].boolValue
-        
+        let showNativeAtBottom = remoteConfig["show_scanner_native_at_bottom"].boolValue
+
         let appOpenId = remoteConfig["ad_id_app_open"].stringValue
         let interstitialId = remoteConfig["ad_id_interstitial"].stringValue
         let nativeId = remoteConfig["ad_id_native"].stringValue
         let bannerId = remoteConfig["ad_id_banner"].stringValue
         let rewardedId = remoteConfig["ad_id_rewarded"].stringValue
 
+        
         self.iap_varient = variant
         self.maxInterstitalAdCounter = Int(adCounter) ?? 0
         self.adLoaderCounter = Int(adLoaderCounter) ?? 0
         self.splashInterstitialEnabled = splashInterstitial
         self.onboardingReviewEnabled = onboardingReviewEnabled
         self.showInterstitalAfterOnboarding = interstitialAfterOnboarding
+        self.showScannerNativeAtBottom = showNativeAtBottom
 #if !DEBUG
         self.appOpen = AdMobId(analyticsId: .appOpenAd, adId: appOpenId)
         self.interstitial = AdMobId(analyticsId: .interstitialAd, adId: interstitialId)

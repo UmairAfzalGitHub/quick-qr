@@ -17,7 +17,6 @@ class ScannerViewController: UIViewController {
     let scannerManager = CodeScannerManager()
     
     // Native Ad Properties
-    private let showAdAtBottom: Bool = false // Set to false to show ad at top
     private let nativeAdParentView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
@@ -151,7 +150,7 @@ class ScannerViewController: UIViewController {
         }
         
         // Position the ad based on the showAdAtBottom flag
-        if showAdAtBottom {
+        if RemoteConfigManager.shared.showScannerNativeAtBottom {
             // Ad at bottom, scanner in center
             constraints.append(contentsOf: [
                 scannerFrameImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
