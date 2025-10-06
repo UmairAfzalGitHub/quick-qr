@@ -249,15 +249,7 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         
         controller.hidesBottomBarWhenPushed = true
         self.prepareForPushWithoutBackTitle()
-        if IAPManager.shared.isUserSubscribed == false &&
-            HistoryManager.shared.getCreatedHistory().count > 1 {
-
-            showIAP()
-        } else {
-            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
-                self.navigationController?.pushViewController(controller, animated: true)
-            }
-        }
+        self.navigationController?.pushViewController(controller, animated: true)
     }
     
     // Adjust cell size to fit 4 per row

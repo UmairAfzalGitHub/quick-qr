@@ -206,11 +206,11 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
             completion?()
             return
         }
-        
-        guard adCounter >= RemoteConfigManager.shared.maxInterstitalAdCounter else {
-            completion?()
-            return
-        }
+
+//        guard adCounter >= RemoteConfigManager.shared.maxInterstitalAdCounter else {
+//            completion?()
+//            return
+//        }
         
         // analytics
         Analytics.logEvent("ad_"+adId.analyticsId.rawValue, parameters: nil)

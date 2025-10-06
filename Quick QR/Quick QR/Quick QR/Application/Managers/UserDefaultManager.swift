@@ -32,6 +32,9 @@ class UserDefaultManager: NSObject {
         // Tooltips
         case homeTooltipShown(Bool)
         case classificationTooltipShown(Bool)
+        
+        // Screen Visits
+        case isFirstCodeGeneratorVisit(Bool)
 
         var key: String {
             switch self {
@@ -47,6 +50,7 @@ class UserDefaultManager: NSObject {
             case .appLanguageTitle: return "appLanguageTitle"
             case .homeTooltipShown: return "homeTooltipShown"
             case .classificationTooltipShown: return "classificationTooltipShown"
+            case .isFirstCodeGeneratorVisit: return "isFirstCodeGeneratorVisit"
             }
         }
         
@@ -58,7 +62,8 @@ class UserDefaultManager: NSObject {
                     .isSubscribed(let value),
                     .isPremiumMember(let value),
                     .homeTooltipShown(let value),
-                    .classificationTooltipShown(let value):
+                    .classificationTooltipShown(let value),
+                    .isFirstCodeGeneratorVisit(let value):
                 return value
             case .subscriptionPurchaseDate(let value):
                 return value
@@ -95,6 +100,8 @@ class UserDefaultManager: NSObject {
             return UserDefaults.standard.bool(forKey: UserDefaultsKey.homeTooltipShown(false).key)
         case .classificationTooltipShown:
             return UserDefaults.standard.bool(forKey: UserDefaultsKey.classificationTooltipShown(false).key)
+        case .isFirstCodeGeneratorVisit:
+            return UserDefaults.standard.bool(forKey: UserDefaultsKey.isFirstCodeGeneratorVisit(true).key)
         case .subscriptionPurchaseDate:
             return UserDefaults.standard.object(forKey: UserDefaultsKey.subscriptionPurchaseDate(Date()).key) as? Date
         case .savedImagesIdentifiers:
@@ -137,5 +144,17 @@ class UserDefaultManager: NSObject {
     
     func setClassificationTooltipShown(_ shown: Bool) {
         setValue(.classificationTooltipShown(shown))
+    }
+
+    // MARK: - Code Generator Visit Methods
+
+    func isFirstCodeGeneratorVisit() -> Bool {
+        // Returns true if it's the first visit (default is true)
+        return getValue(.isFirstCodeGeneratorVisit(true)) as? Bool ?? true
+    }
+
+    func setCodeGeneratorVisited() {
+        // Set to false after first visit
+        setValue(.isFirstCodeGeneratorVisit(false))
     }
 }
