@@ -280,13 +280,27 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     // MARK: - Banner Ads
     
     func loadbannerAd(adId: AdMobId, bannerView: BannerView?, root: UIViewController) {
+        print("🔍 ADMANAGER: loadbannerAd called with ID: \(adId.adId)")
+        print("🔍 ADMANAGER: bannerView is \(bannerView == nil ? "nil" : "not nil")")
+        print("🔍 ADMANAGER: root view controller is \(String(describing: type(of: root)))")
+        
         IAPManager.shared.checkSubscriptionStatus(completion: {isSubscribed in
-            guard !isSubscribed else { return }
+            print("🔍 ADMANAGER: User subscription status: \(isSubscribed)")
+            guard !isSubscribed else { 
+                print("🔍 ADMANAGER: User is subscribed, not loading banner ad")
+                return 
+            }
+            
+            print("🔍 ADMANAGER: Setting adUnitID to \(adId.adId)")
             bannerView?.adUnitID = adId.adId
             bannerView?.rootViewController = root
+            
+            print("🔍 ADMANAGER: Loading banner ad")
             bannerView?.load(Request())
+            
             // analytics
             Analytics.logEvent("ad_"+adId.analyticsId.rawValue, parameters: nil)
+            print("🔍 ADMANAGER: Banner ad load request sent")
         })
     }
 
@@ -308,7 +322,7 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
                     return
                 }
                 print("📱 Loading native ad #\(index+1) after delay")
-                self.loadNativeAd(adId: RemoteConfigManager.shared.native, from: root) { [weak self] ad in
+                self.loadNativeAd(adId: RemoteConfigManager.shared.floorNativeAd, from: root) { [weak self] ad in
                     if let ad = ad {
                         self?.nativeAdPool.append(ad)
                         print("✅ Added native ad #\(index+1) to pool. Pool size: \(self?.nativeAdPool.count ?? 0)")
@@ -416,7 +430,7 @@ extension AdManager: FullScreenContentDelegate {
     }
 
     func adLoaderDidFinishLoading(_ adLoader: GoogleMobileAds.AdLoader) {
-        print("ℹ️ AdLoader finished loading.")
+        print("ℹ️ AdLoader finished loading.", adLoader.adUnitID)
     }
 
     func adDidRecordImpression(_ ad: any GoogleMobileAds.FullScreenPresentingAd) {

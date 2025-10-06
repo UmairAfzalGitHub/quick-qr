@@ -24,8 +24,20 @@ class BaseViewController: UIViewController {
     
     var bannerAdView: BannerView? {
         didSet {
-            if let AdId = bannerAdId, !IAPManager.shared.isUserSubscribed {
-                AdManager.shared.loadbannerAd(adId: AdId, bannerView: bannerAdView, root: self)
+            print("🔍 BASE_VC: bannerAdView setter called in \(String(describing: type(of: self)))")
+            if let AdId = bannerAdId {
+                print("🔍 BASE_VC: bannerAdId is set: \(AdId.adId)")
+                IAPManager.shared.checkSubscriptionStatus { isSubscribed in
+                    print("🔍 BASE_VC: User subscription status: \(isSubscribed)")
+                    if !isSubscribed {
+                        print("🔍 BASE_VC: Calling loadbannerAd in AdManager")
+                        AdManager.shared.loadbannerAd(adId: AdId, bannerView: self.bannerAdView, root: self)
+                    } else {
+                        print("🔍 BASE_VC: User is subscribed, not loading banner ad")
+                    }
+                }
+            } else {
+                print("🔍 BASE_VC: bannerAdId is nil")
             }
         }
     }
@@ -72,7 +84,9 @@ class BaseViewController: UIViewController {
     }
     
     func setupBanner(adId: AdMobId) {
+        print("🔍 BASE_VC: setupBanner called in \(String(describing: type(of: self))) with ID: \(adId.adId)")
         bannerAdId = adId
+        print("🔍 BASE_VC: bannerAdId set to \(adId.adId)")
     }
     
     func setup() {

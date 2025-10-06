@@ -13,7 +13,7 @@ enum LanguageIntent {
     case settings
 }
 
-class LanguageSelectionViewController: UIViewController {
+class LanguageSelectionViewController: BaseViewController {
     
     // MARK: - UI Components
     private let titleLabel: UILabel = {
@@ -43,6 +43,16 @@ class LanguageSelectionViewController: UIViewController {
     private var nativeAdView: NativeAdView!
     var nativeAdHeightConstraint: NSLayoutConstraint!
     var nativeAd: GoogleMobileAds.NativeAd?
+    
+    // Banner ad view
+    private let bannerAdParentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        return view
+    }()
+    
+    private var bannerView: BannerView!
+    var bannerAdHeightConstraint: NSLayoutConstraint!
     var intent: LanguageIntent = .onBoarding
     var selected = String()
     
@@ -67,27 +77,98 @@ class LanguageSelectionViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("🔍 LANG_VC: viewDidLoad called")
         view.backgroundColor = .white
         setupCollectionView()
         setupLayout()
         loadNativeAdIfNeeded()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        print("🔍 LANG_VC: viewWillAppear called")
+        
+        // Check banner visibility
+        print("🔍 LANG_VC: Banner parent view hidden: \(bannerAdParentView.isHidden)")
+        print("🔍 LANG_VC: Banner height constraint: \(bannerAdHeightConstraint.constant)")
+        if let bannerView = bannerView {
+            print("🔍 LANG_VC: Banner view exists")
+            print("🔍 LANG_VC: Banner view hidden: \(bannerView.isHidden)")
+            print("🔍 LANG_VC: Banner ad unit ID: \(bannerView.adUnitID ?? "nil")")
+        } else {
+            print("🔍 LANG_VC: Banner view is nil")
+        }
+    }
+    
     private func loadNativeAdIfNeeded() {
         nativeAdParentView.isHidden = true
         nativeAdHeightConstraint.constant = 0
+        bannerAdParentView.isHidden = true
+        bannerAdHeightConstraint.constant = 0
 
         guard !IAPManager.shared.isUserSubscribed else {
             return
         }
 
-        if let ad = AdManager.shared.getNativeAd(stopPrefetch: true) {
+        // First try to get a preloaded floor native ad
+        if let ad = AdManager.shared.getNativeAd() {
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
         } else {
-            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
-                self?.nativeAd = ad
-                self?.showGoogleNativeAd(nativeAd: ad)
+            // If no preloaded ad, try to load a floor native ad
+            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.floorNativeAd, from: self) {[weak self] ad in
+                if let ad = ad {
+                    // If floor native ad loaded successfully, show it
+                    self?.nativeAd = ad
+                    self?.showGoogleNativeAd(nativeAd: ad)
+                } else {
+                    // If floor native ad failed to load, show banner ad instead
+                    self?.setupBannerAd()
+                }
+            }
+        }
+    }
+    
+    private func setupBannerAd() {
+        print("🔍 LANG_VC: Setting up banner ad")
+        // Hide native ad view and show banner ad view
+        nativeAdParentView.isHidden = true
+        nativeAdHeightConstraint.constant = 0
+        bannerAdParentView.isHidden = false
+        bannerAdHeightConstraint.constant = 60
+        print("🔍 LANG_VC: Banner height set to 60")
+        
+        // Check if bannerView exists
+        if bannerView == nil {
+            print("🔍 LANG_VC: Creating new BannerView")
+            bannerView = BannerView()
+            bannerAdParentView.addSubview(bannerView)
+            
+            bannerView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                bannerView.topAnchor.constraint(equalTo: bannerAdParentView.topAnchor),
+                bannerView.leadingAnchor.constraint(equalTo: bannerAdParentView.leadingAnchor),
+                bannerView.trailingAnchor.constraint(equalTo: bannerAdParentView.trailingAnchor),
+                bannerView.bottomAnchor.constraint(equalTo: bannerAdParentView.bottomAnchor)
+            ])
+        } else {
+            print("🔍 LANG_VC: BannerView already exists")
+        }
+        
+        // Use BaseViewController's banner implementation
+        print("🔍 LANG_VC: Setting up banner with ID: \(RemoteConfigManager.shared.banner.adId)")
+        super.setupBanner(adId: RemoteConfigManager.shared.banner)
+        print("🔍 LANG_VC: Setting bannerAdView in BaseViewController")
+        super.bannerAdView = self.bannerView
+        print("🔍 LANG_VC: Banner setup complete")
+        
+        // Check if user is subscribed
+        IAPManager.shared.checkSubscriptionStatus { isSubscribed in
+            print("🔍 LANG_VC: User subscription status: \(isSubscribed)")
+            if !isSubscribed {
+                print("🔍 LANG_VC: User not subscribed, banner should be visible")
+            } else {
+                print("🔍 LANG_VC: User is subscribed, banner should be hidden")
             }
         }
     }
@@ -120,12 +201,15 @@ class LanguageSelectionViewController: UIViewController {
         view.addSubview(headerStack)
         view.addSubview(collectionView)
         view.addSubview(nativeAdParentView)
+        view.addSubview(bannerAdParentView)
         
         headerStack.translatesAutoresizingMaskIntoConstraints = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         nativeAdParentView.translatesAutoresizingMaskIntoConstraints = false
+        bannerAdParentView.translatesAutoresizingMaskIntoConstraints = false
         selectCTA.translatesAutoresizingMaskIntoConstraints = false
         nativeAdHeightConstraint = nativeAdParentView.heightAnchor.constraint(equalToConstant: UIDevice().isSmallerDevice() ? 159 : 240)
+        bannerAdHeightConstraint = bannerAdParentView.heightAnchor.constraint(equalToConstant: 0)
         NSLayoutConstraint.activate([
             headerStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             headerStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -142,7 +226,12 @@ class LanguageSelectionViewController: UIViewController {
             nativeAdHeightConstraint,
             nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0),
             nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0),
-            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            
+            bannerAdHeightConstraint,
+            bannerAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bannerAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bannerAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
     

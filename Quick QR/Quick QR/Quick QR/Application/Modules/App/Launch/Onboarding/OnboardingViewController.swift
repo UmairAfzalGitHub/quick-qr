@@ -14,6 +14,17 @@ class OnboardingViewController: BaseViewController,
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var pageControlCustom: CustomPageControl!
     @IBOutlet weak var nativeAdHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var nativeAdTopConstraint: NSLayoutConstraint!
+    
+    // Banner ad view
+    private let bannerAdParentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        return view
+    }()
+    
+    private var bannerView: BannerView!
+    private var bannerAdHeightConstraint: NSLayoutConstraint!
     
     private var hasShownReviewPrompt = false
     private var nativeAdView: NativeAdView!
@@ -27,28 +38,87 @@ class OnboardingViewController: BaseViewController,
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("🔍 ONBOARD_VC: viewDidLoad called")
         setup()
-        
+        setupBannerAdView()
         loadNativeAdIfNeeded()
     }
     
+    private func setupBannerAdView() {
+        print("🔍 ONBOARD_VC: Setting up banner ad view")
+        view.addSubview(bannerAdParentView)
+        bannerAdParentView.translatesAutoresizingMaskIntoConstraints = false
+        bannerAdHeightConstraint = bannerAdParentView.heightAnchor.constraint(equalToConstant: 0)
+        
+        NSLayoutConstraint.activate([
+            bannerAdHeightConstraint,
+            bannerAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bannerAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bannerAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+        
+        // Create banner view
+        bannerView = BannerView()
+        bannerAdParentView.addSubview(bannerView)
+        bannerView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            bannerView.topAnchor.constraint(equalTo: bannerAdParentView.topAnchor),
+            bannerView.leadingAnchor.constraint(equalTo: bannerAdParentView.leadingAnchor),
+            bannerView.trailingAnchor.constraint(equalTo: bannerAdParentView.trailingAnchor),
+            bannerView.bottomAnchor.constraint(equalTo: bannerAdParentView.bottomAnchor)
+        ])
+    }
+    
     private func loadNativeAdIfNeeded() {
+        print("🔍 ONBOARD_VC: loadNativeAdIfNeeded called")
         nativeAdParentView.isHidden = true
         nativeAdHeightConstraint.constant = 0
+        bannerAdParentView.isHidden = true
+        bannerAdHeightConstraint.constant = 0
 
         guard !IAPManager.shared.isUserSubscribed else {
+            print("🔍 ONBOARD_VC: User is subscribed, not loading ads")
             return
         }
 
+        // First try to get a preloaded floor native ad
         if let ad = AdManager.shared.getNativeAd() {
+            print("🔍 ONBOARD_VC: Got preloaded native ad")
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
         } else {
-            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
-                self?.nativeAd = ad
-                self?.showGoogleNativeAd(nativeAd: ad)
+            // If no preloaded ad, try to load a floor native ad
+            print("🔍 ONBOARD_VC: Loading floor native ad")
+            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.floorNativeAd, from: self) {[weak self] ad in
+                if let ad = ad {
+                    // If floor native ad loaded successfully, show it
+                    print("🔍 ONBOARD_VC: Floor native ad loaded successfully")
+                    self?.nativeAd = ad
+                    self?.showGoogleNativeAd(nativeAd: ad)
+                } else {
+                    // If floor native ad failed to load, show banner ad instead
+                    print("🔍 ONBOARD_VC: Floor native ad failed to load, showing banner instead")
+                    self?.setupBannerAd()
+                }
             }
         }
+    }
+    
+    private func setupBannerAd() {
+        print("🔍 ONBOARD_VC: Setting up banner ad")
+        // Hide native ad view and show banner ad view
+        nativeAdParentView.isHidden = true
+        nativeAdHeightConstraint.constant = 0
+        bannerAdParentView.isHidden = false
+        bannerAdHeightConstraint.constant = 60
+        nativeAdTopConstraint.constant = 80
+        print("🔍 ONBOARD_VC: Banner height set to 60")
+        
+        // Use BaseViewController's banner implementation
+        super.setupBanner(adId: RemoteConfigManager.shared.banner)
+        super.bannerAdView = self.bannerView
+        print("🔍 ONBOARD_VC: Banner setup complete")
     }
     
     override func viewDidLayoutSubviews() {
@@ -253,6 +323,8 @@ class OnboardingViewController: BaseViewController,
             if let googleAd = AdManager.shared.getNativeAd(stopPrefetch: true) {
                 self.nativeAd = googleAd
                 self.showGoogleNativeAd(nativeAd: googleAd)
+            } else {
+                self.setupBannerAd()
             }
             self.scrollToNextItem()
         case 2:
