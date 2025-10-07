@@ -13,7 +13,7 @@ class TabBarController: UITabBarController {
     // MARK: - Properties
     private let centerButton = UIButton(type: .custom)
     private var shouldHideCenterButton = false
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,12 +52,12 @@ class TabBarController: UITabBarController {
         createVC.view.backgroundColor = .systemBackground
         createVC.title = Strings.Label.chooseType
         let createNavController = UINavigationController(rootViewController: createVC)
-
+        
         let favoriteVC = FavouriteViewController()
         favoriteVC.view.backgroundColor = .systemBackground
         favoriteVC.title = Strings.Label.favorite
         let favoriteNavController = UINavigationController(rootViewController: favoriteVC)
-
+        
         let scanVC = ScannerViewController()
         scanVC.view.backgroundColor = .systemBackground
         scanVC.title = "" // Empty title for center tab
@@ -67,12 +67,12 @@ class TabBarController: UITabBarController {
         historyVC.view.backgroundColor = .systemBackground
         historyVC.title = Strings.Label.history
         let historyNavController = UINavigationController(rootViewController: historyVC)
-
+        
         let settingsVC = SettingsViewController()
         settingsVC.view.backgroundColor = .systemBackground
         settingsVC.title = Strings.Label.settings
         let settingsNavController = UINavigationController(rootViewController: settingsVC)
-
+        
         let createImage   = UIImage(named: "create-tabbar-icon")?.withRenderingMode(.alwaysTemplate)
         let favoriteImage = UIImage(named: "heart-tabbar-icon")?.withRenderingMode(.alwaysTemplate)
         let historyImage  = UIImage(named: "history-tabbar-icon")?.withRenderingMode(.alwaysTemplate)
@@ -214,6 +214,12 @@ class TabBarController: UITabBarController {
                 navController.delegate = self
             }
         }
+    }
+    
+    func setTabBarVisibility(_ hidden: Bool) {
+        tabBar.isHidden = hidden
+        shouldHideCenterButton = hidden
+        updateCenterButtonVisibility()
     }
 }
 

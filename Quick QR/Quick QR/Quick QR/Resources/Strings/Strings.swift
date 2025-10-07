@@ -198,6 +198,8 @@ struct Strings {
         static var manageSubscription: String { "manage_subscription".localized() }
         static var restore: String { "restore".localized() }
         static var delete: String { "delete".localized() }
+        static var helpKeepItFree: String { "help_keep_it_free".localized() }
+        static var showYourLove: String { "show_your_love".localized() }
     }
     
     struct Button {

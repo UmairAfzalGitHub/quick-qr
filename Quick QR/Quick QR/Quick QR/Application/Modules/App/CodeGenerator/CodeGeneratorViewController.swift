@@ -111,9 +111,19 @@ class CodeGeneratorViewController: UIViewController {
         }
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setTabBarVisibility(true) // Hide tab bar
+        }
+    }
+    
     // Track when user is navigating back to show interstitial ad
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+//        if let tabBarController = self.tabBarController as? TabBarController {
+//            tabBarController.setTabBarVisibility(false) // Show tab bar
+//        }
         
         // Check if we're navigating back (being popped from navigation stack)
         if isMovingFromParent {
