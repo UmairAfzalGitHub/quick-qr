@@ -59,6 +59,7 @@ class LanguageSelectionViewController: BaseViewController {
     private var languages: [Language] = [
         Language(title: "English", flagImage: "uk-flag", isSelected: false, languageCode: "en"),
         Language(title: "Arabic (العربية)", flagImage: "arabic-flag", isSelected: false, languageCode: "ar"),
+        Language(title: "Japanese (日本語)", flagImage: "japanese-flag", isSelected: false, languageCode: "ja"),
         Language(title: "French (Français)", flagImage: "french-flag", isSelected: false, languageCode: "fr"),
         Language(title: "German (Deutsch)", flagImage: "german-flag", isSelected: false, languageCode: "de"),
         Language(title: "Dutch (Nederlands)", flagImage: "dutch-flag", isSelected: false, languageCode: "nl"),
@@ -67,7 +68,6 @@ class LanguageSelectionViewController: BaseViewController {
         Language(title: "Russian (Русский)", flagImage: "russian-flag", isSelected: false, languageCode: "ru"),
         Language(title: "Spanish (Español)", flagImage: "spanish-flag", isSelected: false, languageCode: "es"),
         Language(title: "Korean (한국어)", flagImage: "korean-flag", isSelected: false, languageCode: "ko"),
-        Language(title: "Japanese (日本語)", flagImage: "japanese-flag", isSelected: false, languageCode: "ja"),
         Language(title: "Turkish (Türkçe)", flagImage: "turkish-flag", isSelected: false, languageCode: "tr"),
         Language(title: "Vietnamese (Tiếng Việt)", flagImage: "vietnamese-flag", isSelected: false, languageCode: "vi")
     ]

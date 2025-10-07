@@ -608,7 +608,7 @@ class ScanResultManager {
         }))
         
         // Add Cancel action
-        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+        alertController.addAction(UIAlertAction(title: Strings.Label.cancel, style: .cancel, handler: { _ in
             completion(false)
         }))
         
@@ -683,7 +683,7 @@ class ScanResultManager {
             }
         }
         if let hostView = hostView {
-            showToast(message: "Copied", on: hostView)
+            showToast(message: Strings.Label.copiedToClipboard, on: hostView)
         }
     }
     

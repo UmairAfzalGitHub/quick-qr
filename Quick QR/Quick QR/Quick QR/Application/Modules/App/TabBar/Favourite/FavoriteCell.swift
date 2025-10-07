@@ -146,7 +146,7 @@ class FavoriteCell: UITableViewCell {
                 guard let self = self else { return }
                 self.delegate?.didTapOptionsButton(cell: self)
             },
-            UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+            UIAction(title: Strings.Label.delete, image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
                 guard let self = self else { return }
                 self.delegate?.didTapOptionsButton(cell: self)
             }
