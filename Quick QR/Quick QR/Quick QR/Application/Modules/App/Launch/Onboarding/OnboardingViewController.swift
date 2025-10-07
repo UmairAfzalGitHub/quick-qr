@@ -36,7 +36,8 @@ class OnboardingViewController: BaseViewController,
     var dataSource: [OnBoarding] = [
         OnBoarding(image: UIImage(named: "onboard1")!, heading: Strings.Label.smartScanQrCode, description: Strings.Label.pointYourCamera),
         OnBoarding(image: UIImage(named: "onboard2")!, heading: Strings.Label.easilyReadBarcodes, description: Strings.Label.easilyScanBarcodes),
-        OnBoarding(image: UIImage(named: "onboard3")!, heading: Strings.Label.quicklyCreateQrCode, description: Strings.Label.generateCustomQr)
+        OnBoarding(image: UIImage(named: "onboard3")!, heading: Strings.Label.quicklyCreateQrCode, description: Strings.Label.generateCustomQr),
+        OnBoarding(image: UIImage(named: "onboard4")!, heading: Strings.Label.quicklyCreateQrCode, description: Strings.Label.generateCustomQr)
     ]
     
     override func viewDidLoad() {
@@ -131,12 +132,12 @@ class OnboardingViewController: BaseViewController,
     //MARK: - Private Methods
     override func setup() {
         // First set up the page control with the full count
-        pageControlCustom.numberOfPages = 3
+        pageControlCustom.numberOfPages = dataSource.count
         
         if RemoteConfigManager.shared.onboardingReviewEnabled == false {
-            // dataSource.removeLast()
+             dataSource.removeLast()
             // Update page control AFTER modifying the data source
-            //pageControlCustom.numberOfPages = dataSource.count
+            pageControlCustom.numberOfPages = dataSource.count
         }
         
         if RemoteConfigManager.shared.splashInterstitialEnabled {
@@ -328,7 +329,7 @@ class OnboardingViewController: BaseViewController,
         print("📢 ONBOARDING: Next page will use Native Ad ID-\(useFirstFloorNativeAd ? "1" : "2") and Banner Ad ID-\(useFirstFloorNativeAd ? "1" : "2")") 
         
         switch currentIndex {
-        case 0, 1:
+        case 0, 1, 2:
             if let googleAd = AdManager.shared.getNativeAd(stopPrefetch: true) {
                 self.nativeAd = googleAd
                 self.showGoogleNativeAd(nativeAd: googleAd)
@@ -350,8 +351,12 @@ class OnboardingViewController: BaseViewController,
                 }
             }
             self.scrollToNextItem()
-        case 2:
-            finishOnboarding()
+        case 3:
+            if hasShownReviewPrompt {
+                finishOnboarding()
+            } else {
+                requestAppStoreReview()
+            }
         default:
             scrollToNextItem()
         }
