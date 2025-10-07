@@ -20,22 +20,22 @@ class IAPManager: NSObject {
 
     var isUserSubscribed: Bool {
         get {
-#if DEBUG
-            return false
-#else
-            if let cached = _isUserSubscribed {
-                return cached
+            if getBuildEnv() == .debug || getBuildEnv() == .testFlight {
+                return false
+            } else {
+                if let cached = _isUserSubscribed {
+                    return cached
+                }
+                if let cached = UserDefaultManager.shared.getValue(.isPremiumMember(false)) as? Bool {
+                    _isUserSubscribed = cached
+                    return cached
+                }
+                if !hasVerifiedReceiptThisLaunch {
+                    hasVerifiedReceiptThisLaunch = true
+                    verifySubscriptionStatusIfNeeded()
+                }
+                return false
             }
-            if let cached = UserDefaultManager.shared.getValue(.isPremiumMember(false)) as? Bool {
-                _isUserSubscribed = cached
-                return cached
-            }
-            if !hasVerifiedReceiptThisLaunch {
-                hasVerifiedReceiptThisLaunch = true
-                verifySubscriptionStatusIfNeeded()
-            }
-            return false
-#endif
         }
         set {
             _isUserSubscribed = newValue  // update the in-memory variable

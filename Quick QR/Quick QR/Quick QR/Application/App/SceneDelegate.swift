@@ -134,3 +134,21 @@ extension UIApplication {
         return sceneDelegate?.window
     }
 }
+
+enum BuildEnvironment {
+    case debug
+    case testFlight
+    case appStore
+}
+
+func getBuildEnv() -> BuildEnvironment {
+    #if DEBUG
+    return .debug
+    #else
+    if isTestFlightBuild() {
+        return .testFlight
+    } else {
+        return .appStore
+    }
+    #endif
+}

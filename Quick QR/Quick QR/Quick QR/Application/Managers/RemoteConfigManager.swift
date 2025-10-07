@@ -12,16 +12,9 @@ class RemoteConfigManager: NSObject {
     var floorNativeAd1 = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
     var floorNativeAd2 = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
     var rewarded = AdMobId(analyticsId: .rewardedAd, adId: "ca-app-pub-3940256099942544/1712485313")
-
-#if DEBUG
     var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
     var banner1 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
     var banner2 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
-#else
-    var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-9143149838002594/2390459928")
-    var banner1 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-9143149838002594/2390459928")
-    var banner2 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-9143149838002594/2390459928")
-#endif
 
     var onboardingReviewEnabled = true
     var splashInterstitialEnabled = true
@@ -83,17 +76,17 @@ class RemoteConfigManager: NSObject {
         self.onboardingReviewEnabled = onboardingReviewEnabled
         self.showInterstitalAfterOnboarding = interstitialAfterOnboarding
         self.showScannerNativeAtBottom = showNativeAtBottom
-#if !DEBUG
-        self.appOpen = AdMobId(analyticsId: .appOpenAd, adId: appOpenId)
-        self.interstitial = AdMobId(analyticsId: .interstitialAd, adId: interstitialId)
-        self.native = AdMobId(analyticsId: .nativeAd, adId: nativeId)
-        self.floorNativeAd1 = AdMobId(analyticsId: .nativeAd, adId: floorNativeId1)
-        self.floorNativeAd2 = AdMobId(analyticsId: .nativeAd, adId: floorNativeId2)
-        self.banner = AdMobId(analyticsId: .bannerAd, adId: bannerId)
-        self.banner1 = AdMobId(analyticsId: .bannerAd, adId: bannerId1)
-        self.banner2 = AdMobId(analyticsId: .bannerAd, adId: bannerId2)
-        self.rewarded = AdMobId(analyticsId: .rewardedAd, adId: rewardedId)
-#endif
 
+        if getBuildEnv() == .appStore {
+            self.appOpen = AdMobId(analyticsId: .appOpenAd, adId: appOpenId)
+            self.interstitial = AdMobId(analyticsId: .interstitialAd, adId: interstitialId)
+            self.native = AdMobId(analyticsId: .nativeAd, adId: nativeId)
+            self.floorNativeAd1 = AdMobId(analyticsId: .nativeAd, adId: floorNativeId1)
+            self.floorNativeAd2 = AdMobId(analyticsId: .nativeAd, adId: floorNativeId2)
+            self.banner = AdMobId(analyticsId: .bannerAd, adId: bannerId)
+            self.banner1 = AdMobId(analyticsId: .bannerAd, adId: bannerId1)
+            self.banner2 = AdMobId(analyticsId: .bannerAd, adId: bannerId2)
+            self.rewarded = AdMobId(analyticsId: .rewardedAd, adId: rewardedId)
+        }
     }
 }
