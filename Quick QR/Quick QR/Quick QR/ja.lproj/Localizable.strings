@@ -42,7 +42,7 @@
 "enter_latitude_location" = "緯度を入力してください";
 "text_message" = "テキストメッセージ";
 "website_url" = "ウェブサイトURL";
-"whatsApp_number" = "WhatsApp番号";
+"whatsApp_number" = "ワッツアップ番号";
 "network_name_ssid" = "ネットワーク名 SSID";
 "enter_ssid" = "SSIDを入力";
 "password" = "パスワード";
@@ -120,17 +120,18 @@
 "created" = "作成済み";
 "no_history_yet" = "履歴はまだありません";
 "your_generated_codes" = "生成されたコードはここに表示されます";
-"wifi" = "Wi-Fi";
+"wifi" = "ワイファイ";
 "phone" = "電話";
 "events" = "イベント";
-"tikTok" = "TikTok";
-"instagram" = "Instagram";
-"facebook" = "Facebook";
-"x" = "X";
-"whatsApp" = "WhatsApp";
-"youtube" = "YouTube";
-"spotify" = "Spotify";
-"viber" = "Viber";
+"tikTok" = "ティックトック";
+"instagram" = "インスタグラム";
+"facebook" = "フェイスブック";
+"x" = "エックス";
+"whatsApp" = "ワッツアップ";
+"youtube" = "ユーチューブ";
+"spotify" = "スポティファイ";
+"viber" = "バイバー";
+
 "camera_access_needed" = "カメラアクセスが必要です";
 "please_enable_camera" = "QRコードをスキャンするには、設定でカメラアクセスを有効にしてください。";
 "settings" = "設定";
