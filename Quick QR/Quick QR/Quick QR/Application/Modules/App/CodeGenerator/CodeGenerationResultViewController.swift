@@ -85,8 +85,17 @@ class CodeGenerationResultViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setTabBarVisibility(true)  // Hide tab bar
+        }
         loadNativeAdIfNeeded()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setTabBarVisibility(false)  // Show tab bar
+        }
     }
 
     private func loadNativeAdIfNeeded() {
