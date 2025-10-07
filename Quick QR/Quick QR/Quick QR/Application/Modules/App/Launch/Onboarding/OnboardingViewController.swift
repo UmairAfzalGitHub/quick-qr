@@ -3,16 +3,28 @@ import UIKit
 import StoreKit
 import GoogleMobileAds
 
-class OnboardingViewController: UIViewController,
+class OnboardingViewController: BaseViewController,
                                 UICollectionViewDelegate,
                                 UICollectionViewDataSource,
-                                UICollectionViewDelegateFlowLayout {
+                                UICollectionViewDelegateFlowLayout,
+                                IAPViewControllerDelegate {
     
     @IBOutlet weak var nextButton: AppButtonView!
     @IBOutlet weak var nativeAdParentView: UIView!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var pageControlCustom: CustomPageControl!
     @IBOutlet weak var nativeAdHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var nativeAdTopConstraint: NSLayoutConstraint!
+    
+    // Banner ad view
+    private let bannerAdParentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        return view
+    }()
+    
+    private var bannerView: BannerView!
+    private var bannerAdHeightConstraint: NSLayoutConstraint!
     
     private var hasShownReviewPrompt = false
     private var nativeAdView: NativeAdView!
@@ -26,28 +38,87 @@ class OnboardingViewController: UIViewController,
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("🔍 ONBOARD_VC: viewDidLoad called")
         setup()
-        
+        setupBannerAdView()
         loadNativeAdIfNeeded()
     }
     
+    private func setupBannerAdView() {
+        print("🔍 ONBOARD_VC: Setting up banner ad view")
+        view.addSubview(bannerAdParentView)
+        bannerAdParentView.translatesAutoresizingMaskIntoConstraints = false
+        bannerAdHeightConstraint = bannerAdParentView.heightAnchor.constraint(equalToConstant: 0)
+        
+        NSLayoutConstraint.activate([
+            bannerAdHeightConstraint,
+            bannerAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bannerAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bannerAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+        
+        // Create banner view
+        bannerView = BannerView()
+        bannerAdParentView.addSubview(bannerView)
+        bannerView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            bannerView.topAnchor.constraint(equalTo: bannerAdParentView.topAnchor),
+            bannerView.leadingAnchor.constraint(equalTo: bannerAdParentView.leadingAnchor),
+            bannerView.trailingAnchor.constraint(equalTo: bannerAdParentView.trailingAnchor),
+            bannerView.bottomAnchor.constraint(equalTo: bannerAdParentView.bottomAnchor)
+        ])
+    }
+    
     private func loadNativeAdIfNeeded() {
+        print("🔍 ONBOARD_VC: loadNativeAdIfNeeded called")
         nativeAdParentView.isHidden = true
         nativeAdHeightConstraint.constant = 0
+        bannerAdParentView.isHidden = true
+        bannerAdHeightConstraint.constant = 0
 
         guard !IAPManager.shared.isUserSubscribed else {
+            print("🔍 ONBOARD_VC: User is subscribed, not loading ads")
             return
         }
 
+        // First try to get a preloaded floor native ad
         if let ad = AdManager.shared.getNativeAd() {
+            print("🔍 ONBOARD_VC: Got preloaded native ad")
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
         } else {
-            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
-                self?.nativeAd = ad
-                self?.showGoogleNativeAd(nativeAd: ad)
+            // If no preloaded ad, try to load a floor native ad
+            print("🔍 ONBOARD_VC: Loading floor native ad")
+            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.floorNativeAd, from: self) {[weak self] ad in
+                if let ad = ad {
+                    // If floor native ad loaded successfully, show it
+                    print("🔍 ONBOARD_VC: Floor native ad loaded successfully")
+                    self?.nativeAd = ad
+                    self?.showGoogleNativeAd(nativeAd: ad)
+                } else {
+                    // If floor native ad failed to load, show banner ad instead
+                    print("🔍 ONBOARD_VC: Floor native ad failed to load, showing banner instead")
+                    self?.setupBannerAd()
+                }
             }
         }
+    }
+    
+    private func setupBannerAd() {
+        print("🔍 ONBOARD_VC: Setting up banner ad")
+        // Hide native ad view and show banner ad view
+        nativeAdParentView.isHidden = true
+        nativeAdHeightConstraint.constant = 0
+        bannerAdParentView.isHidden = false
+        bannerAdHeightConstraint.constant = 60
+        nativeAdTopConstraint.constant = 80
+        print("🔍 ONBOARD_VC: Banner height set to 60")
+        
+        // Use BaseViewController's banner implementation
+        super.setupBanner(adId: RemoteConfigManager.shared.banner)
+        super.bannerAdView = self.bannerView
+        print("🔍 ONBOARD_VC: Banner setup complete")
     }
     
     override func viewDidLayoutSubviews() {
@@ -60,7 +131,7 @@ class OnboardingViewController: UIViewController,
     }
     
     //MARK: - Private Methods
-    func setup() {
+    override func setup() {
         // First set up the page control with the full count
         pageControlCustom.numberOfPages = 3
         
@@ -103,6 +174,11 @@ class OnboardingViewController: UIViewController,
         if UIDevice().isSmallerDevice() {
             nativeAdHeightConstraint.constant = 159.0
         }
+        
+        // load interstitial ad
+        if RemoteConfigManager.shared.showInterstitalAfterOnboarding {
+            AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
+        }
     }
     
     // New method to update button title based on current page
@@ -114,16 +190,7 @@ class OnboardingViewController: UIViewController,
     }
     
     func finishOnboarding() {
-        let nextController = TabBarController()
-        // Set the default selected index based on whether the app is running on a simulator
-#if targetEnvironment(simulator)
-        nextController.selectedIndex = 0 // Create tab for simulator
-#else
-        nextController.selectedIndex = 2 // Scan tab for real device
-#endif
-        
-        UserDefaultManager.shared.setValue(.onBoarding(true))
-        UIApplication.shared.updateRootViewController(to: nextController)
+        showIAP(delegate: self)
     }
     
     private func loadNativeAd(completion: ((GoogleMobileAds.NativeAd?) -> Void)?) {
@@ -256,6 +323,8 @@ class OnboardingViewController: UIViewController,
             if let googleAd = AdManager.shared.getNativeAd(stopPrefetch: true) {
                 self.nativeAd = googleAd
                 self.showGoogleNativeAd(nativeAd: googleAd)
+            } else {
+                self.setupBannerAd()
             }
             self.scrollToNextItem()
         case 2:
@@ -309,5 +378,39 @@ class OnboardingViewController: UIViewController,
         updateButtonTitle()
         
         // skipButton.isHidden = visibleIndexPath.item == dataSource.count - 1
+    }
+
+    // MARK: - IAPViewControllerDelegate
+
+    func cancelAction() {
+        showInterstitialIfNeeded()
+    }
+
+    func performAction() {
+        showInterstitialIfNeeded()
+    }
+
+    func showInterstitialIfNeeded() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+            if RemoteConfigManager.shared.showInterstitalAfterOnboarding {
+                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+                    self?.movetoNextScreen()
+                }
+            } else {
+                self.movetoNextScreen()
+            }
+        })
+    }
+
+    func movetoNextScreen() {
+        let nextController = TabBarController()
+        // Set the default selected index based on whether the app is running on a simulator
+#if targetEnvironment(simulator)
+        nextController.selectedIndex = 0 // Create tab for simulator
+#else
+        nextController.selectedIndex = 2 // Scan tab for real device
+#endif
+        UserDefaultManager.shared.setValue(.onBoarding(true))
+        UIApplication.shared.updateRootViewController(to: nextController)
     }
 }

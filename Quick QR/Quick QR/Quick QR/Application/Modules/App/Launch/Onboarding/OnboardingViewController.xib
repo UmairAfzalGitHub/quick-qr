@@ -14,6 +14,7 @@
                 <outlet property="collectionView" destination="p6m-qV-yGr" id="ZQ6-QJ-SRp"/>
                 <outlet property="nativeAdHeightConstraint" destination="Ert-qV-Uz3" id="ICp-ZJ-cYV"/>
                 <outlet property="nativeAdParentView" destination="4OG-0M-FWC" id="GSm-Zv-ZXf"/>
+                <outlet property="nativeAdTopConstraint" destination="IZ0-og-ddU" id="JZ1-G6-7RZ"/>
                 <outlet property="nextButton" destination="IAQ-1X-eJx" id="Ud9-Xf-rF7"/>
                 <outlet property="pageControlCustom" destination="0w7-IR-X8R" id="fBW-7v-eUx"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
@@ -95,7 +96,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemMintColor">
-            <color red="0.0" green="0.78039215689999997" blue="0.74509803919999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.7803921568627451" blue="0.74509803921568629" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

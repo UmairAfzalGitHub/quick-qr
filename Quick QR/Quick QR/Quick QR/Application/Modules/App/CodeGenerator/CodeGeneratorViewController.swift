@@ -98,7 +98,28 @@ class CodeGeneratorViewController: UIViewController {
             applyPrefilledContent(content)
         }
         
-        loadNativeAdIfNeeded()
+        // Check if this is the first visit to the screen
+        let isFirstVisit = UserDefaultManager.shared.isFirstCodeGeneratorVisit()
+        
+        // Only load ads if it's not the first visit
+        if !isFirstVisit {
+            AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
+            loadNativeAdIfNeeded()
+        } else {
+            // Mark that the user has visited this screen
+            UserDefaultManager.shared.setCodeGeneratorVisited()
+        }
+    }
+    
+    // Track when user is navigating back to show interstitial ad
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        // Check if we're navigating back (being popped from navigation stack)
+        if isMovingFromParent {
+            // Show interstitial ad when navigating back
+            showInterstitialIfNeeded()
+        }
     }
     
     private func loadNativeAdIfNeeded() {
@@ -194,25 +215,41 @@ class CodeGeneratorViewController: UIViewController {
     }
     
     private func setupActions() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(buttonTapped))
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(actionButtonTapped))
         actionButton.addGestureRecognizer(tapGesture)
     }
     
-    @objc private func buttonTapped() {
+    @objc private func actionButtonTapped() {
         // Handle code generation based on current type
         guard let codeType = currentCodeType else {
             print("No Code type configured")
             return
         }
-        
-        // Call custom button action if provided, otherwise handle default generation
-        if let customAction = buttonAction {
-            customAction()
-        } else {
-            handleCodeGeneration(for: codeType)
+
+        showInterstitialIfNeeded {[weak self] in
+            guard let self = self else { return }
+            // Call custom button action if provided, otherwise handle default generation
+            if let customAction = buttonAction {
+                customAction()
+            } else {
+                handleCodeGeneration(for: codeType)
+            }
         }
     }
-    
+
+    private func showInterstitialIfNeeded(completion: (() -> Void)? = nil) {
+        let isFirstVisit = UserDefaultManager.shared.isFirstCodeGeneratorVisit()
+
+        guard !isFirstVisit else {
+            completion?()
+            return
+        }
+        
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {
+            completion?()
+        }
+    }
+
     /// Default Code generation handler
     private func handleCodeGeneration(for codeType: CodeTypeProtocol) {
         print("Generating Code for: \(codeType.title)")

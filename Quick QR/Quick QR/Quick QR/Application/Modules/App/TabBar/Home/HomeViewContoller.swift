@@ -149,7 +149,7 @@ class HomeViewController: UIViewController {
             nativeAdHeightConstraint,
             nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0),
             nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0),
-            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -17)
+            nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24)
         ])
     }
     
@@ -249,15 +249,7 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         
         controller.hidesBottomBarWhenPushed = true
         self.prepareForPushWithoutBackTitle()
-        if IAPManager.shared.isUserSubscribed == false &&
-            HistoryManager.shared.getCreatedHistory().count > 1 {
-
-            showIAP()
-        } else {
-            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
-                self.navigationController?.pushViewController(controller, animated: true)
-            }
-        }
+        self.navigationController?.pushViewController(controller, animated: true)
     }
     
     // Adjust cell size to fit 4 per row
