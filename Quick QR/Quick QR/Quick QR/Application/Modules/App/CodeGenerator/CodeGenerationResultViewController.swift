@@ -50,6 +50,8 @@ class CodeGenerationResultViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Set this view controller to hide the tab bar
+        self.hidesBottomBarWhenPushed = true
         view.backgroundColor = .appSecondaryBackground
         
         // Check if this content already exists and is favorited
@@ -85,17 +87,12 @@ class CodeGenerationResultViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if let tabBarController = self.tabBarController as? TabBarController {
-            tabBarController.setTabBarVisibility(true)  // Hide tab bar
-        }
         loadNativeAdIfNeeded()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        if let tabBarController = self.tabBarController as? TabBarController {
-            tabBarController.setTabBarVisibility(false)  // Show tab bar
-        }
+        // Let the navigation controller delegate handle tab bar visibility
     }
 
     private func loadNativeAdIfNeeded() {

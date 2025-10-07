@@ -247,7 +247,14 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
             controller.currentCodeType = type
         }
         
+        // Set hidesBottomBarWhenPushed to true
         controller.hidesBottomBarWhenPushed = true
+        
+        // Hide tab bar explicitly before pushing
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setTabBarVisibility(true) // true means hide
+        }
+        
         self.prepareForPushWithoutBackTitle()
         self.navigationController?.pushViewController(controller, animated: true)
     }

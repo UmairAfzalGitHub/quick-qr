@@ -152,3 +152,10 @@ func getBuildEnv() -> BuildEnvironment {
     }
     #endif
 }
+
+func isTestFlightBuild() -> Bool {
+    guard let appStoreReceiptURL = Bundle.main.appStoreReceiptURL else {
+        return false
+    }
+    return appStoreReceiptURL.lastPathComponent == "sandboxReceipt"
+}

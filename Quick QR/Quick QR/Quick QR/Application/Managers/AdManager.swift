@@ -215,6 +215,9 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
 //            return
 //        }
         
+        // Check if the view controller is CodeGeneratorViewController
+        let isCodeGeneratorVC = viewController?.isKind(of: NSClassFromString("Quick_QR.CodeGeneratorViewController") ?? UIViewController.self) ?? false
+        
         // analytics
         Analytics.logEvent("ad_"+adId.analyticsId.rawValue, parameters: nil)
         
@@ -224,8 +227,14 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
         adCounter = 0
         print("▶️ Interstitial Ad shown successfully")
         
-        // Call the completion block after the ad is dismissed
-        adDidDismissFullScreenContentCallback = completion
+        // Set up the completion callback
+        adDidDismissFullScreenContentCallback = { [weak viewController] in
+            // If it's a CodeGeneratorViewController, ensure tab bar stays hidden
+            if isCodeGeneratorVC, let vc = viewController {
+                vc.tabBarController?.tabBar.isHidden = true
+            }
+            completion?()
+        }
     }
     
     // MARK: - Rewarded Ads
@@ -390,14 +399,14 @@ extension AdManager: FullScreenContentDelegate {
         interstitialAd = nil
         rewardedAd = nil
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+        DispatchQueue.main.async(execute: {
             self.adDidDismissFullScreenContentCallback?()
             self.adDidDismissRewardedCallback?(self.isRewardGranted)
             
             self.adDidDismissFullScreenContentCallback = nil
             self.adDidDismissRewardedCallback = nil
         })
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: {
             self.isRewardGranted = false
         })

@@ -88,6 +88,9 @@ class CodeGeneratorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Ensure hidesBottomBarWhenPushed is set
+        self.hidesBottomBarWhenPushed = true
+        
         configure(with: currentCodeType!)
         setupUI()
         setupConstraints()
@@ -111,24 +114,35 @@ class CodeGeneratorViewController: UIViewController {
         }
     }
     
+    private func setupNavigationDelegate() {
+        // Set this view controller as the navigation controller's delegate
+        navigationController?.delegate = self
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // Ensure tab bar is hidden
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setTabBarVisibility(true) // Hide tab bar
         }
     }
     
-    // Track when user is navigating back to show interstitial ad
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Double-check tab bar is hidden
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setTabBarVisibility(true) // Hide tab bar
+        }
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-//        if let tabBarController = self.tabBarController as? TabBarController {
-//            tabBarController.setTabBarVisibility(false) // Show tab bar
-//        }
         
-        // Check if we're navigating back (being popped from navigation stack)
+        // Only show the tab bar if we're going back to the previous screen
         if isMovingFromParent {
-            // Show interstitial ad when navigating back
-            showInterstitialIfNeeded()
+            if let tabBarController = self.tabBarController as? TabBarController {
+                tabBarController.setTabBarVisibility(false) // Show tab bar
+            }
         }
     }
     
@@ -235,18 +249,24 @@ class CodeGeneratorViewController: UIViewController {
             print("No Code type configured")
             return
         }
-
-        showInterstitialIfNeeded {[weak self] in
+        
+        // Make sure tab bar is hidden
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setTabBarVisibility(true)
+        }
+        
+        showInterstitialIfNeeded { [weak self] in
             guard let self = self else { return }
+            
             // Call custom button action if provided, otherwise handle default generation
-            if let customAction = buttonAction {
+            if let customAction = self.buttonAction {
                 customAction()
             } else {
-                handleCodeGeneration(for: codeType)
+                self.handleCodeGeneration(for: codeType)
             }
         }
     }
-
+    
     private func showInterstitialIfNeeded(completion: (() -> Void)? = nil) {
         let isFirstVisit = UserDefaultManager.shared.isFirstCodeGeneratorVisit()
 
@@ -255,7 +275,20 @@ class CodeGeneratorViewController: UIViewController {
             return
         }
         
-        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {
+        // Make sure tab bar is hidden before showing the ad
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setTabBarVisibility(true) // Hide tab bar
+        }
+        
+        // Show the interstitial ad with a custom completion handler
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] in
+            // Ensure tab bar is still hidden after the ad is dismissed
+            if let self = self, let tabBarController = self.tabBarController as? TabBarController {
+                // Only keep tab bar hidden if we're not going back
+                if !self.isMovingFromParent {
+                    tabBarController.setTabBarVisibility(true) // Hide tab bar
+                }
+            }
             completion?()
         }
     }
@@ -295,7 +328,16 @@ class CodeGeneratorViewController: UIViewController {
         }
         
         let resultVC = CodeGenerationResultViewController()
+        // Explicitly set hidesBottomBarWhenPushed to true
+        resultVC.hidesBottomBarWhenPushed = true
         configureResultVC(resultVC, with: generatedImage)
+        
+        // Ensure tab bar is hidden before pushing
+        if let tabBarController = self.tabBarController as? TabBarController {
+            tabBarController.setTabBarVisibility(true) // Hide tab bar
+        }
+        
+        // Push the view controller
         navigationController?.pushViewController(resultVC, animated: true)
     }
     
@@ -804,7 +846,33 @@ class CodeGeneratorViewController: UIViewController {
         alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
         present(alert, animated: true)
     }
-    
+}
+
+// MARK: - UINavigationControllerDelegate
+extension CodeGeneratorViewController: UINavigationControllerDelegate {
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        // Check if we're navigating back from this view controller
+        if viewController != self {
+            // We're going back to the previous controller, show the tab bar
+            if let tabBarController = navigationController.tabBarController as? TabBarController {
+                tabBarController.setTabBarVisibility(false) // false means show in this context
+            }
+            
+            // Check if we need to show an interstitial ad when going back
+            if !UserDefaultManager.shared.isFirstCodeGeneratorVisit() && isMovingFromParent {
+                // Show interstitial ad when navigating back
+                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, completion: nil)
+            }
+        } else {
+            // We're showing this view controller, hide the tab bar
+            if let tabBarController = navigationController.tabBarController as? TabBarController {
+                tabBarController.setTabBarVisibility(true) // true means hide in this context
+            }
+        }
+    }
+}
+
+extension CodeGeneratorViewController {
     private func setAdView(_ view: NativeAdView) {
         // Remove the previous ad view
         nativeAdView = view
