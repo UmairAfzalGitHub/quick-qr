@@ -77,7 +77,6 @@ class LanguageSelectionViewController: BaseViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("🔍 LANG_VC: viewDidLoad called")
         view.backgroundColor = .white
         setupCollectionView()
         setupLayout()
@@ -86,18 +85,6 @@ class LanguageSelectionViewController: BaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("🔍 LANG_VC: viewWillAppear called")
-        
-        // Check banner visibility
-        print("🔍 LANG_VC: Banner parent view hidden: \(bannerAdParentView.isHidden)")
-        print("🔍 LANG_VC: Banner height constraint: \(bannerAdHeightConstraint.constant)")
-        if let bannerView = bannerView {
-            print("🔍 LANG_VC: Banner view exists")
-            print("🔍 LANG_VC: Banner view hidden: \(bannerView.isHidden)")
-            print("🔍 LANG_VC: Banner ad unit ID: \(bannerView.adUnitID ?? "nil")")
-        } else {
-            print("🔍 LANG_VC: Banner view is nil")
-        }
     }
     
     private func loadNativeAdIfNeeded() {
@@ -115,14 +102,17 @@ class LanguageSelectionViewController: BaseViewController {
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
         } else {
-            // If no preloaded ad, try to load a floor native ad
-            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.floorNativeAd, from: self) {[weak self] ad in
+            // If no preloaded ad, try to load floor native ad 1
+            print("📢 LANGUAGE: Loading Native Ad ID-1")
+            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.floorNativeAd1, from: self) {[weak self] ad in
                 if let ad = ad {
                     // If floor native ad loaded successfully, show it
+                    print("📢 LANGUAGE: Showing Native Ad ID-1")
                     self?.nativeAd = ad
                     self?.showGoogleNativeAd(nativeAd: ad)
                 } else {
                     // If floor native ad failed to load, show banner ad instead
+                    print("📢 LANGUAGE: Native Ad ID-1 failed, falling back to Banner Ad ID-1")
                     self?.setupBannerAd()
                 }
             }
@@ -130,17 +120,14 @@ class LanguageSelectionViewController: BaseViewController {
     }
     
     private func setupBannerAd() {
-        print("🔍 LANG_VC: Setting up banner ad")
         // Hide native ad view and show banner ad view
         nativeAdParentView.isHidden = true
         nativeAdHeightConstraint.constant = 0
         bannerAdParentView.isHidden = false
         bannerAdHeightConstraint.constant = 60
-        print("🔍 LANG_VC: Banner height set to 60")
         
         // Check if bannerView exists
         if bannerView == nil {
-            print("🔍 LANG_VC: Creating new BannerView")
             bannerView = BannerView()
             bannerAdParentView.addSubview(bannerView)
             
@@ -151,26 +138,12 @@ class LanguageSelectionViewController: BaseViewController {
                 bannerView.trailingAnchor.constraint(equalTo: bannerAdParentView.trailingAnchor),
                 bannerView.bottomAnchor.constraint(equalTo: bannerAdParentView.bottomAnchor)
             ])
-        } else {
-            print("🔍 LANG_VC: BannerView already exists")
         }
         
-        // Use BaseViewController's banner implementation
-        print("🔍 LANG_VC: Setting up banner with ID: \(RemoteConfigManager.shared.banner.adId)")
-        super.setupBanner(adId: RemoteConfigManager.shared.banner)
-        print("🔍 LANG_VC: Setting bannerAdView in BaseViewController")
+        // Use BaseViewController's banner implementation with banner1
+        print("📢 LANGUAGE: Setting up Banner Ad ID-1")
+        super.setupBanner(adId: RemoteConfigManager.shared.banner1)
         super.bannerAdView = self.bannerView
-        print("🔍 LANG_VC: Banner setup complete")
-        
-        // Check if user is subscribed
-        IAPManager.shared.checkSubscriptionStatus { isSubscribed in
-            print("🔍 LANG_VC: User subscription status: \(isSubscribed)")
-            if !isSubscribed {
-                print("🔍 LANG_VC: User not subscribed, banner should be visible")
-            } else {
-                print("🔍 LANG_VC: User is subscribed, banner should be hidden")
-            }
-        }
     }
     
     // MARK: - Setup Collection View

@@ -9,13 +9,18 @@ class RemoteConfigManager: NSObject {
     var appOpen = AdMobId(analyticsId: .appOpenAd, adId: "ca-app-pub-3940256099942544/5575463023")
     var interstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-3940256099942544/4411468910")
     var native = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
-    var floorNativeAd = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511") // Default test ID
+    var floorNativeAd1 = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
+    var floorNativeAd2 = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
     var rewarded = AdMobId(analyticsId: .rewardedAd, adId: "ca-app-pub-3940256099942544/1712485313")
 
 #if DEBUG
     var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
+    var banner1 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
+    var banner2 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
 #else
     var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-9143149838002594/2390459928")
+    var banner1 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-9143149838002594/2390459928")
+    var banner2 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-9143149838002594/2390459928")
 #endif
 
     var onboardingReviewEnabled = true
@@ -64,10 +69,12 @@ class RemoteConfigManager: NSObject {
         let appOpenId = remoteConfig["ad_id_app_open"].stringValue
         let interstitialId = remoteConfig["ad_id_interstitial"].stringValue
         let nativeId = remoteConfig["ad_id_native"].stringValue
-        let floorNativeId = remoteConfig["ad_id_floor_native"].stringValue
+        let floorNativeId1 = remoteConfig["ad_id_floor_native_1"].stringValue
+        let floorNativeId2 = remoteConfig["ad_id_floor_native_2"].stringValue
         let bannerId = remoteConfig["ad_id_banner"].stringValue
+        let bannerId1 = remoteConfig["ad_id_banner_1"].stringValue
+        let bannerId2 = remoteConfig["ad_id_banner_2"].stringValue
         let rewardedId = remoteConfig["ad_id_rewarded"].stringValue
-
         
         self.iap_varient = variant
         self.maxInterstitalAdCounter = Int(adCounter) ?? 0
@@ -80,8 +87,11 @@ class RemoteConfigManager: NSObject {
         self.appOpen = AdMobId(analyticsId: .appOpenAd, adId: appOpenId)
         self.interstitial = AdMobId(analyticsId: .interstitialAd, adId: interstitialId)
         self.native = AdMobId(analyticsId: .nativeAd, adId: nativeId)
-        self.floorNativeAd = AdMobId(analyticsId: .nativeAd, adId: floorNativeId)
+        self.floorNativeAd1 = AdMobId(analyticsId: .nativeAd, adId: floorNativeId1)
+        self.floorNativeAd2 = AdMobId(analyticsId: .nativeAd, adId: floorNativeId2)
         self.banner = AdMobId(analyticsId: .bannerAd, adId: bannerId)
+        self.banner1 = AdMobId(analyticsId: .bannerAd, adId: bannerId1)
+        self.banner2 = AdMobId(analyticsId: .bannerAd, adId: bannerId2)
         self.rewarded = AdMobId(analyticsId: .rewardedAd, adId: rewardedId)
 #endif
 
