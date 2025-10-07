@@ -44,6 +44,9 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     private var nativeAdPool: [NativeAd] = []
     private let maxNativeAds = 3
     private var shouldPrefetchNativeAds = true
+    
+    // Track which floor native ad ID to use next
+    private var useFirstFloorNativeAd = true
 
     var isRewardGranted = false
     var avilableNativeAd: NativeAd?
@@ -280,27 +283,17 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     // MARK: - Banner Ads
     
     func loadbannerAd(adId: AdMobId, bannerView: BannerView?, root: UIViewController) {
-        print("🔍 ADMANAGER: loadbannerAd called with ID: \(adId.adId)")
-        print("🔍 ADMANAGER: bannerView is \(bannerView == nil ? "nil" : "not nil")")
-        print("🔍 ADMANAGER: root view controller is \(String(describing: type(of: root)))")
-        
         IAPManager.shared.checkSubscriptionStatus(completion: {isSubscribed in
-            print("🔍 ADMANAGER: User subscription status: \(isSubscribed)")
             guard !isSubscribed else { 
-                print("🔍 ADMANAGER: User is subscribed, not loading banner ad")
                 return 
             }
             
-            print("🔍 ADMANAGER: Setting adUnitID to \(adId.adId)")
             bannerView?.adUnitID = adId.adId
             bannerView?.rootViewController = root
-            
-            print("🔍 ADMANAGER: Loading banner ad")
             bannerView?.load(Request())
             
             // analytics
             Analytics.logEvent("ad_"+adId.analyticsId.rawValue, parameters: nil)
-            print("🔍 ADMANAGER: Banner ad load request sent")
         })
     }
 
@@ -314,20 +307,27 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
         for index in 0..<adsToLoad {
             // Use increasing delay for each ad (2 seconds between each request)
             let delay = 2.0 * Double(index + 1)
-            print("📱 Scheduling native ad load #\(index+1) with delay: \(delay) seconds")
+            // Schedule native ad load with delay
             
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
                 guard let self = self else { return }
                 guard nativeAdPool.count < maxNativeAds else {
                     return
                 }
-                print("📱 Loading native ad #\(index+1) after delay")
-                self.loadNativeAd(adId: RemoteConfigManager.shared.floorNativeAd, from: root) { [weak self] ad in
+                // Alternate between floor native ad IDs
+                let adId = self.useFirstFloorNativeAd ? 
+                    RemoteConfigManager.shared.floorNativeAd1 : 
+                    RemoteConfigManager.shared.floorNativeAd2
+                print("Loading Native Ad # \(self.useFirstFloorNativeAd ? "1" : "2")")
+                // Toggle for next time
+                self.useFirstFloorNativeAd = !self.useFirstFloorNativeAd
+                
+                self.loadNativeAd(adId: adId, from: root) { [weak self] ad in
                     if let ad = ad {
                         self?.nativeAdPool.append(ad)
-                        print("✅ Added native ad #\(index+1) to pool. Pool size: \(self?.nativeAdPool.count ?? 0)")
+                        // Native ad added to pool
                     } else {
-                        print("❌ Failed to load native ad #\(index+1)")
+                        // Failed to load native ad
                     }
                 }
             }

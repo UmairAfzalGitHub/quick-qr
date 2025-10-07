@@ -30,6 +30,9 @@ class OnboardingViewController: BaseViewController,
     private var nativeAdView: NativeAdView!
     var nativeAd: GoogleMobileAds.NativeAd?
     
+    // Track which floor native ad ID to use
+    private var useFirstFloorNativeAd = false
+    
     var dataSource: [OnBoarding] = [
         OnBoarding(image: UIImage(named: "onboard1")!, heading: Strings.Label.smartScanQrCode, description: Strings.Label.pointYourCamera),
         OnBoarding(image: UIImage(named: "onboard2")!, heading: Strings.Label.easilyReadBarcodes, description: Strings.Label.easilyScanBarcodes),
@@ -38,14 +41,12 @@ class OnboardingViewController: BaseViewController,
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("🔍 ONBOARD_VC: viewDidLoad called")
         setup()
         setupBannerAdView()
         loadNativeAdIfNeeded()
     }
     
     private func setupBannerAdView() {
-        print("🔍 ONBOARD_VC: Setting up banner ad view")
         view.addSubview(bannerAdParentView)
         bannerAdParentView.translatesAutoresizingMaskIntoConstraints = false
         bannerAdHeightConstraint = bannerAdParentView.heightAnchor.constraint(equalToConstant: 0)
@@ -71,54 +72,51 @@ class OnboardingViewController: BaseViewController,
     }
     
     private func loadNativeAdIfNeeded() {
-        print("🔍 ONBOARD_VC: loadNativeAdIfNeeded called")
         nativeAdParentView.isHidden = true
         nativeAdHeightConstraint.constant = 0
         bannerAdParentView.isHidden = true
         bannerAdHeightConstraint.constant = 0
 
         guard !IAPManager.shared.isUserSubscribed else {
-            print("🔍 ONBOARD_VC: User is subscribed, not loading ads")
             return
         }
 
         // First try to get a preloaded floor native ad
         if let ad = AdManager.shared.getNativeAd() {
-            print("🔍 ONBOARD_VC: Got preloaded native ad")
+            print("📢 ONBOARDING: Using preloaded Native Ad")
             nativeAd = ad
             showGoogleNativeAd(nativeAd: nativeAd)
         } else {
-            // If no preloaded ad, try to load a floor native ad
-            print("🔍 ONBOARD_VC: Loading floor native ad")
-            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.floorNativeAd, from: self) {[weak self] ad in
+            // If no preloaded ad, try to load floor native ad 2 (initially)
+            print("📢 ONBOARDING: Loading Native Ad ID-2 (initial)")
+            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.floorNativeAd2, from: self) {[weak self] ad in
                 if let ad = ad {
                     // If floor native ad loaded successfully, show it
-                    print("🔍 ONBOARD_VC: Floor native ad loaded successfully")
+                    print("📢 ONBOARDING: Showing Native Ad ID-2")
                     self?.nativeAd = ad
                     self?.showGoogleNativeAd(nativeAd: ad)
                 } else {
                     // If floor native ad failed to load, show banner ad instead
-                    print("🔍 ONBOARD_VC: Floor native ad failed to load, showing banner instead")
+                    print("📢 ONBOARDING: Native Ad ID-2 failed, falling back to Banner Ad ID-2")
                     self?.setupBannerAd()
                 }
             }
         }
     }
     
-    private func setupBannerAd() {
-        print("🔍 ONBOARD_VC: Setting up banner ad")
+    private func setupBannerAd(withAdId adId: AdMobId? = nil) {
         // Hide native ad view and show banner ad view
         nativeAdParentView.isHidden = true
         nativeAdHeightConstraint.constant = 0
         bannerAdParentView.isHidden = false
         bannerAdHeightConstraint.constant = 60
         nativeAdTopConstraint.constant = 80
-        print("🔍 ONBOARD_VC: Banner height set to 60")
         
         // Use BaseViewController's banner implementation
-        super.setupBanner(adId: RemoteConfigManager.shared.banner)
+        let bannerAdId = adId ?? RemoteConfigManager.shared.banner2
+        print("📢 ONBOARDING: Setting up Banner Ad ID-\(adId?.adId == RemoteConfigManager.shared.banner1.adId ? "1" : "2")")
+        super.setupBanner(adId: bannerAdId)
         super.bannerAdView = self.bannerView
-        print("🔍 ONBOARD_VC: Banner setup complete")
     }
     
     override func viewDidLayoutSubviews() {
@@ -318,13 +316,38 @@ class OnboardingViewController: BaseViewController,
     @objc func didTapNextButton() {
         let currentIndex = getCurrentPageIndex()
         
+        // Toggle between floor native ad IDs
+        useFirstFloorNativeAd.toggle()
+        let floorNativeAdId = useFirstFloorNativeAd ?
+            RemoteConfigManager.shared.floorNativeAd1 : 
+            RemoteConfigManager.shared.floorNativeAd2
+        let bannerAdId = useFirstFloorNativeAd ? 
+            RemoteConfigManager.shared.banner1 : 
+            RemoteConfigManager.shared.banner2
+            
+        print("📢 ONBOARDING: Next page will use Native Ad ID-\(useFirstFloorNativeAd ? "1" : "2") and Banner Ad ID-\(useFirstFloorNativeAd ? "1" : "2")") 
+        
         switch currentIndex {
         case 0, 1:
             if let googleAd = AdManager.shared.getNativeAd(stopPrefetch: true) {
                 self.nativeAd = googleAd
                 self.showGoogleNativeAd(nativeAd: googleAd)
             } else {
-                self.setupBannerAd()
+                // Try to load the alternating floor native ad
+                print("📢 ONBOARDING: Loading Native Ad ID-\(useFirstFloorNativeAd ? "1" : "2")")
+                AdManager.shared.loadNativeAd(adId: floorNativeAdId, from: self) {[weak self] ad in
+                    guard let self = self else { return }
+                    if let ad = ad {
+                        // If floor native ad loaded successfully, show it
+                        print("📢 ONBOARDING: Showing Native Ad ID-\(self.useFirstFloorNativeAd ? "1" : "2")")
+                        self.nativeAd = ad
+                        self.showGoogleNativeAd(nativeAd: ad)
+                    } else {
+                        // If floor native ad failed to load, show banner ad instead
+                        print("📢 ONBOARDING: Native Ad ID-\(useFirstFloorNativeAd ? "1" : "2") failed, falling back to Banner Ad ID-\(useFirstFloorNativeAd ? "1" : "2")")
+                        self.setupBannerAd(withAdId: bannerAdId)
+                    }
+                }
             }
             self.scrollToNextItem()
         case 2:
