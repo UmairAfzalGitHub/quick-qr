@@ -363,12 +363,12 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         })
         
         // Add delete action
-        actionSheet.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+        actionSheet.addAction(UIAlertAction(title: Strings.Label.delete, style: .destructive) { [weak self] _ in
             self?.deleteHistoryItem(at: indexPath)
         })
         
         // Add cancel action
-        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        actionSheet.addAction(UIAlertAction(title: Strings.Label.cancel, style: .cancel, handler: nil))
         
         // Present the action sheet
         present(actionSheet, animated: true)

@@ -93,7 +93,11 @@ class PremiumBannerView: UIView {
         upgradeLabel.text = Strings.Label.upgradeNow
         upgradeLabel.font = UIFont.systemFont(ofSize: 13, weight: .medium)
         upgradeLabel.textColor = .white
-        containerView.addSubview(upgradeLabel)
+        upgradeLabel.textAlignment = .center
+        upgradeLabel.adjustsFontSizeToFitWidth = true
+        upgradeLabel.minimumScaleFactor = 0.5  // or any value between 0 and 1
+        upgradeLabel.numberOfLines = 1
+        upgradeButton.addSubview(upgradeLabel)
 
         // Layout constraints
         NSLayoutConstraint.activate([
@@ -124,8 +128,9 @@ class PremiumBannerView: UIView {
             upgradeButton.widthAnchor.constraint(equalToConstant: 140),
             upgradeButton.heightAnchor.constraint(equalToConstant: 50),
             
-            upgradeLabel.centerXAnchor.constraint(equalTo: upgradeButton.centerXAnchor),
-            upgradeLabel.centerYAnchor.constraint(equalTo: upgradeButton.centerYAnchor, constant: -8),
+            upgradeLabel.leadingAnchor.constraint(equalTo: upgradeButton.leadingAnchor, constant: 22),
+            upgradeLabel.trailingAnchor.constraint(equalTo: upgradeButton.trailingAnchor, constant: -22),
+            upgradeLabel.centerYAnchor.constraint(equalTo: upgradeButton.centerYAnchor, constant: -6),
         ])
     }
     

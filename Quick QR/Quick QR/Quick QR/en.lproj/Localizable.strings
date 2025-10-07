@@ -189,3 +189,5 @@
 "purchase_restored_successfully" = "Purchase restored successfully!";
 "manage_subscription" = "Manage Subscription";
 "restore" = "Restore";
+"delete" = "Delete";
+

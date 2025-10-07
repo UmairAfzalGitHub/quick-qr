@@ -188,3 +188,4 @@
 "purchase_restored_successfully" = "購入が正常に復元されました！";
 "manage_subscription" = "サブスクリプションを管理";
 "restore" = "復元";
+"delete" = "削除";

@@ -187,3 +187,4 @@
 "purchase_restored_successfully" = "구매가 성공적으로 복원되었습니다!";
 "manage_subscription" = "구독 관리";
 "restore" = "복원";
+"delete" = "삭제";
