@@ -131,7 +131,6 @@
 "youtube" = "ユーチューブ";
 "spotify" = "スポティファイ";
 "viber" = "バイバー";
-
 "camera_access_needed" = "カメラアクセスが必要です";
 "please_enable_camera" = "QRコードをスキャンするには、設定でカメラアクセスを有効にしてください。";
 "settings" = "設定";
@@ -189,3 +188,5 @@
 "manage_subscription" = "サブスクリプションを管理";
 "restore" = "復元";
 "delete" = "削除";
+"help_keep_it_free" = "無料のまま維持するのを手伝ってください";
+"show_your_love" = "App Storeでレビューを残して、Photo Recoveryを応援してください。";

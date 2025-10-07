@@ -37,7 +37,7 @@ class OnboardingViewController: BaseViewController,
         OnBoarding(image: UIImage(named: "onboard1")!, heading: Strings.Label.smartScanQrCode, description: Strings.Label.pointYourCamera),
         OnBoarding(image: UIImage(named: "onboard2")!, heading: Strings.Label.easilyReadBarcodes, description: Strings.Label.easilyScanBarcodes),
         OnBoarding(image: UIImage(named: "onboard3")!, heading: Strings.Label.quicklyCreateQrCode, description: Strings.Label.generateCustomQr),
-        OnBoarding(image: UIImage(named: "onboard4")!, heading: Strings.Label.quicklyCreateQrCode, description: Strings.Label.generateCustomQr)
+        OnBoarding(image: UIImage(named: "onboard4")!, heading: Strings.Label.helpKeepItFree, description: Strings.Label.showYourLove)
     ]
     
     override func viewDidLoad() {
