@@ -36,7 +36,7 @@ class QRTypeCell: UICollectionViewCell {
     
     private let lockOverlayView: UIView = {
         let v = UIView()
-        v.backgroundColor = UIColor.black.withAlphaComponent(0.2)
+        v.backgroundColor = .appLockedBackground
         v.layer.cornerRadius = 11
         v.isHidden = true
         return v
@@ -45,7 +45,7 @@ class QRTypeCell: UICollectionViewCell {
     private let lockIconView: UIImageView = {
         let iv = UIImageView()
         iv.contentMode = .scaleAspectFit
-        iv.image = UIImage(named: "crown")
+        iv.image = UIImage(named: "iap-lock")
         return iv
     }()
     
@@ -54,11 +54,12 @@ class QRTypeCell: UICollectionViewCell {
         
         contentView.addSubview(boxView)
         contentView.addSubview(titleLabel)
-        boxView.addSubview(iconView)
         
         // Add lock overlay
         boxView.addSubview(lockOverlayView)
         lockOverlayView.addSubview(lockIconView)
+        
+        boxView.addSubview(iconView)
         
         boxView.translatesAutoresizingMaskIntoConstraints = false
         iconView.translatesAutoresizingMaskIntoConstraints = false
@@ -93,10 +94,10 @@ class QRTypeCell: UICollectionViewCell {
             lockOverlayView.bottomAnchor.constraint(equalTo: boxView.bottomAnchor),
             
             // Lock icon constraints
-            lockIconView.topAnchor.constraint(equalTo: lockOverlayView.topAnchor, constant: -12),
-            lockIconView.trailingAnchor.constraint(equalTo: lockOverlayView.trailingAnchor, constant: 8),
-            lockIconView.widthAnchor.constraint(equalToConstant:24),
-            lockIconView.heightAnchor.constraint(equalToConstant: 24)
+            lockIconView.topAnchor.constraint(equalTo: lockOverlayView.topAnchor, constant: 1),
+            lockIconView.trailingAnchor.constraint(equalTo: lockOverlayView.trailingAnchor, constant: -1),
+            lockIconView.widthAnchor.constraint(equalToConstant:20),
+            lockIconView.heightAnchor.constraint(equalToConstant: 20)
         ])
     }
     
@@ -109,6 +110,7 @@ class QRTypeCell: UICollectionViewCell {
     
     func showLockOverlay(_ show: Bool) {
         lockOverlayView.isHidden = !show
+        boxView.layer.borderColor =  show ? UIColor.appLockedCorner.cgColor : UIColor.appBorderDark.cgColor
     }
 }
 
