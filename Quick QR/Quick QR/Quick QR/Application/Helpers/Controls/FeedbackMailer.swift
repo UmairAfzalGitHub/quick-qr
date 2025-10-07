@@ -56,7 +56,14 @@ class FeedbackMailer: NSObject, MFMailComposeViewControllerDelegate {
     
     // Helper: Show Error Alert if Mail Cannot Be Sent
     private func showMailErrorAlert(on viewController: UIViewController) {
-        let alert = CustomAlertViewController(title: "Mail Not Configured", description: "Please configure your Mail app to send feedback.", alertType: .error)
-        viewController.present(alert, animated: true)
+        let alert = UIAlertController(
+                title: "Mail Not Configured",
+                message: "Please configure your Mail app to send feedback.",
+                preferredStyle: .alert
+            )
+            
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            
+            viewController.present(alert, animated: true, completion: nil)
     }
 }
