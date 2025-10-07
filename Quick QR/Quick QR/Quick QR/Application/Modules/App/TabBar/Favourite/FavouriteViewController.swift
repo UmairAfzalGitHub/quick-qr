@@ -191,7 +191,20 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
                     resultVC.setGeneratedContent(item.content, existingItemId: item.id, isFavorite: true)
                 }
             }
+            
+            // Set hidesBottomBarWhenPushed to true
+            resultVC.hidesBottomBarWhenPushed = true
+            
+            // Hide tab bar explicitly before showing interstitial
+            if let tabBarController = self.tabBarController as? TabBarController {
+                tabBarController.setTabBarVisibility(true) // true means hide
+            }
+            
             AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
+                // Ensure tab bar is still hidden before pushing
+                if let tabBarController = self.tabBarController as? TabBarController {
+                    tabBarController.setTabBarVisibility(true) // true means hide
+                }
                 self.navigationController?.pushViewController(resultVC, animated: true)
             }
         case .scanned:
@@ -208,7 +221,20 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
             scanResultVC.intent = .history
             // Pass the item ID and favorite status
             scanResultVC.setExistingItemId(item.id, isFavorite: true)
+            
+            // Set hidesBottomBarWhenPushed to true
+            scanResultVC.hidesBottomBarWhenPushed = true
+            
+            // Hide tab bar explicitly before showing interstitial
+            if let tabBarController = self.tabBarController as? TabBarController {
+                tabBarController.setTabBarVisibility(true) // true means hide
+            }
+            
             AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
+                // Ensure tab bar is still hidden before pushing
+                if let tabBarController = self.tabBarController as? TabBarController {
+                    tabBarController.setTabBarVisibility(true) // true means hide
+                }
                 self.navigationController?.pushViewController(scanResultVC, animated: true)
             }
         }

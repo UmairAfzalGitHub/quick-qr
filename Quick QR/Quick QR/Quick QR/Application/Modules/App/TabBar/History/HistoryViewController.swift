@@ -277,7 +277,19 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }
             
+            // Set hidesBottomBarWhenPushed to true
+            resultVC.hidesBottomBarWhenPushed = true
+            
+            // Hide tab bar explicitly before showing interstitial
+            if let tabBarController = self.tabBarController as? TabBarController {
+                tabBarController.setTabBarVisibility(true) // true means hide
+            }
+            
             AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
+                // Ensure tab bar is still hidden before pushing
+                if let tabBarController = self.tabBarController as? TabBarController {
+                    tabBarController.setTabBarVisibility(true) // true means hide
+                }
                 self.navigationController?.pushViewController(resultVC, animated: true)
             }
         } else {
@@ -296,7 +308,20 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             let scanResultVC = ScanResultViewController(scannedData: selectedItem.content, metadataObjectType: metadataType)
             scanResultVC.intent = .history
+            
+            // Set hidesBottomBarWhenPushed to true
+            scanResultVC.hidesBottomBarWhenPushed = true
+            
+            // Hide tab bar explicitly before showing interstitial
+            if let tabBarController = self.tabBarController as? TabBarController {
+                tabBarController.setTabBarVisibility(true) // true means hide
+            }
+            
             AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
+                // Ensure tab bar is still hidden before pushing
+                if let tabBarController = self.tabBarController as? TabBarController {
+                    tabBarController.setTabBarVisibility(true) // true means hide
+                }
                 self.navigationController?.pushViewController(scanResultVC, animated: true)
             }
         }
