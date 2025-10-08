@@ -162,7 +162,7 @@ class TabBarController: UITabBarController {
         // Position the button in the center of the tab bar, raised higher
         let tabBarHeight = tabBar.frame.height
         let buttonSize: CGFloat = 60
-        let yOffset: CGFloat = 25 // Increased offset to make it more prominent
+        let yOffset: CGFloat = 18 // Increased offset to make it more prominent
         
         centerButton.frame = CGRect(
             x: view.bounds.width / 2 - buttonSize / 2,
