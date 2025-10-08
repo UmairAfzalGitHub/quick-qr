@@ -176,7 +176,7 @@ class IAPViewController: UIViewController {
             loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
         
-        view.addSubview(restorePurchasesButton)
+        
         restorePurchasesButton.layer.cornerRadius = 8
         restorePurchasesButton.setTitle(Strings.Label.restore, for: .normal)
         restorePurchasesButton.tintColor = .white
@@ -186,8 +186,8 @@ class IAPViewController: UIViewController {
         restorePurchasesButton.addTarget(self, action: #selector(restoreButtonTapped), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
-            restorePurchasesButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            restorePurchasesButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            restorePurchasesButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            restorePurchasesButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             restorePurchasesButton.heightAnchor.constraint(equalToConstant: 34),
             restorePurchasesButton.widthAnchor.constraint(equalToConstant: 64)
         ])
@@ -244,6 +244,7 @@ class IAPViewController: UIViewController {
         
         contentView.addSubview(titleLabel)
         contentView.addSubview(closeButton)
+        contentView.addSubview(restorePurchasesButton)
         
         NSLayoutConstraint.activate([
             closeButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
@@ -263,7 +264,8 @@ class IAPViewController: UIViewController {
         
         contentView.addSubview(topImageView)
         
-        var width: CGFloat = UIDevice().isSmallerDevice() ? 140 : 200
+        let width: CGFloat = UIDevice().isSmallerDevice() ? 140 : (UIDevice().isProDevice() ? 140 : 185)
+
         NSLayoutConstraint.activate([
             topImageView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
             topImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
@@ -312,9 +314,10 @@ class IAPViewController: UIViewController {
         
         contentView.addSubview(featureContainer)
         featureContainer.addSubview(featureStackView)
-        
+        let height: CGFloat = UIDevice().isSmallerDevice() ? 14 : (UIDevice().isProDevice() ? 18 : 24)
+
         NSLayoutConstraint.activate([
-            featureContainer.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 24),
+            featureContainer.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: height),
             featureContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             featureContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
