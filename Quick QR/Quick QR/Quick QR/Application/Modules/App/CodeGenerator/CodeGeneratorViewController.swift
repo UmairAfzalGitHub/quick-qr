@@ -82,6 +82,10 @@ class CodeGeneratorViewController: UIViewController {
     internal var currentCodeType: CodeTypeProtocol?
     internal var buttonAction: (() -> Void)?
     
+    // MARK: - Callbacks
+    /// Callback that will be triggered when the back button is tapped
+    var backButtonTappedCallback: (() -> Void)?
+    
     // MARK: - Prefilled Content
     internal var prefilledContent: String?
     
@@ -95,6 +99,8 @@ class CodeGeneratorViewController: UIViewController {
         setupUI()
         setupConstraints()
         setupActions()
+        setupCustomBackButton()
+        setupNavigationDelegate()
         
         // Apply prefilled content if available
         if let content = prefilledContent {
@@ -106,6 +112,7 @@ class CodeGeneratorViewController: UIViewController {
         
         // Only load ads if it's not the first visit
         if !isFirstVisit {
+            // Preload interstitial ad for both normal ads and back button ad
             AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
             loadNativeAdIfNeeded()
         } else {
@@ -117,6 +124,77 @@ class CodeGeneratorViewController: UIViewController {
     private func setupNavigationDelegate() {
         // Set this view controller as the navigation controller's delegate
         navigationController?.delegate = self
+        
+        // Set up gesture recognizer to intercept back swipe
+        setupInteractiveBackGesture()
+    }
+    
+    private func setupInteractiveBackGesture() {
+        // Get the navigation controller's built-in back gesture recognizer
+        if let interactivePopGestureRecognizer = navigationController?.interactivePopGestureRecognizer {
+            // Create our own gesture recognizer that will show the ad first
+            let customBackGesture = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handleCustomBackGesture(_:)))
+            customBackGesture.edges = .left
+            view.addGestureRecognizer(customBackGesture)
+            
+            // Disable the built-in gesture recognizer
+            interactivePopGestureRecognizer.isEnabled = false
+        }
+    }
+    
+    @objc private func handleCustomBackGesture(_ gesture: UIScreenEdgePanGestureRecognizer) {
+        // Only handle the completed gesture
+        if gesture.state == .ended {
+            let translation = gesture.translation(in: view)
+            let velocity = gesture.velocity(in: view)
+            
+            // Check if the gesture was significant enough to trigger a back action
+            if translation.x > 100 || velocity.x > 500 {
+                // Show interstitial ad and then navigate back
+                showBackButtonInterstitial()
+            }
+        }
+    }
+    
+    /// Sets up a custom back button to intercept back button taps
+    private func setupCustomBackButton() {
+        // Only set up custom back button if we're not the root view controller
+        if navigationController?.viewControllers.first != self {
+            // Create a custom back button with the same image as the global one
+            let backButton = UIBarButtonItem(image: UIImage(named: "arrow-left"), 
+                                           style: .plain,
+                                           target: self, 
+                                           action: #selector(backButtonTapped))
+            
+            // Maintain the same appearance as the global back button
+            backButton.tintColor = navigationController?.navigationBar.tintColor
+            
+            // Set as the left bar button item
+            navigationItem.leftBarButtonItem = backButton
+        }
+    }
+    
+    /// Called when the custom back button is tapped
+    @objc private func backButtonTapped() {
+        // Call the callback
+        backButtonTappedCallback?()
+        
+        // Show interstitial ad before navigating back
+        showBackButtonInterstitial()
+    }
+    
+    /// Shows an interstitial ad when the back button is tapped and navigates back after the ad is dismissed
+    private func showBackButtonInterstitial() {
+        let isFirstVisit = UserDefaultManager.shared.isFirstCodeGeneratorVisit()
+        if !isFirstVisit {
+            // Show the interstitial ad with a completion handler that navigates back
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] in
+                // Navigate back after the ad is dismissed
+                self?.navigationController?.popViewController(animated: true)
+            }
+        } else {
+            self.navigationController?.popViewController(animated: true)
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -138,8 +216,11 @@ class CodeGeneratorViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        // Only show the tab bar if we're going back to the previous screen
+        // Only handle if we're going back to the previous screen
         if isMovingFromParent {
+            // Call the callback
+            backButtonTappedCallback?()
+            
             if let tabBarController = self.tabBarController as? TabBarController {
                 tabBarController.setTabBarVisibility(false) // Show tab bar
             }
@@ -857,17 +938,24 @@ extension CodeGeneratorViewController: UINavigationControllerDelegate {
             if let tabBarController = navigationController.tabBarController as? TabBarController {
                 tabBarController.setTabBarVisibility(false) // false means show in this context
             }
-            
-            // Check if we need to show an interstitial ad when going back
-            if !UserDefaultManager.shared.isFirstCodeGeneratorVisit() && isMovingFromParent {
-                // Show interstitial ad when navigating back
-                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, completion: nil)
-            }
         } else {
             // We're showing this view controller, hide the tab bar
             if let tabBarController = navigationController.tabBarController as? TabBarController {
                 tabBarController.setTabBarVisibility(true) // true means hide in this context
             }
+        }
+    }
+    
+    // This method is called when interactive pop gesture begins (user swipes back)
+    func navigationController(_ navigationController: UINavigationController, 
+                              didShow viewController: UIViewController, 
+                              animated: Bool) {
+        // If we're no longer visible but we were the previous controller
+        if navigationController.viewControllers.contains(self) == false {
+            // We've been popped off the stack by a gesture
+            // No need to show ad here as we've already been popped
+            // But we can log the event for analytics
+            print("[CodeGeneratorViewController] Popped by back gesture")
         }
     }
 }
