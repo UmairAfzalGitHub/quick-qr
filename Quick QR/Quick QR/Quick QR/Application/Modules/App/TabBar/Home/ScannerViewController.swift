@@ -111,7 +111,7 @@ class ScannerViewController: UIViewController {
         
         // Configure native ad view
         nativeAdParentView.translatesAutoresizingMaskIntoConstraints = false
-        nativeAdHeightConstraint = nativeAdParentView.heightAnchor.constraint(equalToConstant: UIDevice().isSmallerDevice() ? 159 : 240)
+        nativeAdHeightConstraint = nativeAdParentView.heightAnchor.constraint(equalToConstant: 159)
         
         // Add tap gesture recognizer for focus
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
@@ -124,14 +124,15 @@ class ScannerViewController: UIViewController {
     
     func setupConstraints() {
         // Common constraints for UI elements
+        let multiplier: CGFloat = UIDevice().isSmallerDevice() || UIDevice().isProDevice() ? 0.6 : 0.8
+
         var constraints = [
             iapImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
             iapImage.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             iapImage.heightAnchor.constraint(equalToConstant: 31),
             iapImage.widthAnchor.constraint(equalToConstant: 77),
-            
             scannerFrameImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            scannerFrameImageView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.7),
+            scannerFrameImageView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: multiplier),
             scannerFrameImageView.heightAnchor.constraint(equalTo: scannerFrameImageView.widthAnchor),
             
             qrTempImageView.topAnchor.constraint(equalTo: scannerFrameImageView.topAnchor, constant: 4),
@@ -285,20 +286,15 @@ class ScannerViewController: UIViewController {
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
         nativeAdParentView.isHidden = false
-        nativeAdHeightConstraint.constant = UIDevice().isSmallerDevice() ? 159 : 240
+        nativeAdHeightConstraint.constant = 159
 
-        let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
+        let nibName = "NativeAdView"
         let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
         guard let nativeAdView = nibView as? NativeAdView else { return }
         setAdView(nativeAdView)
-
-        if UIDevice().isSmallerDevice() {
-            nativeAdView.mediaView?.isHidden = true
-            nativeAdView.mediaView?.removeFromSuperview()
-        } else {
-            (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
-            nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
-        }
+        
+        nativeAdView.mediaView?.isHidden = true
+        nativeAdView.mediaView?.removeFromSuperview()
 
         // Configure optional assets
         (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
