@@ -156,6 +156,10 @@ class HomeViewController: UIViewController {
     @objc private func segmentChanged(_ sender: BetterSegmentedControl) {
         // Reload collection view when segment changes
         collectionView.reloadData()
+        AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
+            guard let self = self, let ad = ad else { return }
+            showGoogleNativeAd(nativeAd: ad)
+        }
     }
     
     @objc private func showIAP() {
