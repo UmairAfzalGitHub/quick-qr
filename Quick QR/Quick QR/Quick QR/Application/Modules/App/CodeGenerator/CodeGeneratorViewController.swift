@@ -107,6 +107,9 @@ class CodeGeneratorViewController: UIViewController {
             applyPrefilledContent(content)
         }
         
+        // Initialize button state based on current input
+        validateInputAndUpdateButton()
+        
         // Check if this is the first visit to the screen
         let isFirstVisit = UserDefaultManager.shared.isFirstCodeGeneratorVisit()
         
@@ -225,6 +228,11 @@ class CodeGeneratorViewController: UIViewController {
                 tabBarController.setTabBarVisibility(false) // Show tab bar
             }
         }
+    }
+    
+    deinit {
+        // Remove all notification observers when the view controller is deallocated
+        NotificationCenter.default.removeObserver(self)
     }
     
     private func loadNativeAdIfNeeded() {
@@ -927,6 +935,187 @@ class CodeGeneratorViewController: UIViewController {
         alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
         present(alert, animated: true)
     }
+    
+    // MARK: - Input Validation
+    
+    /// Recursively finds all text fields in a view and adds change listeners to them
+    private func addTextFieldChangeListeners(in view: UIView) {
+        // Process all subviews
+        for subview in view.subviews {
+            // If the subview is a text field, add a target-action
+            if let textField = subview as? UITextField {
+                textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+            }
+            // If the subview is a text view, add a notification observer
+            else if let textView = subview as? UITextView {
+                NotificationCenter.default.addObserver(self, 
+                                                     selector: #selector(textViewDidChange(_:)), 
+                                                     name: UITextView.textDidChangeNotification, 
+                                                     object: textView)
+            }
+            // If the subview has its own subviews, process them recursively
+            else if !subview.subviews.isEmpty {
+                addTextFieldChangeListeners(in: subview)
+            }
+        }
+    }
+    
+    /// Called when a text field's text changes
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        validateInputAndUpdateButton()
+    }
+    
+    /// Called when a text view's text changes
+    @objc private func textViewDidChange(_ notification: Notification) {
+        validateInputAndUpdateButton()
+    }
+    
+    /// Validates the current input and updates the create button state
+    private func validateInputAndUpdateButton() {
+        let isValid = isInputValid()
+        updateCreateButtonState(isEnabled: isValid)
+    }
+    
+    /// Updates the create button's enabled state
+    private func updateCreateButtonState(isEnabled: Bool) {
+        // Use the built-in setEnabled method of AppButtonView
+        actionButton.setEnabled(isEnabled)
+        
+        // If we're enabling the button, ensure it has the primary style
+        if isEnabled {
+            actionButton.configure(with: .primary(title: Strings.Label.create, image: nil))
+        }
+    }
+    
+    /// Checks if the current input is valid for code generation
+    private func isInputValid() -> Bool {
+        guard let codeType = currentCodeType else { return false }
+        
+        // Use the existing validation logic from the generate methods
+        if let qrCodeType = codeType as? QRCodeType {
+            // Simulate the validation without actually generating the QR code
+            return wouldGenerateQRCode(for: qrCodeType)
+        } else if let socialQRCodeType = codeType as? SocialQRCodeType {
+            // Simulate the validation without actually generating the social QR code
+            return wouldGenerateSocialQRCode(for: socialQRCodeType)
+        } else if let barCodeType = codeType as? BarCodeType {
+            // Simulate the validation without actually generating the barcode
+            return wouldGenerateBarCode(for: barCodeType)
+        }
+        
+        return false
+    }
+    
+    /// Checks if QR code generation would succeed without actually generating the image
+    private func wouldGenerateQRCode(for type: QRCodeType) -> Bool {
+        switch type {
+        case .wifi:
+            return wifiView?.getSSID()?.isEmpty == false
+            
+        case .phone:
+            return phoneView?.getPhoneNumber()?.isEmpty == false
+            
+        case .text:
+            return textView?.getText()?.isEmpty == false
+            
+        case .contact:
+            guard let contactsView = contactsView,
+                  let name = contactsView.getName(),
+                  let phone = contactsView.getPhone(),
+                  let email = contactsView.getEmail() else {
+                return false
+            }
+            return !name.isEmpty || !phone.isEmpty || !email.isEmpty
+            
+        case .email:
+            return emailView?.getEmail()?.isEmpty == false
+            
+        case .website:
+            return websiteView?.getURL()?.isEmpty == false
+            
+        case .location:
+            guard let locationView = locationView,
+                  let latitudeStr = locationView.getLatitude(),
+                  let longitudeStr = locationView.getLongitude(),
+                  let _ = Double(latitudeStr),
+                  let _ = Double(longitudeStr) else {
+                return false
+            }
+            return true
+            
+        case .events:
+            guard let calendarView = calendarView,
+                  let title = calendarView.getTitle(),
+                  let startDate = calendarView.getStartDate(),
+                  let endDate = calendarView.getEndDate(),
+                  let _ = calendarView.getLocation() else {
+                return false
+            }
+            return !title.isEmpty && startDate <= endDate
+        }
+    }
+    
+    /// Checks if social QR code generation would succeed without actually generating the image
+    private func wouldGenerateSocialQRCode(for type: SocialQRCodeType) -> Bool {
+        switch type {
+        case .facebook:
+            guard let facebookView = facebookView else { return false }
+            return (facebookView.getUrl()?.isEmpty == false) || (facebookView.getUsername()?.isEmpty == false)
+            
+        case .instagram:
+            guard let instagramView = instagramView else { return false }
+            return (instagramView.getUrl()?.isEmpty == false) || (instagramView.getUsername()?.isEmpty == false)
+            
+        case .tiktok:
+            return tiktokView?.getUsername()?.isEmpty == false
+            
+        case .x:
+            guard let xView = xView else { return false }
+            return (xView.getUrl()?.isEmpty == false) || (xView.getUsername()?.isEmpty == false)
+            
+        case .whatsapp:
+            return whatsappView?.getPhoneNumber()?.isEmpty == false
+            
+        case .youtube:
+            guard let youtubeView = youtubeView else { return false }
+            return (youtubeView.getUrl()?.isEmpty == false) || (youtubeView.getUsername()?.isEmpty == false)
+            
+        case .spotify:
+            guard let spotifyView = spotifyView else { return false }
+            return (spotifyView.getUrl()?.isEmpty == false) || (spotifyView.getUsername()?.isEmpty == false)
+            
+        case .viber:
+            return viberView?.getPhoneNumber()?.isEmpty == false
+        }
+    }
+    
+    /// Checks if barcode generation would succeed without actually generating the image
+    private func wouldGenerateBarCode(for type: BarCodeType) -> Bool {
+        guard let barCodeView = barCodeView,
+              let content = barCodeView.getContent() else {
+            return false
+        }
+        
+        if content.isEmpty {
+            return false
+        }
+        
+        // Additional validation for specific barcode types
+        switch type {
+        case .ean13:
+            return content.count == 13 && content.allSatisfy { $0.isNumber }
+        case .ean8:
+            return content.count == 8 && content.allSatisfy { $0.isNumber }
+        case .upca:
+            return content.count == 12 && content.allSatisfy { $0.isNumber }
+        case .upce:
+            return content.count == 8 && content.allSatisfy { $0.isNumber }
+        case .isbn:
+            return (content.count == 10 || content.count == 13) && content.allSatisfy { $0.isNumber || $0 == "X" || $0 == "x" }
+        default:
+            return !content.isEmpty
+        }
+    }
 }
 
 // MARK: - UINavigationControllerDelegate
@@ -1090,92 +1279,129 @@ extension CodeGeneratorViewController {
     
     private func createWiFiView() -> UIView {
         wifiView = WifiView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: wifiView!)
         return wifiView!
     }
     
     private func createCalendarView() -> UIView {
         calendarView = CalendarView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: calendarView!)
         return calendarView!
     }
     
     private func createPhoneView() -> UIView {
         phoneView = PhoneView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: phoneView!)
         return phoneView!
     }
     
     private func createTextView() -> UIView {
         textView = TextView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: textView!)
         return textView!
     }
     
     private func createContactView() -> UIView {
         contactsView = ContactsView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: contactsView!)
         return contactsView!
     }
     
     private func createEmailView() -> UIView {
         emailView = EmailView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: emailView!)
         return emailView!
     }
     
     private func createWebsiteView() -> UIView {
         websiteView = WebsiteView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: websiteView!)
         return websiteView!
     }
     
     private func createLocationView() -> UIView {
         locationView = LocationView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: locationView!)
         return locationView!
     }
     
     private func createEventsView() -> UIView {
         calendarView = CalendarView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: calendarView!)
         return calendarView!
     }
     
     private func createTikTokView() -> UIView {
         tiktokView = TiktokView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: tiktokView!)
         return tiktokView!
     }
     
     private func createInstagramView() -> UIView {
         instagramView = InstagramView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: instagramView!)
         return instagramView!
     }
     
     private func createFacebookView() -> UIView {
         facebookView = FacebookView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: facebookView!)
         return facebookView!
     }
     
     private func createXView() -> UIView {
         xView = XView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: xView!)
         return xView!
     }
     
     private func createWhatsAppView() -> UIView {
         whatsappView = WhatsappView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: whatsappView!)
         return whatsappView!
     }
     
     private func createYouTubeView() -> UIView {
         youtubeView = YoutubeView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: youtubeView!)
         return youtubeView!
     }
     
     private func createSpotifyView() -> UIView {
         spotifyView = SpotifyView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: spotifyView!)
         return spotifyView!
     }
     
     private func createViberView() -> UIView {
         viberView = ViberView()
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: viberView!)
         return viberView!
     }
     
     private func createBarcodeView(type: BarCodeType) -> UIView {
         barCodeView = BarCodeView()
         barCodeView?.type = type
+        
+        // Add text field change listeners to all text fields in the view
+        addTextFieldChangeListeners(in: barCodeView!)
         
         // Add test data based on barcode type
 //        switch type {
