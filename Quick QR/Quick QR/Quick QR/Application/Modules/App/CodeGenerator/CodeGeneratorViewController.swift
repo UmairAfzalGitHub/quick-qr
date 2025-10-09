@@ -1121,18 +1121,6 @@ class CodeGeneratorViewController: UIViewController {
 // MARK: - UINavigationControllerDelegate
 extension CodeGeneratorViewController: UINavigationControllerDelegate {
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
-        // Check if we're navigating back from this view controller
-        if viewController != self {
-            // We're going back to the previous controller, show the tab bar
-            if let tabBarController = navigationController.tabBarController as? TabBarController {
-                tabBarController.setTabBarVisibility(false) // false means show in this context
-            }
-        } else {
-            // We're showing this view controller, hide the tab bar
-            if let tabBarController = navigationController.tabBarController as? TabBarController {
-                tabBarController.setTabBarVisibility(true) // true means hide in this context
-            }
-        }
     }
     
     // This method is called when interactive pop gesture begins (user swipes back)
