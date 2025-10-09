@@ -509,9 +509,10 @@ class IAPViewController: UIViewController {
 
         containerView.addSubview(leftStack)
         containerView.addSubview(rightStack)
-
+        
+        let height: CGFloat = UIDevice().isProDevice() ? 78 : 90
         NSLayoutConstraint.activate([
-            containerView.heightAnchor.constraint(equalToConstant: 90),
+            containerView.heightAnchor.constraint(equalToConstant: height),
 
             leftStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
             leftStack.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
