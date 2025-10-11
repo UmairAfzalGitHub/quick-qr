@@ -498,8 +498,8 @@ final class ScanResultViewController: UIViewController {
     
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
-        let nibView = Bundle.main.loadNibNamed("OnBoardingNativeAdView", owner: nil, options: nil)?.first
-        guard let nativeAdView = nibView as? NativeAdView else { return }
+        let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
+        let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
         setAdView(nativeAdView)
 
         (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline

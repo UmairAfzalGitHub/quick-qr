@@ -20,7 +20,7 @@ class IAPManager: NSObject {
 
     var isUserSubscribed: Bool {
         get {
-            if getBuildEnv() == .debug || getBuildEnv() == .testFlight {
+            if getBuildEnv() == .debug {
                 return false
             } else {
                 if let cached = _isUserSubscribed {

@@ -331,13 +331,8 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         guard let nativeAdView = nibView as? NativeAdView else { return }
         setAdView(nativeAdView)
 
-        if UIDevice().isSmallerDevice() {
-            nativeAdView.mediaView?.isHidden = true
-            nativeAdView.mediaView?.removeFromSuperview()
-        } else {
-            (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
-            nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
-        }
+        (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+        nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
 
         // Configure optional assets
         (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
@@ -348,10 +343,10 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         nativeAdView.callToActionView?.layer.cornerRadius = 12.0
         
         (nativeAdView.iconView as? UIImageView)?.image = nativeAd.icon?.image
-//        nativeAdView.iconView?.isHidden = nativeAd.icon == nil
+        nativeAdView.iconView?.isHidden = nativeAd.icon == nil
         
         (nativeAdView.advertiserView as? UILabel)?.text = nativeAd.advertiser
-//        nativeAdView.advertiserView?.isHidden = nativeAd.advertiser == nil
+        nativeAdView.advertiserView?.isHidden = nativeAd.advertiser == nil
         
         // Disable user interaction on call-to-action view for SDK to handle touches
         nativeAdView.callToActionView?.isUserInteractionEnabled = false

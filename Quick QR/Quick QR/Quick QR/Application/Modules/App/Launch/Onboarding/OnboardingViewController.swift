@@ -229,23 +229,12 @@ class OnboardingViewController: BaseViewController,
 
         let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
         let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
-        nativeAdParentView.layer.borderColor = UIColor.customColor(fromHex: "0A3853").cgColor
-        nativeAdParentView.layer.borderWidth = 1
-
-        guard let nativeAdView = nibView as? NativeAdView else {
-            return
-        }
-        
+        guard let nativeAdView = nibView as? NativeAdView else { return }
         setAdView(nativeAdView)
-        
-        if UIDevice().isSmallerDevice() {
-            nativeAdView.mediaView?.isHidden = true
-            nativeAdView.mediaView?.removeFromSuperview()
-        } else {
-            (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
-            nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
-        }
-        
+
+        (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
+        nativeAdView.mediaView?.mediaContent = nativeAd.mediaContent
+
         // Configure optional assets
         (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
         nativeAdView.bodyView?.isHidden = nativeAd.body == nil

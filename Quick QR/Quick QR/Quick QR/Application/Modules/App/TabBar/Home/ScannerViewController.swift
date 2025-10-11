@@ -10,25 +10,12 @@ import AVFoundation
 import CoreImage
 import GoogleMobileAds
 
-class ScannerViewController: UIViewController {
+class ScannerViewController: BaseViewController {
     
     // MARK: - Properties
     
     let scannerManager = CodeScannerManager()
-    
-    // Native Ad Properties
-    private let nativeAdParentView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
-        view.layer.borderColor = UIColor.customColor(fromHex: "0A3853").cgColor
-        view.layer.borderWidth = 1
-        return view
-    }()
-    
-    private var nativeAdView: NativeAdView!
-    var nativeAd: GoogleMobileAds.NativeAd?
-    var nativeAdHeightConstraint: NSLayoutConstraint!
-    
+
     // Focus animation view
     private let focusIndicator: UIView = {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
@@ -63,6 +50,11 @@ class ScannerViewController: UIViewController {
         return imageView
     }()
     
+    // MARK: - Banner Properties
+    var bannerView: BannerView!
+    var bannerViewHeghtConstraint: NSLayoutConstraint!
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -74,15 +66,15 @@ class ScannerViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        setupBanner(adId: RemoteConfigManager.shared.banner)
+        super.bannerAdView = self.bannerView
+
         super.viewWillAppear(animated)
         
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         hideCenterQRImageView()
         // Pre-configure camera but don't start yet
         scannerManager.prepareCamera()
-        
-        // Load native ad if needed
-        loadNativeAdIfNeeded()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -107,12 +99,13 @@ class ScannerViewController: UIViewController {
         view.addSubview(scannerFrameImageView)
         scannerFrameImageView.addSubview(qrTempImageView)
         view.addSubview(focusIndicator)
-        view.addSubview(nativeAdParentView)
-        
-        // Configure native ad view
-        nativeAdParentView.translatesAutoresizingMaskIntoConstraints = false
-        nativeAdHeightConstraint = nativeAdParentView.heightAnchor.constraint(equalToConstant: 159)
-        
+
+        bannerView = BannerView()
+        bannerView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(bannerView)
+        // Create banner view height constraint
+        bannerViewHeghtConstraint = bannerView.heightAnchor.constraint(equalToConstant: 60)
+
         // Add tap gesture recognizer for focus
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
         view.addGestureRecognizer(tapGesture)
@@ -139,32 +132,26 @@ class ScannerViewController: UIViewController {
             qrTempImageView.leadingAnchor.constraint(equalTo: scannerFrameImageView.leadingAnchor, constant: 4),
             qrTempImageView.trailingAnchor.constraint(equalTo: scannerFrameImageView.trailingAnchor, constant: -4),
             qrTempImageView.bottomAnchor.constraint(equalTo: scannerFrameImageView.bottomAnchor, constant: -4),
-            
-            // Native ad constraints (excluding height constraint which is added separately)
-            nativeAdParentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16.0),
-            nativeAdParentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0)
+            bannerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bannerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bannerViewHeghtConstraint!,
         ]
-        
-        // Add height constraint separately since it's an optional
-        if let heightConstraint = nativeAdHeightConstraint {
-            constraints.append(heightConstraint)
-        }
-        
+
         // Position the ad based on the showAdAtBottom flag
         if RemoteConfigManager.shared.showScannerNativeAtBottom {
             // Ad at bottom, scanner in center
             constraints.append(contentsOf: [
                 scannerFrameImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-                nativeAdParentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24)
+                bannerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
             ])
         } else {
             // Ad at top, scanner below it
             constraints.append(contentsOf: [
-                nativeAdParentView.topAnchor.constraint(equalTo: iapImage.bottomAnchor, constant: 10),
-                scannerFrameImageView.topAnchor.constraint(equalTo: nativeAdParentView.bottomAnchor, constant: 20)
+                bannerView.topAnchor.constraint(equalTo: iapImage.bottomAnchor, constant: 10),
+                scannerFrameImageView.topAnchor.constraint(equalTo: bannerView.bottomAnchor, constant: 20)
             ])
         }
-        
+
         NSLayoutConstraint.activate(constraints)
     }
     
@@ -235,83 +222,6 @@ class ScannerViewController: UIViewController {
         let vc = IAPViewController()
         vc.modalPresentationStyle = .fullScreen
         present(vc, animated: true)
-    }
-    
-    // MARK: - Native Ad Methods
-    
-    private func loadNativeAdIfNeeded() {
-        nativeAdParentView.isHidden = true
-        nativeAdHeightConstraint.constant = 0
-
-        guard !IAPManager.shared.isUserSubscribed else {
-            return
-        }
-
-        if let ad = AdManager.shared.getNativeAd(stopPrefetch: true) {
-            nativeAd = ad
-            showGoogleNativeAd(nativeAd: nativeAd)
-        } else {
-            AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
-                self?.nativeAd = ad
-                self?.showGoogleNativeAd(nativeAd: ad)
-            }
-        }
-    }
-    
-    private func setAdView(_ view: NativeAdView) {
-        // Remove the previous ad view
-        if nativeAdView != nil {
-            nativeAdView.removeFromSuperview()
-        }
-
-        nativeAdView = view
-        nativeAdView.tag = 2500
-        nativeAdParentView.addSubview(nativeAdView)
-        nativeAdView.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Layout constraints for positioning the native ad view
-        let viewDictionary = ["_nativeAdView": nativeAdView!]
-        nativeAdParentView.addConstraints(
-            NSLayoutConstraint.constraints(
-                withVisualFormat: "H:|[_nativeAdView]|",
-                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
-        )
-        nativeAdParentView.addConstraints(
-            NSLayoutConstraint.constraints(
-                withVisualFormat: "V:|[_nativeAdView]|",
-                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: viewDictionary)
-        )
-    }
-    
-    private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
-        guard let nativeAd else { return }
-        nativeAdParentView.isHidden = false
-        nativeAdHeightConstraint.constant = 159
-
-        let nibName = "NativeAdView"
-        let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
-        guard let nativeAdView = nibView as? NativeAdView else { return }
-        setAdView(nativeAdView)
-        
-        nativeAdView.mediaView?.isHidden = true
-        nativeAdView.mediaView?.removeFromSuperview()
-
-        // Configure optional assets
-        (nativeAdView.bodyView as? UILabel)?.text = nativeAd.body
-        nativeAdView.bodyView?.isHidden = nativeAd.body == nil
-        
-        (nativeAdView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
-        nativeAdView.callToActionView?.isHidden = nativeAd.callToAction == nil
-        nativeAdView.callToActionView?.layer.cornerRadius = 12.0
-        
-        (nativeAdView.iconView as? UIImageView)?.image = nativeAd.icon?.image
-        
-        (nativeAdView.advertiserView as? UILabel)?.text = nativeAd.advertiser
-        
-        // Disable user interaction on call-to-action view for SDK to handle touches
-        nativeAdView.callToActionView?.isUserInteractionEnabled = false
-        
-        nativeAdView.nativeAd = nativeAd
     }
 }
 
