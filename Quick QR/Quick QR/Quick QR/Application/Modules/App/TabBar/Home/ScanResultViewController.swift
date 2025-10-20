@@ -175,7 +175,10 @@ final class ScanResultViewController: UIViewController {
         setupActions()
         updateUIForScanResult()
         
-        AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) { ad in
+        AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
+            guard let self = self else {
+                return
+            }
             self.showGoogleNativeAd(nativeAd: ad)
         }
     }
@@ -498,8 +501,10 @@ final class ScanResultViewController: UIViewController {
     
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
+        
         let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
         let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
+        guard let nativeAdView = nibView as? NativeAdView else { return }
         setAdView(nativeAdView)
 
         (nativeAdView.headlineView as? UILabel)?.text = nativeAd.headline
