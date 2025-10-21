@@ -177,6 +177,10 @@ class TabBarController: UITabBarController {
         // Select the middle tab (index 2)
         
         selectedIndex = 2
+        if let nav = selectedViewController as? UINavigationController {
+            nav.popToRootViewController(animated: true)
+            print("Popped all controllers in tab index 2")
+        }
     }
     
     // MARK: - Factory Method
