@@ -81,7 +81,7 @@ class BaseViewController: UIViewController {
     
     func setup() {
 //        view.addSubview(customNavigationBar)
-//        let navigationBarHeight: CGFloat = UIDevice().isSmallerDevice() ? 70 : 100
+//        let navigationBarHeight: CGFloat = UIDevice().isSmallDevice ? 70 : 100
 //        NSLayoutConstraint.activate([
 //            customNavigationBar.topAnchor.constraint(equalTo: view.topAnchor),
 //            customNavigationBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),

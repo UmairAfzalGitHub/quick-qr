@@ -16,7 +16,7 @@ class OnBoardingCollectionViewCell: UICollectionViewCell {
         contentImageView.image = data.topImage
         headingLabel.text = data.heading
         descriptionLabel.text = data.description
-        if UIDevice().isSmallerDevice() {
+        if UIDevice().isSmallDevice {
             imageBottomConstraint.constant = 2
         } else if UIDevice().isProDevice() {
             imageBottomConstraint.constant = 6

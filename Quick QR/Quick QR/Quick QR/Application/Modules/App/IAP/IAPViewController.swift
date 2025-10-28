@@ -264,7 +264,7 @@ class IAPViewController: UIViewController {
         
         contentView.addSubview(topImageView)
         
-        let width: CGFloat = UIDevice().isSmallerDevice() ? 140 : (UIDevice().isProDevice() ? 140 : 185)
+        let width: CGFloat = UIDevice().isSmallDevice ? 140 : (UIDevice().isProDevice() ? 140 : 185)
 
         NSLayoutConstraint.activate([
             topImageView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
@@ -314,7 +314,7 @@ class IAPViewController: UIViewController {
         
         contentView.addSubview(featureContainer)
         featureContainer.addSubview(featureStackView)
-        let height: CGFloat = UIDevice().isSmallerDevice() ? 14 : (UIDevice().isProDevice() ? 18 : 24)
+        let height: CGFloat = UIDevice().isSmallDevice ? 14 : (UIDevice().isProDevice() ? 18 : 24)
 
         NSLayoutConstraint.activate([
             featureContainer.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: height),

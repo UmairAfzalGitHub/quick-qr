@@ -117,7 +117,7 @@ class ScannerViewController: BaseViewController {
     
     func setupConstraints() {
         // Common constraints for UI elements
-        let multiplier: CGFloat = UIDevice().isSmallerDevice() || UIDevice().isProDevice() ? 0.6 : 0.8
+        let multiplier: CGFloat = UIDevice().isSmallDevice || UIDevice().isProDevice() ? 0.6 : 0.8
 
         var constraints = [
             iapImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),

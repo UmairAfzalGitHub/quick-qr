@@ -291,7 +291,7 @@ class CodeGeneratorViewController: UIViewController {
         placeholderHeightConstraint = replaceableContentView.heightAnchor.constraint(equalToConstant: 200)
         placeholderHeightConstraint?.priority = UILayoutPriority(999)
         placeholderHeightConstraint?.isActive = true
-        nativeAdHeightConstraint = adContainerView.heightAnchor.constraint(equalToConstant: UIDevice().isSmallerDevice() ? 159 : 240)
+        nativeAdHeightConstraint = adContainerView.heightAnchor.constraint(equalToConstant: UIDevice().isSmallDevice ? 159 : 240)
 
         NSLayoutConstraint.activate([
             // Ad Container - Fixed at bottom
@@ -1161,9 +1161,9 @@ extension CodeGeneratorViewController {
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
         adContainerView.isHidden = false
-        nativeAdHeightConstraint.constant = UIDevice().isSmallerDevice() ? 159 : 240
+        nativeAdHeightConstraint.constant = UIDevice().isSmallDevice ? 159 : 240
 
-        let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
+        let nibName = UIDevice().isSmallDevice ? "NativeAdView" : "OnBoardingNativeAdView"
         let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
         guard let nativeAdView = nibView as? NativeAdView else { return }
         setAdView(nativeAdView)

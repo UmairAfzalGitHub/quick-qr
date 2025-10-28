@@ -170,7 +170,7 @@ class OnboardingViewController: BaseViewController,
         
         self.navigationController?.navigationBar.isHidden = true
         
-        if UIDevice().isSmallerDevice() {
+        if UIDevice().isSmallDevice {
             nativeAdHeightConstraint.constant = 159.0
         }
         
@@ -225,9 +225,9 @@ class OnboardingViewController: BaseViewController,
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
         nativeAdParentView.isHidden = false
-        nativeAdHeightConstraint.constant = UIDevice().isSmallerDevice() ? 159 : 240
+        nativeAdHeightConstraint.constant = UIDevice().isSmallDevice ? 159 : 240
 
-        let nibName = UIDevice().isSmallerDevice() ? "NativeAdView" : "OnBoardingNativeAdView"
+        let nibName = UIDevice().isSmallDevice ? "NativeAdView" : "OnBoardingNativeAdView"
         let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
         guard let nativeAdView = nibView as? NativeAdView else { return }
         setAdView(nativeAdView)
