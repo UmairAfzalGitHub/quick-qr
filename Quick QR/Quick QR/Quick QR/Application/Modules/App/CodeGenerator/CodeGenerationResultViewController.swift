@@ -81,6 +81,7 @@ class CodeGenerationResultViewController: UIViewController {
         setupUI()
         setupConstraints()
         setupActions()
+        AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -365,38 +366,44 @@ class CodeGenerationResultViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func toggleFavoriteTapped() {
-        var itemId: String
-        
-        if let existingId = existingItemId {
-            // Use the existing item ID if we found one
-            itemId = existingId
-        } else {
-            // Otherwise get the latest created history item
-            let createdHistory = HistoryManager.shared.getCreatedHistory()
-            guard let latestItem = createdHistory.first else { return }
-            itemId = latestItem.id
-            // Store this ID for future use
-            existingItemId = itemId
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+            guard let self = self else { return }
+            
+            var itemId: String
+            
+            if let existingId = existingItemId {
+                // Use the existing item ID if we found one
+                itemId = existingId
+            } else {
+                // Otherwise get the latest created history item
+                let createdHistory = HistoryManager.shared.getCreatedHistory()
+                guard let latestItem = createdHistory.first else { return }
+                itemId = latestItem.id
+                // Store this ID for future use
+                existingItemId = itemId
+            }
+            
+            let newFavoriteStatus = HistoryManager.shared.toggleFavorite(forItemWithId: itemId)
+            let heartImageName = newFavoriteStatus ? "heart-fill" : "heart-empty"
+            let heartImage = UIImage(named: heartImageName)
+            
+            // Create a new button with the updated heart image
+            let heartButton = UIBarButtonItem(image: heartImage, style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+            
+            // Set the tint color to red if favorited
+            if newFavoriteStatus {
+                heartButton.tintColor = .systemRed
+            }
+            
+            navigationItem.rightBarButtonItem = heartButton
         }
-        
-        let newFavoriteStatus = HistoryManager.shared.toggleFavorite(forItemWithId: itemId)
-        let heartImageName = newFavoriteStatus ? "heart-fill" : "heart-empty"
-        let heartImage = UIImage(named: heartImageName)
-        
-        // Create a new button with the updated heart image
-        let heartButton = UIBarButtonItem(image: heartImage, style: .plain, target: self, action: #selector(toggleFavoriteTapped))
-        
-        // Set the tint color to red if favorited
-        if newFavoriteStatus {
-            heartButton.tintColor = .systemRed
-        }
-        
-        navigationItem.rightBarButtonItem = heartButton
     }
 
     
     @objc private func shareButtonTapped() {
-        shareAction?()
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+            self?.shareAction?()
+        }
     }
     
     @objc private func saveButtonTapped() {
@@ -417,37 +424,44 @@ class CodeGenerationResultViewController: UIViewController {
     }
 
     private func saveImageToGallery() {
-        let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
-        guard let imageToSave = image else {
-            let alert = UIAlertController(title: Strings.Label.error, message: Strings.Label.noImageToSave, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
-            present(alert, animated: true)
-            return
-        }
-        PhotosManager.shared.save(image: imageToSave) { result in
-            switch result {
-            case .success:
-                let alert = UIAlertController(title: "\(Strings.Label.saved)!", message: Strings.Label.imageSavedToLibrary, preferredStyle: .alert)
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+            guard let self = self else { return }
+            let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
+            guard let imageToSave = image else {
+                let alert = UIAlertController(title: Strings.Label.error, message: Strings.Label.noImageToSave, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
-                self.present(alert, animated: true)
-            case .failure(let error):
-                let alert = UIAlertController(title: Strings.Label.error, message: error.localizedDescription, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
-                self.present(alert, animated: true)
+                present(alert, animated: true)
+                return
+            }
+            PhotosManager.shared.save(image: imageToSave) { result in
+                switch result {
+                case .success:
+                    let alert = UIAlertController(title: "\(Strings.Label.saved)!", message: Strings.Label.imageSavedToLibrary, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
+                    self.present(alert, animated: true)
+                case .failure(let error):
+                    let alert = UIAlertController(title: Strings.Label.error, message: error.localizedDescription, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
+                    self.present(alert, animated: true)
+                }
             }
         }
     }
 
     private func saveImageToFiles() {
-        let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
-        guard let imageToSave = image else {
-            let alert = UIAlertController(title: Strings.Label.error, message: Strings.Label.noImageToSave, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
-            present(alert, animated: true)
-            return
-        }
-        PhotosManager.shared.saveToFiles(image: imageToSave, presenter: self) { result in
-            print(result)
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+            guard let self = self else { return }
+            
+            let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
+            guard let imageToSave = image else {
+                let alert = UIAlertController(title: Strings.Label.error, message: Strings.Label.noImageToSave, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
+                present(alert, animated: true)
+                return
+            }
+            PhotosManager.shared.saveToFiles(image: imageToSave, presenter: self) { result in
+                print(result)
+            }
         }
     }
     

@@ -14,78 +14,76 @@ protocol IAPViewControllerDelegate {
     func cancelAction()
 }
 
+enum SubscriptionPlan: Int, CaseIterable {
+    case weekly = 0
+    case monthly = 1
+    
+    var title: String {
+        switch self {
+        case .weekly: return Strings.Label.weekly
+        case .monthly: return Strings.Label.monthly
+        }
+    }
+    
+    var price: String {
+        switch self {
+        case .weekly: return "Loading..."
+        case .monthly: return "Loading..."
+        }
+    }
+    
+    var dailyPrice: String? {
+        switch self {
+        case .weekly: return "Loading..."
+        case .monthly: return nil
+        }
+    }
+    
+    var tag: String? {
+        switch self {
+        case .weekly: return ""
+        case .monthly: return Strings.Label.recommended
+        }
+    }
+    
+    var perDayText: String? {
+        switch self {
+        case .weekly: return Strings.Label.perDay
+        case .monthly: return nil
+        }
+    }
+    
+    var subtitle: String? {
+        switch self {
+        case .weekly: return Strings.Label.perfectForShortTerm
+        case .monthly: return Strings.Label.saveFiftyPercentVs
+        }
+    }
+}
+
+enum Feature: Int, CaseIterable {
+    case membershipBenefits
+    case noAds
+    case batchScanning
+    
+    var title: String {
+        switch self {
+        case .membershipBenefits: return Strings.Label.unlockMoreMembership
+        case .noAds: return Strings.Label.noAdsSmoothScanning
+        case .batchScanning: return Strings.Label.scanCodesInBatches
+        }
+    }
+    
+    var imageName: String {
+        switch self {
+        case .membershipBenefits: return "crown-iap"
+        case .noAds: return "noAds-iap"
+        case .batchScanning: return "scanner-iap"
+        }
+    }
+}
+
 class IAPViewController: UIViewController {
-    
-    // MARK: - Models
-    enum SubscriptionPlan: Int, CaseIterable {
-        case weekly = 0
-        case monthly = 1
-        
-        var title: String {
-            switch self {
-            case .weekly: return Strings.Label.weekly
-            case .monthly: return Strings.Label.monthly
-            }
-        }
-        
-        var price: String {
-            switch self {
-            case .weekly: return "Loading..."
-            case .monthly: return "Loading..."
-            }
-        }
-        
-        var dailyPrice: String? {
-            switch self {
-            case .weekly: return "Loading..."
-            case .monthly: return nil
-            }
-        }
-        
-        var tag: String? {
-            switch self {
-            case .weekly: return ""
-            case .monthly: return Strings.Label.recommended
-            }
-        }
-        
-        var perDayText: String? {
-            switch self {
-            case .weekly: return Strings.Label.perDay
-            case .monthly: return nil
-            }
-        }
-        
-        var subtitle: String? {
-            switch self {
-            case .weekly: return Strings.Label.perfectForShortTerm
-            case .monthly: return Strings.Label.saveFiftyPercentVs
-            }
-        }
-    }
-    
-    enum Feature: Int, CaseIterable {
-        case membershipBenefits
-        case noAds
-        case batchScanning
-        
-        var title: String {
-            switch self {
-            case .membershipBenefits: return Strings.Label.unlockMoreMembership
-            case .noAds: return Strings.Label.noAdsSmoothScanning
-            case .batchScanning: return Strings.Label.scanCodesInBatches
-            }
-        }
-        
-        var imageName: String {
-            switch self {
-            case .membershipBenefits: return "crown-iap"
-            case .noAds: return "noAds-iap"
-            case .batchScanning: return "scanner-iap"
-            }
-        }
-    }
-    
     // MARK: - Properties
     private var selectedPlan: SubscriptionPlan = .monthly
     
@@ -231,6 +229,8 @@ class IAPViewController: UIViewController {
     
     private func setupHeader() {
         // Close button
+        closeButton.alpha = 0.0
+        closeButton.isHidden = true
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
         closeButton.tintColor = .gray
@@ -255,6 +255,13 @@ class IAPViewController: UIViewController {
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
             titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
         ])
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            self?.closeButton.isHidden = false
+            UIView.animate(withDuration: 0.3) {
+                self?.closeButton.alpha = 1.0
+            }
+        }
     }
     
     private func setupQRImage() {

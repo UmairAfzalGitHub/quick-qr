@@ -9,7 +9,7 @@ import BetterSegmentedControl
 import GoogleMobileAds
 
 // MARK: - HomeViewController
-class HomeViewController: UIViewController {
+class HomeViewController: UIViewController, IAPViewControllerDelegate {
     
     private let betterSegmentedControl: BetterSegmentedControl = {
         let control = BetterSegmentedControl(
@@ -53,6 +53,10 @@ class HomeViewController: UIViewController {
         view.backgroundColor = .white
         setupUI()
         setupNavigationBar()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {[weak self] in
+            self?.showIAP()
+        })
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -165,7 +169,21 @@ class HomeViewController: UIViewController {
     @objc private func showIAP() {
         let vc = IAPViewController()
         vc.modalPresentationStyle = .fullScreen
-        present(vc, animated: true)
+        vc.delegate = self
+        self.tabBarController?.present(vc, animated: true)
+    }
+    
+    // MARK: - IAPViewControllerDelegate
+
+    func cancelAction() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {
+                AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
+            }
+        })
+    }
+
+    func performAction() {
     }
 }
 

@@ -31,7 +31,7 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
                 AdsConsentManager.shared.checkAdsState {
                     // Only setup ads and navigate after consent is handled
                     AdManager.shared.setupAds()                    
-                    self.progressBar.animateIndeterminate(duration: 4.0, speed: 1.5) {
+                    self.progressBar.animateIndeterminate(duration: 2.0, speed: 1.5) {
                         self.animateForTwoSeconds(preload: false)
                     }
                 }
@@ -64,6 +64,10 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
     }
 
     func checkLanguageStatus() {
+        
+        // Try to load the ad
+        AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial) { _, _ in }
+
         let onBoardingStatus = UserDefaults.standard.bool(forKey: "isOnboardingComplete")
         if onBoardingStatus {
             // Set maximum animation time to 4 seconds
@@ -99,14 +103,8 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
             }
             
             // Set a timeout to ensure we don't wait more than 4 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 navigateToTabBar(false) // Navigate without ad if timeout occurs
-            }
-            
-            // Try to load the ad
-            AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial) { isLoaded, interstitial in
-                // If ad loaded successfully, show it and navigate
-                navigateToTabBar(isLoaded ?? false)
             }
         } else {
             updateRootViewController(to: LanguageSelectionViewController())

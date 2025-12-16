@@ -14,6 +14,8 @@ class TabBarController: UITabBarController {
     private let centerButton = UIButton(type: .custom)
     private var shouldHideCenterButton = false
 
+    var adCounter = 0
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -231,6 +233,18 @@ class TabBarController: UITabBarController {
 extension TabBarController: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         return true
+    }
+
+    override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+        adCounter += 1
+
+        guard adCounter >= RemoteConfigManager.shared.maxInterstitalAdCounter else {
+            return
+        }
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] in
+            self?.adCounter = 0
+            AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
+        }
     }
 }
 
