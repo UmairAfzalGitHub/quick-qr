@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import StoreKit
+import FirebaseAnalytics
 
 protocol IAPViewControllerDelegate {
     func performAction()
@@ -137,6 +138,8 @@ class IAPViewController: UIViewController {
         setupUI()
         setupIAP()
         localize()
+        
+        Analytics.logEvent("IAP", parameters: nil)
     }
     
     // MARK: - UI Setup

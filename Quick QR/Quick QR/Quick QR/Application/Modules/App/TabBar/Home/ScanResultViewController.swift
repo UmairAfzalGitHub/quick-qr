@@ -11,6 +11,7 @@ import EventKit
 import Foundation
 import GoogleMobileAds
 import Photos
+import FirebaseAnalytics
 
 enum ScanResultIntent {
     case scan
@@ -181,6 +182,7 @@ final class ScanResultViewController: UIViewController {
             }
             self.showGoogleNativeAd(nativeAd: ad)
         }
+        
     }
 
     @objc private func toggleFavoriteTapped() {
@@ -211,6 +213,11 @@ final class ScanResultViewController: UIViewController {
         }
         
         navigationItem.rightBarButtonItem = heartButton
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        Analytics.logEvent("Scan Result", parameters: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {

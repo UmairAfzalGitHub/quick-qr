@@ -9,6 +9,7 @@ import UIKit
 import IOS_Helpers
 import AVFoundation
 import GoogleMobileAds
+import FirebaseAnalytics
 
 class FavouriteViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
     
@@ -42,6 +43,7 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
         loadFavorites()
         
         loadNativeAdIfNeeded()
+        Analytics.logEvent("Favorite", parameters: nil)
     }
     
     private func loadNativeAdIfNeeded() {

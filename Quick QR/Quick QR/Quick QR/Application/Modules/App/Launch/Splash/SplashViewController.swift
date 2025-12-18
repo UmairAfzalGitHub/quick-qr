@@ -3,6 +3,7 @@ import UIKit
 import Lottie
 import IOS_Helpers
 import GoogleMobileAds
+import FirebaseAnalytics
 
 class SplashViewController: BaseViewController, UITextViewDelegate {
         
@@ -37,6 +38,8 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
                 }
             }
         })
+        
+        Analytics.logEvent("splash screen", parameters: nil)
     }
 
     override func viewWillAppear(_ animated: Bool) {

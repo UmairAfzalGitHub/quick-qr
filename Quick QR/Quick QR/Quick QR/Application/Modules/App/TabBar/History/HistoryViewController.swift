@@ -11,6 +11,7 @@ import BetterSegmentedControl
 import IOS_Helpers
 import AVFoundation
 import GoogleMobileAds
+import FirebaseAnalytics
 
 class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
     
@@ -72,6 +73,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         navigationItem.rightBarButtonItem?.isEnabled = !dataSource.isEmpty
         
         loadNativeAdIfNeeded()
+        Analytics.logEvent("History Scan", parameters: nil)
     }
     
     private func loadNativeAdIfNeeded() {
@@ -168,6 +170,12 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     @objc private func segmentChanged(_ sender: BetterSegmentedControl) {
         // Reload history when segment changes
         loadHistory()
+        
+        if isScanSelected {
+            Analytics.logEvent("History Scan", parameters: nil)
+        } else {
+            Analytics.logEvent("Histroy Create", parameters: nil)
+        }
     }
 
     // MARK: - Empty State Handling

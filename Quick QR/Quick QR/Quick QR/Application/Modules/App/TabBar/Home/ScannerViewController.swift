@@ -9,6 +9,7 @@ import UIKit
 import AVFoundation
 import CoreImage
 import GoogleMobileAds
+import FirebaseAnalytics
 
 class ScannerViewController: BaseViewController {
     
@@ -75,6 +76,7 @@ class ScannerViewController: BaseViewController {
         hideCenterQRImageView()
         // Pre-configure camera but don't start yet
         scannerManager.prepareCamera()
+        Analytics.logEvent("Home screen", parameters: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {

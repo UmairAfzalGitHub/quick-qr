@@ -2,6 +2,7 @@
 import UIKit
 import StoreKit
 import GoogleMobileAds
+import FirebaseAnalytics
 
 class OnboardingViewController: BaseViewController,
                                 UICollectionViewDelegate,
@@ -45,6 +46,7 @@ class OnboardingViewController: BaseViewController,
         setup()
         setupBannerAdView()
         loadNativeAdIfNeeded()
+        Analytics.logEvent("OB-1", parameters: nil)
     }
     
     private func setupBannerAdView() {
@@ -306,7 +308,15 @@ class OnboardingViewController: BaseViewController,
     //MARK: - IBActions
     @objc func didTapNextButton() {
         let currentIndex = getCurrentPageIndex()
-        
+        if currentIndex == 0 {
+            Analytics.logEvent("OB-1", parameters: nil)
+        } else if currentIndex == 1 {
+            Analytics.logEvent("OB-2", parameters: nil)
+        } else if currentIndex == 2 {
+            Analytics.logEvent("OB-3", parameters: nil)
+        } else if currentIndex == 3 {
+            Analytics.logEvent("OB-4", parameters: nil)
+        }
         // Toggle between floor native ad IDs
         useFirstFloorNativeAd.toggle()
         let floorNativeAdId = useFirstFloorNativeAd ?

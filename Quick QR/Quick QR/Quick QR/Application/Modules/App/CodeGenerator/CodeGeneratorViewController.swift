@@ -9,6 +9,7 @@ import UIKit
 import IOS_Helpers
 import Foundation
 import GoogleMobileAds
+import FirebaseAnalytics
 
 class CodeGeneratorViewController: UIViewController {
     
@@ -122,6 +123,7 @@ class CodeGeneratorViewController: UIViewController {
             // Mark that the user has visited this screen
             UserDefaultManager.shared.setCodeGeneratorVisited()
         }
+
     }
     
     private func setupNavigationDelegate() {
@@ -205,6 +207,12 @@ class CodeGeneratorViewController: UIViewController {
         // Ensure tab bar is hidden
         if let tabBarController = self.tabBarController as? TabBarController {
             tabBarController.setTabBarVisibility(true) // Hide tab bar
+        }
+        
+        if let _ = currentCodeType as? QRCodeType {
+            Analytics.logEvent("QR Code Create", parameters: nil)
+        } else if let _ = currentCodeType as? BarCodeType {
+            Analytics.logEvent("Barcode Create", parameters: nil)
         }
     }
     

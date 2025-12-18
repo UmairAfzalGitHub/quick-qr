@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAnalytics
 import GoogleMobileAds
 
 enum LanguageIntent {
@@ -85,6 +86,7 @@ class LanguageSelectionViewController: BaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        Analytics.logEvent("languages screen", parameters: nil)
     }
     
     private func loadNativeAdIfNeeded() {

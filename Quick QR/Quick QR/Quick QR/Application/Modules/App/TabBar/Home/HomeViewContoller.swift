@@ -7,6 +7,7 @@
 import UIKit
 import BetterSegmentedControl
 import GoogleMobileAds
+import FirebaseAnalytics
 
 // MARK: - HomeViewController
 class HomeViewController: UIViewController, IAPViewControllerDelegate {
@@ -63,6 +64,7 @@ class HomeViewController: UIViewController, IAPViewControllerDelegate {
         super.viewWillAppear(animated)
         collectionView.reloadData()
         loadNativeAdIfNeeded()
+        Analytics.logEvent("Home QR Code view", parameters: nil)
     }
     
     private func loadNativeAdIfNeeded() {
@@ -163,6 +165,12 @@ class HomeViewController: UIViewController, IAPViewControllerDelegate {
         AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
             guard let self = self, let ad = ad else { return }
             showGoogleNativeAd(nativeAd: ad)
+        }
+        
+        if isQRCodeSelected {
+            Analytics.logEvent("Home QR Code view", parameters: nil)
+        } else {
+            Analytics.logEvent("Home BarCode view", parameters: nil)
         }
     }
     
