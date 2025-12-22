@@ -79,6 +79,9 @@ class CodeGeneratorViewController: UIViewController {
     private var nativeAdView: NativeAdView!
     var nativeAd: GoogleMobileAds.NativeAd?
 
+    var shouldLoadAd: Bool = false
+    var hasShownAd: Bool = false
+    
     // MARK: - Code Type
     internal var currentCodeType: CodeTypeProtocol?
     internal var buttonAction: (() -> Void)?
@@ -115,7 +118,7 @@ class CodeGeneratorViewController: UIViewController {
         let isFirstVisit = UserDefaultManager.shared.isFirstCodeGeneratorVisit()
         
         // Only load ads if it's not the first visit
-        if !isFirstVisit {
+        if !isFirstVisit && shouldLoadAd {
             // Preload interstitial ad for both normal ads and back button ad
             AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
             loadNativeAdIfNeeded()
@@ -191,9 +194,9 @@ class CodeGeneratorViewController: UIViewController {
     /// Shows an interstitial ad when the back button is tapped and navigates back after the ad is dismissed
     private func showBackButtonInterstitial() {
         let isFirstVisit = UserDefaultManager.shared.isFirstCodeGeneratorVisit()
-        if !isFirstVisit {
+        if !isFirstVisit && shouldLoadAd && !hasShownAd {
             // Show the interstitial ad with a completion handler that navigates back
-            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] in
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] _ in
                 // Navigate back after the ad is dismissed
                 self?.navigationController?.popViewController(animated: true)
             }
@@ -378,7 +381,8 @@ class CodeGeneratorViewController: UIViewController {
         }
         
         // Show the interstitial ad with a custom completion handler
-        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] in
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {  [weak self] _ in
+            self?.hasShownAd = true
             // Ensure tab bar is still hidden after the ad is dismissed
             if let self = self, let tabBarController = self.tabBarController as? TabBarController {
                 // Only keep tab bar hidden if we're not going back

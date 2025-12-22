@@ -241,7 +241,7 @@ extension TabBarController: UITabBarControllerDelegate {
         guard adCounter >= RemoteConfigManager.shared.maxInterstitalAdCounter else {
             return
         }
-        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] in
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] _ in
             self?.adCounter = 0
             AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
         }

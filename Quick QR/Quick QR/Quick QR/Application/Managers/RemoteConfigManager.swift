@@ -8,6 +8,7 @@ class RemoteConfigManager: NSObject {
 
     var appOpen = AdMobId(analyticsId: .appOpenAd, adId: "ca-app-pub-3940256099942544/5575463023")
     var interstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-3940256099942544/4411468910")
+    var highECPMinterstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-3940256099942544/4411468910")
     var native = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
     var floorNativeAd1 = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
     var floorNativeAd2 = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-3940256099942544/3986624511")
@@ -61,6 +62,7 @@ class RemoteConfigManager: NSObject {
 
         let appOpenId = remoteConfig["ad_id_app_open"].stringValue
         let interstitialId = remoteConfig["ad_id_interstitial"].stringValue
+        let highECPMInterstitialId = remoteConfig["ad_id_high_ecpm_interstitial"].stringValue
         let nativeId = remoteConfig["ad_id_native"].stringValue
         let floorNativeId1 = remoteConfig["ad_id_floor_native_1"].stringValue
         let floorNativeId2 = remoteConfig["ad_id_floor_native_2"].stringValue
@@ -80,6 +82,7 @@ class RemoteConfigManager: NSObject {
         if getBuildEnv() == .appStore {
             self.appOpen = AdMobId(analyticsId: .appOpenAd, adId: appOpenId)
             self.interstitial = AdMobId(analyticsId: .interstitialAd, adId: interstitialId)
+            self.highECPMinterstitial = AdMobId(analyticsId: .interstitialAd, adId: highECPMInterstitialId)
             self.native = AdMobId(analyticsId: .nativeAd, adId: nativeId)
             self.floorNativeAd1 = AdMobId(analyticsId: .nativeAd, adId: floorNativeId1)
             self.floorNativeAd2 = AdMobId(analyticsId: .nativeAd, adId: floorNativeId2)

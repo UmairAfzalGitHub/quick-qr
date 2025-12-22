@@ -96,8 +96,8 @@ class SplashViewController: BaseViewController, UITextViewDelegate {
                 
                 if withAd && RemoteConfigManager.shared.splashInterstitialEnabled {
                     AdManager.shared.adCounter = RemoteConfigManager.shared.maxInterstitalAdCounter
-                    AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {
-                        self.updateRootViewController(to: nextController)
+                    AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] _ in
+                        self?.updateRootViewController(to: nextController)
                     }
                 } else {
                     // No ad to show, navigate directly

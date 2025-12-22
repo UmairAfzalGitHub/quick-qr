@@ -192,8 +192,8 @@ class SettingsViewController: UIViewController,
                 let controller = LanguageSelectionViewController()
                 controller.intent = .settings
                 controller.hidesBottomBarWhenPushed = true
-                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
-                    self.navigationController?.pushViewController(controller, animated: true)
+                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) { [weak self] _ in
+                    self?.navigationController?.pushViewController(controller, animated: true)
                 }
             }
             

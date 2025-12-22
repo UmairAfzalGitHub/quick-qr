@@ -65,6 +65,8 @@ class HomeViewController: UIViewController, IAPViewControllerDelegate {
         collectionView.reloadData()
         loadNativeAdIfNeeded()
         Analytics.logEvent("Home QR Code view", parameters: nil)
+        AdManager.shared.loadHighECPMInterstitialAd()
+        AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
     }
     
     private func loadNativeAdIfNeeded() {
@@ -185,7 +187,7 @@ class HomeViewController: UIViewController, IAPViewControllerDelegate {
 
     func cancelAction() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
-            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { _ in
                 AdManager.shared.loadInterstitialAd(id: RemoteConfigManager.shared.interstitial)
             }
         })
@@ -279,14 +281,20 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         
         // Set hidesBottomBarWhenPushed to true
         controller.hidesBottomBarWhenPushed = true
-        
-        // Hide tab bar explicitly before pushing
-        if let tabBarController = self.tabBarController as? TabBarController {
-            tabBarController.setTabBarVisibility(true) // true means hide
+
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.highECPMinterstitial, useHighECPM: true) { [weak self] wasShown in
+            guard let self = self else { return }
+            if wasShown == false {
+                controller.shouldLoadAd = true
+            }
+            // Hide tab bar explicitly before pushing
+            if let tabBarController = self.tabBarController as? TabBarController {
+                tabBarController.setTabBarVisibility(true) // true means hide
+            }
+            
+            self.prepareForPushWithoutBackTitle()
+            self.navigationController?.pushViewController(controller, animated: true)
         }
-        
-        self.prepareForPushWithoutBackTitle()
-        self.navigationController?.pushViewController(controller, animated: true)
     }
     
     // Adjust cell size to fit 4 per row

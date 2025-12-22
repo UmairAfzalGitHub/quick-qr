@@ -202,12 +202,12 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
                 tabBarController.setTabBarVisibility(true) // true means hide
             }
             
-            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) { [weak self] _ in
                 // Ensure tab bar is still hidden before pushing
-                if let tabBarController = self.tabBarController as? TabBarController {
+                if let tabBarController = self?.tabBarController as? TabBarController {
                     tabBarController.setTabBarVisibility(true) // true means hide
                 }
-                self.navigationController?.pushViewController(resultVC, animated: true)
+                self?.navigationController?.pushViewController(resultVC, animated: true)
             }
         case .scanned:
             // Use ScanResultViewController logic from HistoryViewController
@@ -232,12 +232,12 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
                 tabBarController.setTabBarVisibility(true) // true means hide
             }
             
-            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) {
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) { [weak self] _ in
                 // Ensure tab bar is still hidden before pushing
-                if let tabBarController = self.tabBarController as? TabBarController {
+                if let tabBarController = self?.tabBarController as? TabBarController {
                     tabBarController.setTabBarVisibility(true) // true means hide
                 }
-                self.navigationController?.pushViewController(scanResultVC, animated: true)
+                self?.navigationController?.pushViewController(scanResultVC, animated: true)
             }
         }
     }

@@ -286,7 +286,7 @@ class LanguageSelectionViewController: BaseViewController {
         if RemoteConfigManager.shared.splashInterstitialEnabled == true {
             if RemoteConfigManager.shared.splashInterstitialEnabled {
                 AdManager.shared.adCounter = RemoteConfigManager.shared.maxInterstitalAdCounter
-                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] _ in
                     self?.navigateToOnBoarding()
                 }
             }

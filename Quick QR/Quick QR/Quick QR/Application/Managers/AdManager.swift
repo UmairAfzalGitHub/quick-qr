@@ -29,6 +29,7 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     // Ad Properties
     var appOpenAd: AppOpenAd?
     var interstitialAd: InterstitialAd?
+    var highECPMInterstitialAd: GoogleMobileAds.InterstitialAd?
     var rewardedAd: RewardedAd?
     private var nativeAdLoader: AdLoader?
     private var nativeAdCompletions: [AdLoader: (NativeAd?) -> Void] = [:]
@@ -51,6 +52,7 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     var isRewardGranted = false
     var avilableNativeAd: NativeAd?
     var isShowingAd = false
+    var isShowingHighECPMInterstitial = false
     var adCounter = 0
     var adLoaderCounter = 1
     
@@ -169,6 +171,10 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     
     // MARK: - Interstitial Ads
     func loadInterstitialAd(id: AdMobId, completion: ((Bool?, InterstitialAd?) -> Void)? = nil) {
+        guard interstitialAd == nil  else {
+            return
+        }
+        
         IAPManager.shared.checkSubscriptionStatus(completion: {[weak self] isSubscribed in
             guard let self, !isSubscribed, !isLoadingInterstitial else {
                 completion?(nil, nil)
@@ -194,19 +200,77 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
             }
         })
     }
-    
-    func showInterstitial(adId: AdMobId, from viewController: UIViewController? = nil, completion: (() -> Void)? = nil) {
-        incrementAdCounter()
 
-        guard let interstitialAd = interstitialAd else {
-            print("❌ Interstitial Ad is not available")
-            completion?()
+    // MARK: - High ECPM Interstitial Ad
+    /// Loads a High ECPM interstitial ad and stores it in the AdManager for later use.
+    /// No completion handler needed - the ad will be silently loaded and stored.
+    func loadHighECPMInterstitialAd() {
+        guard highECPMInterstitialAd == nil  else {
             return
         }
         
+        // Check subscription status
+        IAPManager.shared.checkSubscriptionStatus { [weak self] isSubscribed in
+            guard let self = self else { return }
+            
+            // Don't load if user is subscribed
+            guard !isSubscribed else {
+                print("ℹ️ User is subscribed - skipping backup interstitial ad load")
+                return
+            }
+            
+            // Load the backup interstitial ad
+            GoogleMobileAds.InterstitialAd.load(with: "",
+                                              request: GoogleMobileAds.Request()) { [weak self] ad, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("❌ Failed to load backup interstitial ad: \(error.localizedDescription)")
+                    return
+                }
+                
+                print("✅ Backup Interstitial ad loaded and stored successfully")
+                self.highECPMInterstitialAd = ad
+                self.highECPMInterstitialAd?.fullScreenContentDelegate = self
+            }
+        }
+    }
+    
+    func showInterstitial(adId: AdMobId, from viewController: UIViewController? = nil, useHighECPM: Bool = false, completion: ((Bool) -> Void)? = nil) {
+//        incrementAdCounter()
+        
         guard !isShowingAd else {
             print("❌ Interstitial Ad cannot be shown because an ad is already being displayed")
-            completion?()
+            completion?(false)
+            return
+        }
+
+        var loadedAd: GoogleMobileAds.InterstitialAd?
+        if useHighECPM {
+            // User explicitly requested high eCPM ad
+            if let ad = highECPMInterstitialAd {
+                loadedAd = ad
+                isShowingHighECPMInterstitial = true
+            } else if let ad = interstitialAd {
+                // Fallback to regular interstitial if high eCPM not available
+                loadedAd = ad
+                isShowingHighECPMInterstitial = false
+            }
+        } else {
+            // Default behavior: prefer regular interstitial
+            if let ad = interstitialAd {
+                loadedAd = ad
+                isShowingHighECPMInterstitial = false
+            } else if let ad = highECPMInterstitialAd {
+                // Fallback to high eCPM if regular not available
+                loadedAd = ad
+                isShowingHighECPMInterstitial = true
+            }
+        }
+        
+        guard let interstitialAd = loadedAd else {
+            print("❌ Interstitial Ad is not available")
+            completion?(false)
             return
         }
 
@@ -233,7 +297,7 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
             if isCodeGeneratorVC, let vc = viewController {
                 vc.tabBarController?.tabBar.isHidden = true
             }
-            completion?()
+            completion?(true)
         }
     }
     
@@ -410,6 +474,13 @@ extension AdManager: FullScreenContentDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: {
             self.isRewardGranted = false
         })
+        
+        // Only clear backup ad if it was the one displayed
+        if isShowingHighECPMInterstitial {
+            highECPMInterstitialAd = nil
+            isShowingHighECPMInterstitial = false
+            loadHighECPMInterstitialAd()
+        }
     }
 
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {

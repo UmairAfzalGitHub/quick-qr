@@ -366,7 +366,7 @@ class CodeGenerationResultViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func toggleFavoriteTapped() {
-        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] _ in
             guard let self = self else { return }
             
             var itemId: String
@@ -401,7 +401,7 @@ class CodeGenerationResultViewController: UIViewController {
 
     
     @objc private func shareButtonTapped() {
-        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] _ in
             self?.shareAction?()
         }
     }
@@ -424,7 +424,7 @@ class CodeGenerationResultViewController: UIViewController {
     }
 
     private func saveImageToGallery() {
-        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] _ in
             guard let self = self else { return }
             let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image
             guard let imageToSave = image else {
@@ -449,7 +449,7 @@ class CodeGenerationResultViewController: UIViewController {
     }
 
     private func saveImageToFiles() {
-        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+        AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] _ in
             guard let self = self else { return }
             
             let image = !qrCodeImageView.isHidden ? qrCodeImageView.image : barCodeImageView.image

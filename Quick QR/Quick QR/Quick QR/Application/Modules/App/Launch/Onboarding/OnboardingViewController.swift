@@ -421,7 +421,7 @@ class OnboardingViewController: BaseViewController,
     func showInterstitialIfNeeded() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
             if RemoteConfigManager.shared.showInterstitalAfterOnboarding {
-                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) {[weak self] in
+                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] _ in
                     self?.movetoNextScreen()
                 }
             } else {
