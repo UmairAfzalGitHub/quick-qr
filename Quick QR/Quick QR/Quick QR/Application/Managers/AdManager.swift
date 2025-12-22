@@ -251,21 +251,23 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
             if let ad = highECPMInterstitialAd {
                 loadedAd = ad
                 isShowingHighECPMInterstitial = true
-            } else if let ad = interstitialAd {
-                // Fallback to regular interstitial if high eCPM not available
-                loadedAd = ad
-                isShowingHighECPMInterstitial = false
             }
+//            else if let ad = interstitialAd {
+//                // Fallback to regular interstitial if high eCPM not available
+//                loadedAd = ad
+//                isShowingHighECPMInterstitial = false
+//            }
         } else {
             // Default behavior: prefer regular interstitial
             if let ad = interstitialAd {
                 loadedAd = ad
                 isShowingHighECPMInterstitial = false
-            } else if let ad = highECPMInterstitialAd {
-                // Fallback to high eCPM if regular not available
-                loadedAd = ad
-                isShowingHighECPMInterstitial = true
             }
+//            else if let ad = highECPMInterstitialAd {
+//                // Fallback to high eCPM if regular not available
+//                loadedAd = ad
+//                isShowingHighECPMInterstitial = true
+//            }
         }
         
         guard let interstitialAd = loadedAd else {
