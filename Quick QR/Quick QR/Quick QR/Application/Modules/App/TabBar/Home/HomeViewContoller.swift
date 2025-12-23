@@ -54,10 +54,6 @@ class HomeViewController: UIViewController, IAPViewControllerDelegate {
         view.backgroundColor = .white
         setupUI()
         setupNavigationBar()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {[weak self] in
-            self?.showIAP()
-        })
     }
     
     override func viewWillAppear(_ animated: Bool) {

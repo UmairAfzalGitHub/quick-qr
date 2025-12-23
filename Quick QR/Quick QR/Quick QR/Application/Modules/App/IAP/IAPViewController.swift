@@ -93,6 +93,9 @@ class IAPViewController: UIViewController {
     private var monthlyProduct: SKProduct?
     var delegate: IAPViewControllerDelegate?
     
+    // Track if this IAP was shown from scanner flow
+    var isFromScannerFlow: Bool = false
+    
     // MARK: - UI Components
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -744,8 +747,18 @@ class IAPViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func closeButtonTapped() {
-        delegate?.cancelAction()
-        dismiss(animated: true)
+        // If from scanner flow, show interstitial on top of IAP, then dismiss after ad
+        if isFromScannerFlow {
+            // Show interstitial from this IAP view controller
+            AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) { [weak self] _ in
+                // After ad completes, dismiss IAP
+                self?.delegate?.cancelAction()
+                self?.dismiss(animated: true)
+            }
+        } else {
+            delegate?.cancelAction()
+            dismiss(animated: true)
+        }
     }
     
     @objc private func planViewTapped(_ sender: UITapGestureRecognizer) {

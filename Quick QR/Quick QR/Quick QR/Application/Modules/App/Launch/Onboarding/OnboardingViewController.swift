@@ -203,6 +203,7 @@ class OnboardingViewController: BaseViewController,
     
     private func setAdView(_ view: NativeAdView) {
         // Remove the previous ad view
+        nativeAdView?.removeFromSuperview()
         nativeAdView = view
         nativeAdParentView.addSubview(nativeAdView)
         nativeAdView.translatesAutoresizingMaskIntoConstraints = false

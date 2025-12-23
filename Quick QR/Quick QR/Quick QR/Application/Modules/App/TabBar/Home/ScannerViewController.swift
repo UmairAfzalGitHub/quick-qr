@@ -64,6 +64,15 @@ class ScannerViewController: BaseViewController {
         // Configure scanner manager
         scannerManager.delegate = self
         scannerManager.previewContainer = view
+        
+        if IAPManager.shared.isUserSubscribed == false {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5, execute: {[weak self] in
+                let vc = IAPViewController()
+                vc.isFromScannerFlow = true
+                vc.modalPresentationStyle = .fullScreen
+                self?.tabBarController?.present(vc, animated: true)
+            })
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -249,6 +258,7 @@ extension ScannerViewController: CodeScannerDelegate {
         if IAPManager.shared.isUserSubscribed == false &&
             HistoryManager.shared.getScanHistory().count > 1 {
             let vc = IAPViewController()
+            vc.isFromScannerFlow = true
             vc.modalPresentationStyle = .fullScreen
             present(vc, animated: true)
         } else {

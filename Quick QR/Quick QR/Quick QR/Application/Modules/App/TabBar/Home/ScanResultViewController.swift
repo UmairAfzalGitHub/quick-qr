@@ -176,6 +176,9 @@ final class ScanResultViewController: UIViewController {
         setupActions()
         updateUIForScanResult()
         
+        // Hide ad container initially
+        adContainer.isHidden = true
+        
         AdManager.shared.loadNativeAd(adId: RemoteConfigManager.shared.native, from: self) {[weak self] ad in
             guard let self = self else {
                 return
@@ -509,6 +512,9 @@ final class ScanResultViewController: UIViewController {
     private func showGoogleNativeAd(nativeAd: GoogleMobileAds.NativeAd?) {
         guard let nativeAd else { return }
         
+        // Show ad container now that we have an ad
+        adContainer.isHidden = false
+        
         let nibName = UIDevice().isSmallDevice ? "NativeAdView" : "OnBoardingNativeAdView"
         let nibView = Bundle.main.loadNibNamed(nibName, owner: nil, options: nil)?.first
         guard let nativeAdView = nibView as? NativeAdView else { return }
@@ -539,6 +545,7 @@ final class ScanResultViewController: UIViewController {
     
     private func setAdView(_ view: NativeAdView) {
         // Remove the previous ad view
+        nativeAdView?.removeFromSuperview()
         nativeAdView = view
         adContainer.addSubview(nativeAdView)
         nativeAdView.translatesAutoresizingMaskIntoConstraints = false
