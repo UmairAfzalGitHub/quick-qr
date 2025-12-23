@@ -255,31 +255,31 @@ extension ScannerViewController: CodeScannerDelegate {
             print("\(title) Detected: \(value)")
         }
         
-        if IAPManager.shared.isUserSubscribed == false &&
-            HistoryManager.shared.getScanHistory().count > 1 {
-            let vc = IAPViewController()
-            vc.isFromScannerFlow = true
-            vc.modalPresentationStyle = .fullScreen
-            present(vc, animated: true)
-        } else {
-            // Create and push the scan result view controller
-            let resultVC = ScanResultViewController(scannedData: value, metadataObjectType: type)
-            
-            // Set up a navigation controller if needed
-            if navigationController == nil {
-                // If we're not in a navigation controller, wrap in one
-                let navController = UINavigationController(rootViewController: resultVC)
-                navController.modalPresentationStyle = .fullScreen
-                present(navController, animated: true)
-            } else {
-                // Push to existing navigation controller
-                navigationController?.pushViewController(resultVC, animated: true)
-            }
-        }
-
+//        if IAPManager.shared.isUserSubscribed == false &&
+//            HistoryManager.shared.getScanHistory().count > 1 {
+//            let vc = IAPViewController()
+//            vc.isFromScannerFlow = true
+//            vc.modalPresentationStyle = .fullScreen
+//            present(vc, animated: true)
+//        } else {
+            navigateToResultScreen(value: value, type: type)
+//        }
+    }
+    
+    func navigateToResultScreen(value: String, type: AVMetadataObject.ObjectType) {
+        // Create and push the scan result view controller
+        let resultVC = ScanResultViewController(scannedData: value, metadataObjectType: type)
         
-        // Pause camera feed while showing results
-        // It will resume when user navigates back
+        // Set up a navigation controller if needed
+        if navigationController == nil {
+            // If we're not in a navigation controller, wrap in one
+            let navController = UINavigationController(rootViewController: resultVC)
+            navController.modalPresentationStyle = .fullScreen
+            present(navController, animated: true)
+        } else {
+            // Push to existing navigation controller
+            navigationController?.pushViewController(resultVC, animated: true)
+        }
     }
     
     func scannerDidUpdatePermission(granted: Bool) {
