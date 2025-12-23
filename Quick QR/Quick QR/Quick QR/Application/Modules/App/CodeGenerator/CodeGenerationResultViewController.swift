@@ -52,6 +52,11 @@ class CodeGenerationResultViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .appSecondaryBackground
         
+        // Setup custom back button
+        let backButtonImage = UIImage(named: "arrow-left")?.withRenderingMode(.alwaysOriginal)
+        let backButton = UIBarButtonItem(image: backButtonImage, style: .plain, target: self, action: #selector(backButtonTapped))
+        navigationItem.leftBarButtonItem = backButton
+        
         // Check if this content already exists and is favorited
         if let content = generatedContent {
             let favoriteStatus = HistoryManager.shared.isContentFavorited(content)
@@ -365,6 +370,10 @@ class CodeGenerationResultViewController: UIViewController {
     }
     
     // MARK: - Actions
+    @objc private func backButtonTapped() {
+        navigationController?.popToRootViewController(animated: true)
+    }
+    
     @objc private func toggleFavoriteTapped() {
         AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial) { [weak self] _ in
             guard let self = self else { return }

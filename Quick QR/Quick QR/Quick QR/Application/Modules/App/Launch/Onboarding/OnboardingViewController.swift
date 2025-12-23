@@ -47,6 +47,9 @@ class OnboardingViewController: BaseViewController,
         setupBannerAdView()
         loadNativeAdIfNeeded()
         Analytics.logEvent("OB-1", parameters: nil)
+        
+        nativeAdParentView.layer.borderColor = UIColor.customColor(fromHex: "0A3853").cgColor
+        nativeAdParentView.layer.borderWidth = 1
     }
     
     private func setupBannerAdView() {
