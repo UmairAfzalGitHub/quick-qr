@@ -106,7 +106,6 @@ class ScannerViewController: BaseViewController {
     }
     
     func setupUI() {
-        view.addSubview(iapImage)
         view.addSubview(scannerFrameImageView)
         scannerFrameImageView.addSubview(qrTempImageView)
         view.addSubview(focusIndicator)
@@ -116,6 +115,9 @@ class ScannerViewController: BaseViewController {
         view.addSubview(bannerView)
         // Create banner view height constraint
         bannerViewHeghtConstraint = bannerView.heightAnchor.constraint(equalToConstant: 60)
+        
+        // Add iapImage last so it appears on top
+        view.addSubview(iapImage)
 
         // Add tap gesture recognizer for focus
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
@@ -131,7 +133,6 @@ class ScannerViewController: BaseViewController {
         let multiplier: CGFloat = UIDevice().isSmallDevice || UIDevice().isProDevice() ? 0.6 : 0.8
 
         var constraints = [
-            iapImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
             iapImage.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             iapImage.heightAnchor.constraint(equalToConstant: 31),
             iapImage.widthAnchor.constraint(equalToConstant: 77),
@@ -150,16 +151,18 @@ class ScannerViewController: BaseViewController {
 
         // Position the ad based on the showAdAtBottom flag
         if RemoteConfigManager.shared.showScannerNativeAtBottom {
-            // Ad at bottom, scanner in center
+            // Ad at bottom, scanner in center, pro button at top
             constraints.append(contentsOf: [
+                iapImage.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
                 scannerFrameImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
                 bannerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
             ])
         } else {
-            // Ad at top, scanner below it
+            // Ad at top, pro button below ad with 12px padding, scanner below pro button
             constraints.append(contentsOf: [
-                bannerView.topAnchor.constraint(equalTo: iapImage.bottomAnchor, constant: 10),
-                scannerFrameImageView.topAnchor.constraint(equalTo: bannerView.bottomAnchor, constant: 20)
+                bannerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                iapImage.topAnchor.constraint(equalTo: bannerView.bottomAnchor, constant: 12),
+                scannerFrameImageView.topAnchor.constraint(equalTo: iapImage.bottomAnchor, constant: 20)
             ])
         }
 
