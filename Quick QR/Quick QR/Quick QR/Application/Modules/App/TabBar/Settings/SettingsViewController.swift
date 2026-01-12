@@ -13,7 +13,7 @@ import IOS_Helpers
 // Enums are defined in SettingsViewController+Enums.swift
 // No explicit import needed as they're in the same module
 
-class SettingsViewController: UIViewController,
+class SettingsViewController: BaseViewController,
                               SettingsCellDelegate,
                               UITableViewDelegate,
                               UITableViewDataSource,
@@ -32,6 +32,8 @@ class SettingsViewController: UIViewController,
         super.viewDidLoad()
         setupUI()
         setupTableView()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSubscriptionPurchased), name: NSNotification.Name("SubscriptionPurchased"), object: nil)
     }
     
     // MARK: - Setup
@@ -225,4 +227,10 @@ class SettingsViewController: UIViewController,
         iapViewController.modalPresentationStyle = .fullScreen
         present(iapViewController, animated: true)
     }
+    
+    override func handleSubscriptionPurchased() {
+        super.handleSubscriptionPurchased()
+        tableView.reloadData()
+    }
 }
+

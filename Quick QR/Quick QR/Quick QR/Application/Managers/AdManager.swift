@@ -237,6 +237,11 @@ class AdManager: NSObject, AdLoaderDelegate, NativeAdLoaderDelegate {
     }
     
     func showInterstitial(adId: AdMobId, from viewController: UIViewController? = nil, useHighECPM: Bool = false, completion: ((Bool) -> Void)? = nil) {
+        
+        guard !IAPManager.shared.isUserSubscribed else {
+            return
+        }
+        
 //        incrementAdCounter()
         
         guard !isShowingAd else {
