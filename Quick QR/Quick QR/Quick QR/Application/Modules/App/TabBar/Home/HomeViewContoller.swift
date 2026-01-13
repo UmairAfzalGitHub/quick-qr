@@ -200,6 +200,7 @@ class HomeViewController: BaseViewController, IAPViewControllerDelegate {
     }
     
     private func hideAds() {
+        collectionView.reloadData()
         nativeAdParentView.isHidden = true
         nativeAdHeightConstraint.constant = 0
         UIView.animate(withDuration: 0.3) {
