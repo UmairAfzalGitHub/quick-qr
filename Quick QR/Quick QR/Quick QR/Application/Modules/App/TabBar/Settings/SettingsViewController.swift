@@ -205,11 +205,10 @@ class SettingsViewController: UIViewController,
 //                let textToShare = "QR Code scanner\n\(appStoreURL)"
 //                self.presentShareSheet(with: [textToShare])
 //            case .rateUs:
-//                LinkOpener.shared.openLink("https://doc-hosting.flycricket.io/photo-recovery-videos-recovery-privacy-policy/b1727af7-f37a-4686-b37d-f925a1e26218/privacy", from: self)
             case .feedback:
                 FeedbackMailer.shared.sendFeedback(from: self)
             case .privacyPolicy:
-                LinkOpener.shared.openLink("https://qrcodescanerreader.blogspot.com/2025/09/qr-code-scanner.html", from: self)
+                LinkOpener.shared.openLink("https://umairafzalgithub.github.io/PrivacyPolicies/QrScanner/", from: self)
             }
             
         default:

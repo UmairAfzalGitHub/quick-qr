@@ -191,8 +191,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = 46YGX3B2FK;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z78BNUN8G3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Quick QR/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "QR Code scanner";
@@ -210,7 +210,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = gt.qr.code.scanner.barcode.reader;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -228,8 +228,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
-				DEVELOPMENT_TEAM = 46YGX3B2FK;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z78BNUN8G3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Quick QR/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "QR Code scanner";
@@ -247,7 +247,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = gt.qr.code.scanner.barcode.reader;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

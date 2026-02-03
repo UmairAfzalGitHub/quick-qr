@@ -817,7 +817,7 @@ class IAPViewController: UIViewController {
     }
     
     @objc private func privacyButtonTapped() {
-        if let url = URL(string: "https://qrcodescanerreader.blogspot.com/2025/09/qr-code-scanner.html") {
+        if let url = URL(string: "https://umairafzalgithub.github.io/PrivacyPolicies/QrScanner/") {
             UIApplication.shared.open(url)
         }
     }
