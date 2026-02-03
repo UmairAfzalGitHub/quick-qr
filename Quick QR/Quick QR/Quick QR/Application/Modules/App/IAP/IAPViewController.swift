@@ -739,6 +739,7 @@ class IAPViewController: UIViewController {
     
     private func handleSuccessfulPurchase(message: String) {
         UserDefaults.standard.set(true, forKey: "isSubscribed")
+        NotificationCenter.default.post(name: NSNotification.Name("SubscriptionPurchased"), object: nil)
         delegate?.performAction()
         showAlert(title: Strings.Label.success, message: message) {
             self.dismiss(animated: true, completion: nil)

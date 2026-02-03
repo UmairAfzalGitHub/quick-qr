@@ -49,6 +49,8 @@ class BaseViewController: UIViewController {
         view.backgroundColor = .appPrimaryBackground
         setupNavigationBarAppearance()
         setupStandardBackButton()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSubscriptionPurchased), name: NSNotification.Name("SubscriptionPurchased"), object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -69,6 +71,7 @@ class BaseViewController: UIViewController {
     
     deinit {
         print("DE-INIT: \(self)")
+        NotificationCenter.default.removeObserver(self)
     }
     
     func style() {
@@ -370,5 +373,9 @@ class BaseViewController: UIViewController {
                 toastLabel.removeFromSuperview()
             }
         }
+    }
+    
+    @objc func handleSubscriptionPurchased() {
+        bannerAdView?.isHidden = true
     }
 }

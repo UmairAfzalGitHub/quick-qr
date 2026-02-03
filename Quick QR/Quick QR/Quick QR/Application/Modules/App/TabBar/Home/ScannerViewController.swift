@@ -105,6 +105,15 @@ class ScannerViewController: BaseViewController {
         scannerManager.stopCameraSession()
     }
     
+    override func handleSubscriptionPurchased() {
+        super.handleSubscriptionPurchased()
+        bannerViewHeghtConstraint.constant = 0
+        bannerView.isHidden = true
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
     func setupUI() {
         view.addSubview(scannerFrameImageView)
         scannerFrameImageView.addSubview(qrTempImageView)

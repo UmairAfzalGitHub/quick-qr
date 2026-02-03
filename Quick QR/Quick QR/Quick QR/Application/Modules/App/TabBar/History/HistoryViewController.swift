@@ -13,7 +13,7 @@ import AVFoundation
 import GoogleMobileAds
 import FirebaseAnalytics
 
-class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
+class HistoryViewController: BaseViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
     
     private let betterSegmentedControl: BetterSegmentedControl = {
         let control = BetterSegmentedControl(
@@ -519,4 +519,14 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         nativeAdView.nativeAd = nativeAd
     }
+    
+    override func handleSubscriptionPurchased() {
+        super.handleSubscriptionPurchased()
+        nativeAdParentView.isHidden = true
+        nativeAdHeightConstraint.constant = 0
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
 }
+

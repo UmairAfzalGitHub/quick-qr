@@ -10,7 +10,7 @@ import GoogleMobileAds
 import FirebaseAnalytics
 
 // MARK: - HomeViewController
-class HomeViewController: UIViewController, IAPViewControllerDelegate {
+class HomeViewController: BaseViewController, IAPViewControllerDelegate {
     
     private let betterSegmentedControl: BetterSegmentedControl = {
         let control = BetterSegmentedControl(
@@ -54,6 +54,8 @@ class HomeViewController: UIViewController, IAPViewControllerDelegate {
         view.backgroundColor = .white
         setupUI()
         setupNavigationBar()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSubscriptionPurchased), name: NSNotification.Name("SubscriptionPurchased"), object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -190,6 +192,20 @@ class HomeViewController: UIViewController, IAPViewControllerDelegate {
     }
 
     func performAction() {
+    }
+    
+    override func handleSubscriptionPurchased() {
+        super.handleSubscriptionPurchased()
+        hideAds()
+    }
+    
+    private func hideAds() {
+        collectionView.reloadData()
+        nativeAdParentView.isHidden = true
+        nativeAdHeightConstraint.constant = 0
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
 }
 

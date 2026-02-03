@@ -11,7 +11,7 @@ import AVFoundation
 import GoogleMobileAds
 import FirebaseAnalytics
 
-class FavouriteViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
+class FavouriteViewController: BaseViewController, UITableViewDelegate, UITableViewDataSource, FavoriteCellDelegate {
     
     // MARK: - Properties
     private let tableView = UITableView()
@@ -36,6 +36,8 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSubscriptionPurchased), name: NSNotification.Name("SubscriptionPurchased"), object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -460,8 +462,20 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
         
         nativeAdView.nativeAd = nativeAd
     }
+    
+    override func handleSubscriptionPurchased() {
+        super.handleSubscriptionPurchased()
+        hideAds()
+    }
+    
+    private func hideAds() {
+        nativeAdParentView.isHidden = true
+        nativeAdHeightConstraint.constant = 0
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
 }
-
 
 // MARK: - Models
 struct FavoriteItem {
