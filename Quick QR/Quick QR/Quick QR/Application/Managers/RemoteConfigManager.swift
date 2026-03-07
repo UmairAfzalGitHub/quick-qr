@@ -121,8 +121,9 @@ class RemoteConfigManager: NSObject {
             self.showInterstitalAfterOnboarding = config.showInterstitialAfterOnboarding ?? self.showInterstitalAfterOnboarding
             self.showScannerNativeAtBottom = config.showScannerNativeAtBottom ?? self.showScannerNativeAtBottom
             
-            // Update ad IDs only for AppStore builds
-            if getBuildEnv() == .appStore {
+#if DEBUG
+// do nothing
+#else
                 if let appOpen = config.appOpen {
                     self.appOpen = AdMobId(analyticsId: .appOpenAd, adId: appOpen.status ? appOpen.id : "")
                 }
@@ -153,8 +154,8 @@ class RemoteConfigManager: NSObject {
                 if let banner2 = config.banner2 {
                     self.banner2 = AdMobId(analyticsId: .bannerAd, adId: banner2.status ? banner2.id : "")
                 }
-            }
-            
+#endif
+
             print("✅ Remote Config loaded successfully")
             print("📊 Ad Counter: \(self.maxInterstitalAdCounter)")
             print("📊 Splash Interstitial: \(self.splashInterstitialEnabled)")
