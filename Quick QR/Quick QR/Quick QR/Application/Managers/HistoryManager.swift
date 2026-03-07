@@ -6,13 +6,23 @@
 //
 
 import Foundation
+import AVFoundation
 
 // MARK: - History Item Model
+// MARK: - History Item Model
+struct BatchScanItem {
+    let value: String
+    let type: AVMetadataObject.ObjectType
+    let scanResult: ScanDataParser.ScanResult
+    let timestamp: Date
+}
+
 struct HistoryItem: Codable {
     enum ItemType: String, Codable {
         case qrCode
         case socialQRCode
         case barCode
+        case batchScan
     }
     
     let id: String
@@ -70,6 +80,15 @@ struct HistoryItem: Codable {
                 itemType = .barCode(barType)
             } else {
                 itemType = .barCode(.code128) // Default fallback
+            }
+        case .batchScan:
+            itemType = .batchScan
+            // Show item count summary instead of raw JSON content
+            if let data = content.data(using: .utf8),
+               let dicts = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
+                displayContent = "\(dicts.count) items scanned"
+            } else {
+                displayContent = "Batch scan"
             }
         }
         
@@ -153,6 +172,49 @@ class HistoryManager {
             imageFileName: imageFileName
         )
         saveHistoryItem(item, forScan: true)
+    }
+
+    /// Saves an entire batch scan session as a single history item.
+    /// The individual items are serialized to JSON in the `content` field.
+    func saveBatchScanHistory(_ batchItems: [BatchScanItem]) {
+        guard !batchItems.isEmpty else { return }
+
+        // Encode each item as a simple dictionary
+        let itemDicts: [[String: String]] = batchItems.map { item in
+            [
+                "value": item.value,
+                "type": item.type.rawValue,
+                "title": item.scanResult.title ?? "Unknown"
+            ]
+        }
+
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: itemDicts),
+              let jsonString = String(data: jsonData, encoding: .utf8) else { return }
+
+        let item = HistoryItem(
+            type: .batchScan,
+            subtype: "batch",
+            content: jsonString,
+            title: "Batch Scan (\(batchItems.count) items)"
+        )
+        saveHistoryItem(item, forScan: true)
+    }
+
+    /// Decodes batch scan items from a history item's JSON content.
+    func decodeBatchItems(from historyItem: HistoryItem) -> [BatchScanItem] {
+        guard historyItem.type == .batchScan,
+              let data = historyItem.content.data(using: .utf8),
+              let dicts = try? JSONSerialization.jsonObject(with: data) as? [[String: String]] else {
+            return []
+        }
+
+        return dicts.compactMap { dict in
+            guard let value = dict["value"],
+                  let typeRaw = dict["type"] else { return nil }
+            let metaType = AVMetadataObject.ObjectType(rawValue: typeRaw)
+            let scanResult = ScanDataParser.parse(data: value, symbology: metaType)
+            return BatchScanItem(value: value, type: metaType, scanResult: scanResult, timestamp: historyItem.timestamp)
+        }
     }
     
     private func saveHistoryItem(_ item: HistoryItem, forScan: Bool) {

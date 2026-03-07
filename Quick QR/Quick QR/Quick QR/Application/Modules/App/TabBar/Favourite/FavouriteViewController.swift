@@ -194,6 +194,8 @@ class FavouriteViewController: BaseViewController, UITableViewDelegate, UITableV
                     // Set the generated content and pass the item ID since it's already a favorite
                     resultVC.setGeneratedContent(item.content, existingItemId: item.id, isFavorite: true)
                 }
+            case .batchScan:
+                break // Batch scans are only from scanned origin, but switch must be exhaustive
             }
             
             // Set hidesBottomBarWhenPushed to true
@@ -212,6 +214,28 @@ class FavouriteViewController: BaseViewController, UITableViewDelegate, UITableV
                 self?.navigationController?.pushViewController(resultVC, animated: true)
             }
         case .scanned:
+            // ───── BATCH SCAN ─────
+            if item.type == .batchScan {
+                let batchItems = HistoryManager.shared.decodeBatchItems(from: item)
+                let batchVC = BatchResultsViewController()
+                batchVC.batchItems = batchItems
+                batchVC.isFromHistory = true
+                batchVC.hidesBottomBarWhenPushed = true
+
+                if let tabBarController = self.tabBarController as? TabBarController {
+                    tabBarController.setTabBarVisibility(true)
+                }
+
+                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) { [weak self] _ in
+                    if let tabBarController = self?.tabBarController as? TabBarController {
+                        tabBarController.setTabBarVisibility(true)
+                    }
+                    self?.navigationController?.pushViewController(batchVC, animated: true)
+                }
+                return
+            }
+
+            // ───── SINGLE SCAN ─────
             // Use ScanResultViewController logic from HistoryViewController
             var metadataType: AVMetadataObject.ObjectType = .qr
             if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == item.subtype.lowercased() }) {
@@ -316,6 +340,8 @@ class FavouriteViewController: BaseViewController, UITableViewDelegate, UITableV
             if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == item.title.lowercased() }) {
                 imageToShare = CodeGeneratorManager.shared.generateBarcode(content: item.url, type: barType)
             }
+        case .batchScan:
+            imageToShare = nil // Batch items share as text (count summary)
         }
         
         // Share the image if available
@@ -483,6 +509,7 @@ struct FavoriteItem {
         case qrCode(QRCodeType)
         case socialQRCode(SocialQRCodeType)
         case barCode(BarCodeType)
+        case batchScan
     }
     enum Origin {
         case created

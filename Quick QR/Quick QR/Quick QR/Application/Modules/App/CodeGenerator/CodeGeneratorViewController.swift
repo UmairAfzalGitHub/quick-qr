@@ -42,6 +42,8 @@ class CodeGeneratorViewController: UIViewController {
             } else {
                 return nil
             }
+        case .batchScan:
+            return nil // Cannot create a single code from a batch scan
         }
         
         return viewController

@@ -123,6 +123,11 @@ class FavoriteCell: UITableViewCell {
         itemId = item.id
         isFavorite = item.isFavorite
         
+        // Reset to default appearance
+        iconContainerView.backgroundColor = .clear
+        iconContainerView.layer.borderColor = UIColor.appBorderDark.cgColor
+        contentView.backgroundColor = .white
+        
         // Set icon based on type
         switch item.type {
         case .qrCode(let qrType):
@@ -131,6 +136,13 @@ class FavoriteCell: UITableViewCell {
             iconImageView.image = socialType.icon
         case .barCode(let barType):
             iconImageView.image = barType.icon
+        case .batchScan:
+            // Distinct visual for batch scans
+            let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .semibold)
+            iconImageView.image = UIImage(systemName: "square.stack.3d.up.fill", withConfiguration: config)
+            iconImageView.tintColor = .appPrimary
+            iconContainerView.backgroundColor = UIColor.appPrimary.withAlphaComponent(0.1)
+            iconContainerView.layer.borderColor = UIColor.appPrimary.withAlphaComponent(0.3).cgColor
         }
         
         // Update favorite button appearance

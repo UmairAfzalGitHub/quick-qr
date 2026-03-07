@@ -19,6 +19,10 @@ class ScannerViewController: BaseViewController {
     
     let scannerManager = CodeScannerManager()
 
+    // MARK: - Batch Scan State
+    private var isBatchMode = false
+    private var batchResults: [BatchScanItem] = []
+
     // Focus animation view
     private let focusIndicator: UIView = {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
@@ -53,21 +57,64 @@ class ScannerViewController: BaseViewController {
         return imageView
     }()
 
-    // Gallery scan button
+    // Gallery scan button — dark semi-transparent bg for contrast on camera feed
     private let galleryButton: UIButton = {
         let button = UIButton(type: .system)
         let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
         let icon = UIImage(systemName: "photo.on.rectangle", withConfiguration: config)
         button.setImage(icon, for: .normal)
-        button.tintColor = .appPrimary
-        button.backgroundColor = .white
-        button.layer.cornerRadius = 18 // Circular (half of 36x36)
-        button.layer.borderWidth = 1.0
-        button.layer.borderColor = UIColor.appPrimary.withAlphaComponent(0.2).cgColor
+        button.tintColor = .white
+        button.backgroundColor = UIColor.black.withAlphaComponent(0.55)
+        button.layer.cornerRadius = 20
         button.clipsToBounds = true
         button.translatesAutoresizingMaskIntoConstraints = false
         button.accessibilityLabel = "Scan from gallery"
         return button
+    }()
+
+    // Batch mode toggle button — same dark style, turns appPrimary when active
+    private let batchToggleButton: UIButton = {
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+        let icon = UIImage(systemName: "square.stack.3d.up", withConfiguration: config)
+        button.setImage(icon, for: .normal)
+        button.tintColor = .white
+        button.backgroundColor = UIColor.black.withAlphaComponent(0.55)
+        button.layer.cornerRadius = 20
+        button.clipsToBounds = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.accessibilityLabel = "Toggle batch scan mode"
+        return button
+    }()
+
+    // Floating badge showing batch scan count
+    private let batchBadge: UIButton = {
+        let button = UIButton(type: .system)
+        button.backgroundColor = .appPrimary
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 13, weight: .bold)
+        button.layer.cornerRadius = 20
+        button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.alpha = 0
+        button.isHidden = true
+        // Shadow for floating effect
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 4)
+        button.layer.shadowRadius = 10
+        button.layer.shadowOpacity = 0.3
+        button.layer.masksToBounds = false
+        return button
+    }()
+
+    // Green flash overlay for batch scan feedback
+    private let batchFlashView: UIView = {
+        let v = UIView()
+        v.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.25)
+        v.isUserInteractionEnabled = false
+        v.alpha = 0
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
     }()
 
     // Frosted-glass scanning overlay shown while processing a gallery image
@@ -175,6 +222,15 @@ class ScannerViewController: BaseViewController {
         // Pre-configure camera but don't start yet
         scannerManager.prepareCamera()
         Analytics.logEvent("Home screen", parameters: nil)
+
+        // Sync batch badge when returning from BatchResultsViewController
+        if isBatchMode {
+            if batchResults.isEmpty {
+                hideBatchBadge()
+            } else {
+                updateBatchBadge()
+            }
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -217,9 +273,18 @@ class ScannerViewController: BaseViewController {
         // Add iapImage last so it appears on top
         view.addSubview(iapImage)
 
-        // Add gallery button on top of everything else
+        // Add gallery and batch buttons at the top
         view.addSubview(galleryButton)
         galleryButton.addTarget(self, action: #selector(galleryButtonTapped), for: .touchUpInside)
+        view.addSubview(batchToggleButton)
+        batchToggleButton.addTarget(self, action: #selector(batchModeToggled), for: .touchUpInside)
+
+        // Add batch flash overlay (covers scanner frame area)
+        view.addSubview(batchFlashView)
+
+        // Add batch badge
+        view.addSubview(batchBadge)
+        batchBadge.addTarget(self, action: #selector(batchBadgeTapped), for: .touchUpInside)
 
         // Scanning overlay (hidden by default, shown during gallery processing)
         view.addSubview(scanOverlay)
@@ -259,11 +324,28 @@ class ScannerViewController: BaseViewController {
             bannerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bannerViewHeghtConstraint!,
 
-            // Gallery button — top-left, aligned with IAP button
-            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            // Gallery button — top-left
+            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             galleryButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
-            galleryButton.widthAnchor.constraint(equalToConstant: 46),
-            galleryButton.heightAnchor.constraint(equalToConstant: 46),
+            galleryButton.widthAnchor.constraint(equalToConstant: 40),
+            galleryButton.heightAnchor.constraint(equalToConstant: 40),
+
+            // Batch toggle button — next to gallery
+            batchToggleButton.leadingAnchor.constraint(equalTo: galleryButton.trailingAnchor, constant: 10),
+            batchToggleButton.centerYAnchor.constraint(equalTo: galleryButton.centerYAnchor),
+            batchToggleButton.widthAnchor.constraint(equalToConstant: 40),
+            batchToggleButton.heightAnchor.constraint(equalToConstant: 40),
+
+            // Green flash overlay — covering the scanner frame
+            batchFlashView.topAnchor.constraint(equalTo: scannerFrameImageView.topAnchor),
+            batchFlashView.leadingAnchor.constraint(equalTo: scannerFrameImageView.leadingAnchor),
+            batchFlashView.trailingAnchor.constraint(equalTo: scannerFrameImageView.trailingAnchor),
+            batchFlashView.bottomAnchor.constraint(equalTo: scannerFrameImageView.bottomAnchor),
+
+            // Batch badge — below scanner frame, above banner
+            batchBadge.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            batchBadge.topAnchor.constraint(equalTo: scannerFrameImageView.bottomAnchor, constant: 16),
+            batchBadge.heightAnchor.constraint(equalToConstant: 40),
         ]
 
         // Position the ad based on the showAdAtBottom flag
@@ -353,6 +435,96 @@ class ScannerViewController: BaseViewController {
         let vc = IAPViewController()
         vc.modalPresentationStyle = .fullScreen
         present(vc, animated: true)
+    }
+
+    // MARK: - Batch Mode
+
+    @objc private func batchModeToggled() {
+        isBatchMode.toggle()
+
+        // Animate button press
+        UIView.animate(withDuration: 0.1, animations: {
+            self.batchToggleButton.transform = CGAffineTransform(scaleX: 0.88, y: 0.88)
+        }) { _ in
+            UIView.animate(withDuration: 0.15) {
+                self.batchToggleButton.transform = .identity
+            }
+        }
+
+        // Update button appearance
+        UIView.animate(withDuration: 0.25) {
+            if self.isBatchMode {
+                self.batchToggleButton.backgroundColor = .appPrimary
+                self.batchToggleButton.tintColor = .white
+            } else {
+                self.batchToggleButton.backgroundColor = UIColor.black.withAlphaComponent(0.55)
+                self.batchToggleButton.tintColor = .white
+            }
+        }
+
+        if isBatchMode {
+            // Resume camera if it was paused (from a previous single-scan result)
+            scannerManager.resumeCameraFeed()
+            // Show badge if we already have items
+            if !batchResults.isEmpty {
+                updateBatchBadge()
+            }
+        } else {
+            // Turning off batch mode: hide badge, keep results
+            hideBatchBadge()
+        }
+
+        FeedbackManager.shared.provideScanFeedback()
+    }
+
+    @objc private func batchBadgeTapped() {
+        let batchVC = BatchResultsViewController()
+        batchVC.batchItems = batchResults
+        batchVC.onClearAll = { [weak self] in
+            self?.batchResults.removeAll()
+            self?.hideBatchBadge()
+        }
+        navigationController?.pushViewController(batchVC, animated: true)
+    }
+
+    private func updateBatchBadge() {
+        let count = batchResults.count
+        batchBadge.setTitle("\(count) Scanned — View All ›", for: .normal)
+
+        if batchBadge.isHidden {
+            batchBadge.isHidden = false
+            batchBadge.transform = CGAffineTransform(translationX: 0, y: 60)
+            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5) {
+                self.batchBadge.alpha = 1
+                self.batchBadge.transform = .identity
+            }
+        } else {
+            // Bounce animation on count update
+            UIView.animate(withDuration: 0.15, animations: {
+                self.batchBadge.transform = CGAffineTransform(scaleX: 1.08, y: 1.08)
+            }) { _ in
+                UIView.animate(withDuration: 0.15) {
+                    self.batchBadge.transform = .identity
+                }
+            }
+        }
+    }
+
+    private func hideBatchBadge() {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.batchBadge.alpha = 0
+            self.batchBadge.transform = CGAffineTransform(translationX: 0, y: 60)
+        }) { _ in
+            self.batchBadge.isHidden = true
+            self.batchBadge.transform = .identity
+        }
+    }
+
+    private func playBatchFlash() {
+        batchFlashView.alpha = 0.6
+        UIView.animate(withDuration: 0.35) {
+            self.batchFlashView.alpha = 0
+        }
     }
 
     // MARK: - Gallery Scanning
@@ -494,6 +666,32 @@ class ScannerViewController: BaseViewController {
 extension ScannerViewController: CodeScannerDelegate {
     
     func scannerDidDetectBarcode(value: String, type: AVMetadataObject.ObjectType, title: String) {
+        // ───── BATCH MODE ─────
+        if isBatchMode {
+            // Ignore duplicates
+            if batchResults.contains(where: { $0.value == value }) {
+                // Still resume camera so it keeps scanning
+                scannerManager.resumeCameraFeed()
+                return
+            }
+
+            let scanResult = ScanDataParser.parse(data: value, symbology: type)
+            let item = BatchScanItem(value: value, type: type, scanResult: scanResult, timestamp: Date())
+            batchResults.append(item)
+
+            // Visual + haptic feedback
+            FeedbackManager.shared.provideScanFeedback()
+            playBatchFlash()
+            updateBatchBadge()
+
+            // Resume camera immediately to keep scanning
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                self?.scannerManager.resumeCameraFeed()
+            }
+            return
+        }
+
+        // ───── SINGLE SCAN MODE (existing behavior) ─────
         // Pause camera feed while showing scan result
         scannerManager.pauseCameraFeed()
         
@@ -508,15 +706,7 @@ extension ScannerViewController: CodeScannerDelegate {
             print("\(title) Detected: \(value)")
         }
         
-//        if IAPManager.shared.isUserSubscribed == false &&
-//            HistoryManager.shared.getScanHistory().count > 1 {
-//            let vc = IAPViewController()
-//            vc.isFromScannerFlow = true
-//            vc.modalPresentationStyle = .fullScreen
-//            present(vc, animated: true)
-//        } else {
-            navigateToResultScreen(value: value, type: type)
-//        }
+        navigateToResultScreen(value: value, type: type)
     }
     
     func navigateToResultScreen(value: String, type: AVMetadataObject.ObjectType) {
@@ -634,8 +824,7 @@ extension ScannerViewController: UIImagePickerControllerDelegate, UINavigationCo
             }
 
             print("[GALLERY_SCAN] Success! Total time: \(CFAbsoluteTimeGetCurrent() - selectionTime)s")
-            FeedbackManager.shared.provideScanFeedback()
-            self.navigateToResultScreen(value: value, type: objectType)
+            self.handleGalleryScanResult(value: value, type: objectType)
         }
     }
 
@@ -657,8 +846,27 @@ extension ScannerViewController: UIImagePickerControllerDelegate, UINavigationCo
             }
 
             print("[GALLERY_SCAN] Success! Total time: \(CFAbsoluteTimeGetCurrent() - selectionTime)s")
-            FeedbackManager.shared.provideScanFeedback()
-            self.navigateToResultScreen(value: value, type: objectType)
+            self.handleGalleryScanResult(value: value, type: objectType)
+        }
+    }
+
+    /// Routes a gallery scan result to either the batch list or the single-result screen.
+    private func handleGalleryScanResult(value: String, type: AVMetadataObject.ObjectType) {
+        FeedbackManager.shared.provideScanFeedback()
+
+        if isBatchMode {
+            // Add to batch (skip duplicates)
+            if !batchResults.contains(where: { $0.value == value }) {
+                let scanResult = ScanDataParser.parse(data: value, symbology: type)
+                let item = BatchScanItem(value: value, type: type, scanResult: scanResult, timestamp: Date())
+                batchResults.append(item)
+                playBatchFlash()
+                updateBatchBadge()
+            }
+            // Resume camera for continued scanning
+            scannerManager.resumeCameraFeed()
+        } else {
+            navigateToResultScreen(value: value, type: type)
         }
     }
 

@@ -283,6 +283,8 @@ class HistoryViewController: BaseViewController, UITableViewDelegate, UITableVie
                     }
                     resultVC.setTitleAndDescription(title: selectedItem.title, description: Strings.Label.barCode)
                 }
+            case .batchScan:
+                break // Batch scans are only from scanned origin, but switch must be exhaustive
             }
             
             // Set hidesBottomBarWhenPushed to true
@@ -304,6 +306,29 @@ class HistoryViewController: BaseViewController, UITableViewDelegate, UITableVie
             // Use local scanDataSource
             guard indexPath.row < scanDataSource.count else { return }
             let selectedItem = scanDataSource[indexPath.row]
+
+            // ───── BATCH SCAN ─────
+            if selectedItem.type == .batchScan {
+                let batchItems = HistoryManager.shared.decodeBatchItems(from: selectedItem)
+                let batchVC = BatchResultsViewController()
+                batchVC.batchItems = batchItems
+                batchVC.isFromHistory = true
+                batchVC.hidesBottomBarWhenPushed = true
+
+                if let tabBarController = self.tabBarController as? TabBarController {
+                    tabBarController.setTabBarVisibility(true)
+                }
+
+                AdManager.shared.showInterstitial(adId: RemoteConfigManager.shared.interstitial, from: self) { [weak self] _ in
+                    if let tabBarController = self?.tabBarController as? TabBarController {
+                        tabBarController.setTabBarVisibility(true)
+                    }
+                    self?.navigationController?.pushViewController(batchVC, animated: true)
+                }
+                return
+            }
+
+            // ───── SINGLE SCAN ─────
             // Try to infer code type
             var metadataType: AVMetadataObject.ObjectType = .qr
             // If the subtype matches a barcode type, treat as barcode
@@ -423,6 +448,8 @@ class HistoryViewController: BaseViewController, UITableViewDelegate, UITableVie
             if let barType = BarCodeType.allCases.first(where: { $0.title.lowercased() == item.title.lowercased() }) {
                 imageToShare = CodeGeneratorManager.shared.generateBarcode(content: item.url, type: barType)
             }
+        case .batchScan:
+            imageToShare = nil // Batch items share as text (count summary)
         }
         
         // Share the image if available
