@@ -44,6 +44,9 @@ class TabBarController: UITabBarController {
         scanVC.title = Strings.Label.scan
         let scanNavController = UINavigationController(rootViewController: scanVC)
         
+        // Pre-warm scanning engines for instant gallery scanning
+        ScannerViewController.preWarmEngines()
+        
         let historyVC = HistoryViewController()
         historyVC.view.backgroundColor = .systemBackground
         historyVC.title = Strings.Label.history

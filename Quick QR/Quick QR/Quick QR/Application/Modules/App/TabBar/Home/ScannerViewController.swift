@@ -10,6 +10,8 @@ import AVFoundation
 import CoreImage
 import GoogleMobileAds
 import FirebaseAnalytics
+import Vision
+import ImageIO
 
 class ScannerViewController: BaseViewController {
     
@@ -50,15 +52,102 @@ class ScannerViewController: BaseViewController {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
+
+    // Gallery scan button
+    private let galleryButton: UIButton = {
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+        let icon = UIImage(systemName: "photo.on.rectangle", withConfiguration: config)
+        button.setImage(icon, for: .normal)
+        button.tintColor = .appPrimary
+        button.backgroundColor = .white
+        button.layer.cornerRadius = 18 // Circular (half of 36x36)
+        button.layer.borderWidth = 1.0
+        button.layer.borderColor = UIColor.appPrimary.withAlphaComponent(0.2).cgColor
+        button.clipsToBounds = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.accessibilityLabel = "Scan from gallery"
+        return button
+    }()
+
+    // Frosted-glass scanning overlay shown while processing a gallery image
+    private lazy var scanOverlay: UIView = {
+        let overlay = UIView()
+        overlay.translatesAutoresizingMaskIntoConstraints = false
+        overlay.alpha = 0
+
+        // Simple semi-transparent background (NOT frosted glass). 
+        // Frosted glass (UIVisualEffectView) consumes 100% of the GPU on older devices, 
+        // which was causing the scanning engine to crawl.
+        overlay.backgroundColor = UIColor.black.withAlphaComponent(0.65)
+        
+
+        // Card
+        let card = UIView()
+        card.translatesAutoresizingMaskIntoConstraints = false
+        card.backgroundColor = UIColor.white.withAlphaComponent(0.12)
+        card.layer.cornerRadius = 20
+        card.layer.borderWidth = 1
+        card.layer.borderColor = UIColor.white.withAlphaComponent(0.2).cgColor
+        overlay.addSubview(card)
+
+        // Spinner
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.color = .appPrimary
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.startAnimating()
+        card.addSubview(spinner)
+
+        // Label
+        let label = UILabel()
+        label.text = "Scanning..."
+        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.textColor = UIColor.white.withAlphaComponent(0.85)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            card.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
+            card.centerYAnchor.constraint(equalTo: overlay.centerYAnchor),
+            card.widthAnchor.constraint(equalToConstant: 140),
+            card.heightAnchor.constraint(equalToConstant: 110),
+
+            spinner.centerXAnchor.constraint(equalTo: card.centerXAnchor),
+            spinner.centerYAnchor.constraint(equalTo: card.centerYAnchor, constant: -12),
+
+            label.centerXAnchor.constraint(equalTo: card.centerXAnchor),
+            label.topAnchor.constraint(equalTo: spinner.bottomAnchor, constant: 10),
+        ])
+        return overlay
+    }()
     
     // MARK: - Banner Properties
     var bannerView: BannerView!
     var bannerViewHeghtConstraint: NSLayoutConstraint!
 
+    // Dedicated serial queue for scanning
+    private let scanQueue = DispatchQueue(label: "com.quickqr.scanQueue", qos: .userInteractive)
+    
+    // Static engine hook to keep the Vision hardware "warm"
+    private static let warmUpRequest = VNDetectBarcodesRequest()
+    
+    public static func preWarmEngines() {
+        print("[GALLERY_SCAN] Pre-warming engines...")
+        DispatchQueue.global(qos: .background).async {
+            // A simple request and handler initialization keeps the framework and GPU kernels ready
+            let request = VNDetectBarcodesRequest()
+            let dummy = UIImage(systemName: "circle")?.cgImage
+            if let cg = dummy {
+                let handler = VNImageRequestHandler(cgImage: cg, options: [:])
+                try? handler.perform([request])
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
+        
         setupUI()
         setupConstraints()
         // Configure scanner manager
@@ -124,9 +213,22 @@ class ScannerViewController: BaseViewController {
         view.addSubview(bannerView)
         // Create banner view height constraint
         bannerViewHeghtConstraint = bannerView.heightAnchor.constraint(equalToConstant: 60)
-        
+
         // Add iapImage last so it appears on top
         view.addSubview(iapImage)
+
+        // Add gallery button on top of everything else
+        view.addSubview(galleryButton)
+        galleryButton.addTarget(self, action: #selector(galleryButtonTapped), for: .touchUpInside)
+
+        // Scanning overlay (hidden by default, shown during gallery processing)
+        view.addSubview(scanOverlay)
+        NSLayoutConstraint.activate([
+            scanOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scanOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scanOverlay.topAnchor.constraint(equalTo: view.topAnchor),
+            scanOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
 
         // Add tap gesture recognizer for focus
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
@@ -148,7 +250,7 @@ class ScannerViewController: BaseViewController {
             scannerFrameImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             scannerFrameImageView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: multiplier),
             scannerFrameImageView.heightAnchor.constraint(equalTo: scannerFrameImageView.widthAnchor),
-            
+
             qrTempImageView.topAnchor.constraint(equalTo: scannerFrameImageView.topAnchor, constant: 4),
             qrTempImageView.leadingAnchor.constraint(equalTo: scannerFrameImageView.leadingAnchor, constant: 4),
             qrTempImageView.trailingAnchor.constraint(equalTo: scannerFrameImageView.trailingAnchor, constant: -4),
@@ -156,6 +258,12 @@ class ScannerViewController: BaseViewController {
             bannerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bannerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bannerViewHeghtConstraint!,
+
+            // Gallery button — top-left, aligned with IAP button
+            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            galleryButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
+            galleryButton.widthAnchor.constraint(equalToConstant: 46),
+            galleryButton.heightAnchor.constraint(equalToConstant: 46),
         ]
 
         // Position the ad based on the showAdAtBottom flag
@@ -245,6 +353,139 @@ class ScannerViewController: BaseViewController {
         let vc = IAPViewController()
         vc.modalPresentationStyle = .fullScreen
         present(vc, animated: true)
+    }
+
+    // MARK: - Gallery Scanning
+    @objc private func galleryButtonTapped() {
+        print("[GALLERY_SCAN] Gallery button tapped")
+        
+        // PAUSE CAMERA: Free up GPU/NPU for the image scan
+        scannerManager.pauseCameraFeed()
+        
+        // Animate button press
+        UIView.animate(withDuration: 0.1, animations: {
+            self.galleryButton.transform = CGAffineTransform(scaleX: 0.88, y: 0.88)
+        }) { _ in
+            UIView.animate(withDuration: 0.1) {
+                self.galleryButton.transform = .identity
+            }
+        }
+
+        let picker = UIImagePickerController()
+        picker.sourceType = .photoLibrary
+        picker.delegate = self
+        picker.allowsEditing = false
+        present(picker, animated: true)
+    }
+
+    /// Scan a QR / barcode from a file URL using CGImageSource + Vision.
+    /// Uses `CGImageSourceCreateThumbnailAtIndex` to downsample directly from the
+    /// compressed file — never decodes the full-resolution image into memory,
+    /// making it orders of magnitude faster than going through UIImage.
+    /// Scan a QR / barcode from a file URL using CGImageSource (Downsampled) + Vision.
+    private func scanCodeFromFile(at fileURL: URL, completion: @escaping (String?, AVMetadataObject.ObjectType) -> Void) {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        print("[GALLERY_SCAN] Starting optimized scan for: \(fileURL.lastPathComponent)")
+        
+        scanQueue.async { [weak self] in
+            guard let self else { return }
+
+            // 1. DOWNSAMPLE FIRST: This is critical. Converting to a 512px thumbnail 
+            // takes ~10ms and avoids loading a massive 12MP-48MP photo into the GPU.
+            guard let source = CGImageSourceCreateWithURL(fileURL as CFURL, nil),
+                  let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+                      kCGImageSourceCreateThumbnailFromImageAlways: true,
+                      kCGImageSourceCreateThumbnailWithTransform: true,
+                      kCGImageSourceThumbnailMaxPixelSize: 512
+                  ] as CFDictionary) else {
+                DispatchQueue.main.async { completion(nil, .qr) }
+                return
+            }
+            
+            print("[GALLERY_SCAN] Thumbnail prepared (512px) in: \(CFAbsoluteTimeGetCurrent() - startTime)s")
+
+            // 2. Scan with Vision
+            let request = VNDetectBarcodesRequest()
+            if #available(iOS 16.0, *) {
+                request.revision = VNDetectBarcodesRequestRevision3
+            } else {
+                request.revision = VNDetectBarcodesRequestRevision1
+            }
+            
+            let handler = VNImageRequestHandler(cgImage: cgImage, orientation: .up, options: [:])
+            
+            do {
+                try handler.perform([request])
+                let result = (request.results as? [VNBarcodeObservation])?.first
+                print("[GALLERY_SCAN] Vision finished in: \(CFAbsoluteTimeGetCurrent() - startTime)s")
+                
+                DispatchQueue.main.async {
+                    completion(result?.payloadStringValue, 
+                               self.visionSymbologyToObjectType(result?.symbology ?? .qr))
+                }
+            } catch {
+                print("[GALLERY_SCAN] Scan failed: \(error)")
+                DispatchQueue.main.async { completion(nil, .qr) }
+            }
+        }
+    }
+
+    /// Fallback scanner when we already have a CGImage (e.g. from UIImagePickerController's .originalImage).
+    private func scanCodeFromCGImage(_ cgImage: CGImage, completion: @escaping (String?, AVMetadataObject.ObjectType) -> Void) {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        print("[GALLERY_SCAN] Starting scanCodeFromCGImage")
+        
+        DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+            guard let self else { return }
+
+            let request = VNDetectBarcodesRequest()
+            request.symbologies = [.qr, .ean8, .ean13, .pdf417, .aztec,
+                                   .code39, .code93, .code128, .dataMatrix,
+                                   .i2of5, .upce, .itf14]
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            try? handler.perform([request])
+
+            let result = (request.results as? [VNBarcodeObservation])?.first
+            print("[GALLERY_SCAN] Vision detection finished in: \(CFAbsoluteTimeGetCurrent() - startTime)s")
+            
+            DispatchQueue.main.async {
+                completion(result?.payloadStringValue,
+                           self.visionSymbologyToObjectType(result?.symbology ?? .qr))
+            }
+        }
+    }
+
+    /// Map Vision symbology to AVMetadataObject.ObjectType so we reuse the existing result screen.
+    private func visionSymbologyToObjectType(_ symbology: VNBarcodeSymbology) -> AVMetadataObject.ObjectType {
+        switch symbology {
+        case .qr:              return .qr
+        case .ean8:            return .ean8
+        case .ean13:           return .ean13
+        case .pdf417:          return .pdf417
+        case .aztec:           return .aztec
+        case .code39:          return .code39
+        case .code93:          return .code93
+        case .code128:         return .code128
+        case .dataMatrix:      return .dataMatrix
+        case .i2of5:           return .interleaved2of5
+        case .upce:            return .upce
+        case .itf14:           return .itf14
+        default:               return .qr
+        }
+    }
+
+    /// Show an alert when no QR / barcode is found in the selected photo.
+    private func showNoCodeFoundAlert() {
+        // Resume camera if we fail
+        scannerManager.resumeCameraFeed()
+        
+        let alert = UIAlertController(
+            title: "No Code Found",
+            message: "We couldn't detect a QR code or barcode in the selected photo. Please try a clearer image.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: Strings.Label.ok, style: .default))
+        present(alert, animated: true)
     }
 }
 
@@ -352,5 +593,88 @@ extension ScannerViewController: CodeScannerDelegate {
             if !suffices.isEmpty && suffices.contains(where: { host.hasSuffix($0) }) { return true }
         }
         return false
+    }
+}
+
+// MARK: - UIImagePickerControllerDelegate
+
+extension ScannerViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        let selectionTime = CFAbsoluteTimeGetCurrent()
+        print("[GALLERY_SCAN] imagePickerController didFinishPickingMediaWithInfo")
+
+        picker.dismiss(animated: true) { [weak self] in
+            guard let self else { return }
+
+            // Show the overlay immediately
+            self.showScanOverlay()
+
+            if let imageURL = info[.imageURL] as? URL {
+                // PATH 1: Optimized direct-from-URL scan
+                self.processSelectedImageURL(imageURL, selectionTime: selectionTime)
+            } else if let image = info[.originalImage] as? UIImage {
+                // PATH 2: Fallback to manual UIImage scan
+                self.processSelectedUIImage(image, selectionTime: selectionTime)
+            } else {
+                self.hideScanOverlay()
+                self.showNoCodeFoundAlert()
+            }
+        }
+    }
+
+    private func processSelectedImageURL(_ url: URL, selectionTime: CFAbsoluteTime) {
+        print("[GALLERY_SCAN] Processing via URL: \(url.lastPathComponent)")
+        self.scanCodeFromFile(at: url) { [weak self] value, objectType in
+            guard let self else { return }
+            self.hideScanOverlay()
+
+            guard let value, !value.isEmpty else {
+                self.showNoCodeFoundAlert()
+                return
+            }
+
+            print("[GALLERY_SCAN] Success! Total time: \(CFAbsoluteTimeGetCurrent() - selectionTime)s")
+            FeedbackManager.shared.provideScanFeedback()
+            self.navigateToResultScreen(value: value, type: objectType)
+        }
+    }
+
+    private func processSelectedUIImage(_ image: UIImage, selectionTime: CFAbsoluteTime) {
+        print("[GALLERY_SCAN] Processing via UIImage fallback")
+        guard let cgImage = image.cgImage else {
+            self.hideScanOverlay()
+            self.showNoCodeFoundAlert()
+            return
+        }
+
+        self.scanCodeFromCGImage(cgImage) { [weak self] value, objectType in
+            guard let self else { return }
+            self.hideScanOverlay()
+
+            guard let value, !value.isEmpty else {
+                self.showNoCodeFoundAlert()
+                return
+            }
+
+            print("[GALLERY_SCAN] Success! Total time: \(CFAbsoluteTimeGetCurrent() - selectionTime)s")
+            FeedbackManager.shared.provideScanFeedback()
+            self.navigateToResultScreen(value: value, type: objectType)
+        }
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true) { [weak self] in
+            // Resume camera if user cancelled selection
+            self?.scannerManager.resumeCameraFeed()
+        }
+    }
+
+    private func showScanOverlay() {
+        view.bringSubviewToFront(scanOverlay)
+        UIView.animate(withDuration: 0.2) { self.scanOverlay.alpha = 1 }
+    }
+
+    private func hideScanOverlay() {
+        UIView.animate(withDuration: 0.2) { self.scanOverlay.alpha = 0 }
     }
 }

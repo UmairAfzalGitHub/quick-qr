@@ -164,9 +164,11 @@ final class ScanResultViewController: UIViewController {
             self.existingItemId = itemId
         }
         
-        // Save scan result to history
+        // Save scan result to history in background (avoid blocking main thread with image generation/saving)
         if intent != .history {
-            saveScanResultToHistory()
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                self?.saveScanResultToHistory()
+            }
         }
         
         // Setup UI components
@@ -240,6 +242,7 @@ final class ScanResultViewController: UIViewController {
         if let image = generateCodeImage(for: scanResult) {
             imageFileName = saveImageToDocuments(image)
         }
+        
         switch scanResult {
         case .qrCode(let type, let data):
             HistoryManager.shared.saveScannedQRCodeHistory(type: type, content: data, imageFileName: imageFileName)
@@ -248,9 +251,33 @@ final class ScanResultViewController: UIViewController {
         case .barcode(let type, let data, _):
             HistoryManager.shared.saveScannedBarCodeHistory(type: type, content: data, imageFileName: imageFileName)
         case .unknown:
-            // Optionally handle unknown types
             break
         }
+        
+        // Update heart button on main thread if needed
+        DispatchQueue.main.async { [weak self] in
+            self?.refreshFavoriteStatus()
+        }
+    }
+
+    private func refreshFavoriteStatus() {
+        let data = ScanResultManager.shared.getRawData(from: scanResult) ?? scannedData
+        let favoriteStatus = HistoryManager.shared.isContentFavorited(data)
+        
+        // Update item ID if we found one
+        if let itemId = favoriteStatus.itemId {
+            self.existingItemId = itemId
+        }
+        
+        let heartImageName = favoriteStatus.isFavorite ? "heart-fill" : "heart-empty"
+        let heartImage = UIImage(named: heartImageName)?.withRenderingMode(.alwaysOriginal)
+        let heartButton = UIBarButtonItem(image: heartImage, style: .plain, target: self, action: #selector(toggleFavoriteTapped))
+        
+        if favoriteStatus.isFavorite {
+            heartButton.tintColor = .systemRed
+        }
+        
+        navigationItem.rightBarButtonItem = heartButton
     }
 
     private func generateCodeImage(for scanResult: ScanDataParser.ScanResult) -> UIImage? {

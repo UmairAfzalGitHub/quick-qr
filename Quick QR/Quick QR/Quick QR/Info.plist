@@ -4,6 +4,8 @@
 <dict>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<string>NO</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Quick QR needs access to your photo library to scan QR codes and barcodes from your photos.</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-9143149838002594~7967780732</string>
 	<key>UIApplicationSceneManifest</key>
