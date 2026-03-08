@@ -255,8 +255,8 @@ class IAPViewController: UIViewController {
         NSLayoutConstraint.activate([
             closeButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
             closeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            closeButton.widthAnchor.constraint(equalToConstant: 24),
-            closeButton.heightAnchor.constraint(equalToConstant: 24),
+            closeButton.widthAnchor.constraint(equalToConstant: 18),
+            closeButton.heightAnchor.constraint(equalToConstant: 18),
             
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
             titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
@@ -265,7 +265,7 @@ class IAPViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
             self?.closeButton.isHidden = false
             UIView.animate(withDuration: 0.3) {
-                self?.closeButton.alpha = 1.0
+                self?.closeButton.alpha = 0.4
             }
         }
     }

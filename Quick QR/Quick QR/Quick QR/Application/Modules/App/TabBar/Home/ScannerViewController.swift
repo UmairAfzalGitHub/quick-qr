@@ -72,6 +72,25 @@ class ScannerViewController: BaseViewController {
         return button
     }()
 
+    private let galleryLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Photos"
+        label.font = .systemFont(ofSize: 11, weight: .medium)
+        label.textColor = .white
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private lazy var galleryStack: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [galleryButton, galleryLabel])
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 4
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+
     // Batch mode toggle button — same dark style, turns appPrimary when active
     private let batchToggleButton: UIButton = {
         let button = UIButton(type: .system)
@@ -87,6 +106,35 @@ class ScannerViewController: BaseViewController {
         return button
     }()
 
+    private let batchLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Batch\nScanning"
+        label.font = .systemFont(ofSize: 11, weight: .medium)
+        label.textColor = .white
+        label.textAlignment = .center
+        label.numberOfLines = 2
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private lazy var batchStack: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [batchToggleButton, batchLabel])
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 4
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+
+    // Small crown badge overlaid on the batch button for free users
+    private let batchCrownBadge: UIImageView = {
+        let config = UIImage.SymbolConfiguration(pointSize: 10.8, weight: .bold)
+        let iv = UIImageView(image: UIImage(systemName: "crown.fill", withConfiguration: config))
+        iv.tintColor = UIColor(red: 1.0, green: 0.84, blue: 0.0, alpha: 1.0) // gold
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        iv.isUserInteractionEnabled = false
+        return iv
+    }()
     // Floating badge showing batch scan count
     private let batchBadge: UIButton = {
         let button = UIButton(type: .system)
@@ -273,11 +321,19 @@ class ScannerViewController: BaseViewController {
         // Add iapImage last so it appears on top
         view.addSubview(iapImage)
 
-        // Add gallery and batch buttons at the top
-        view.addSubview(galleryButton)
+        // Gallery stack — bottom-left, batch stack — bottom-right
         galleryButton.addTarget(self, action: #selector(galleryButtonTapped), for: .touchUpInside)
-        view.addSubview(batchToggleButton)
         batchToggleButton.addTarget(self, action: #selector(batchModeToggled), for: .touchUpInside)
+        view.addSubview(galleryStack)
+        view.addSubview(batchStack)
+
+        // Crown badge on batch button — visible only for free users
+        batchToggleButton.addSubview(batchCrownBadge)
+        NSLayoutConstraint.activate([
+            batchCrownBadge.topAnchor.constraint(equalTo: batchToggleButton.topAnchor, constant: 3),
+            batchCrownBadge.trailingAnchor.constraint(equalTo: batchToggleButton.trailingAnchor, constant: -3),
+        ])
+        batchCrownBadge.isHidden = IAPManager.shared.isUserSubscribed
 
         // Add batch flash overlay (covers scanner frame area)
         view.addSubview(batchFlashView)
@@ -324,17 +380,17 @@ class ScannerViewController: BaseViewController {
             bannerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bannerViewHeghtConstraint!,
 
-            // Gallery button — top-left
-            galleryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            galleryButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
+            // Gallery button stack — bottom-left, above banner
             galleryButton.widthAnchor.constraint(equalToConstant: 40),
             galleryButton.heightAnchor.constraint(equalToConstant: 40),
+            galleryStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            galleryStack.bottomAnchor.constraint(equalTo: bannerView.topAnchor, constant: -16),
 
-            // Batch toggle button — next to gallery
-            batchToggleButton.leadingAnchor.constraint(equalTo: galleryButton.trailingAnchor, constant: 10),
-            batchToggleButton.centerYAnchor.constraint(equalTo: galleryButton.centerYAnchor),
+            // Batch button stack — bottom-right, above banner
             batchToggleButton.widthAnchor.constraint(equalToConstant: 40),
             batchToggleButton.heightAnchor.constraint(equalToConstant: 40),
+            batchStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            batchStack.bottomAnchor.constraint(equalTo: bannerView.topAnchor, constant: -16),
 
             // Green flash overlay — covering the scanner frame
             batchFlashView.topAnchor.constraint(equalTo: scannerFrameImageView.topAnchor),
@@ -440,6 +496,14 @@ class ScannerViewController: BaseViewController {
     // MARK: - Batch Mode
 
     @objc private func batchModeToggled() {
+        // Lock batch mode for free users
+        guard IAPManager.shared.isUserSubscribed else {
+            let vc = IAPViewController()
+            vc.modalPresentationStyle = .fullScreen
+            present(vc, animated: true)
+            return
+        }
+
         isBatchMode.toggle()
 
         // Animate button press
