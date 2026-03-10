@@ -54,6 +54,7 @@ class RemoteConfigManager: NSObject {
     static let shared = RemoteConfigManager()
     private var remoteConfig: RemoteConfig!
 
+#if DEBUG
     var appOpen = AdMobId(analyticsId: .appOpenAd, adId: "ca-app-pub-3940256099942544/5575463023")
     var interstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-3940256099942544/4411468910")
     var highECPMinterstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-3940256099942544/4411468910")
@@ -64,6 +65,18 @@ class RemoteConfigManager: NSObject {
     var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
     var banner1 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
     var banner2 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-3940256099942544/2934735716")
+#else
+    var appOpen = AdMobId(analyticsId: .appOpenAd, adId: "ca-app-pub-7197936742422632/6331007920")
+    var interstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-7197936742422632/9679225995")
+    var highECPMinterstitial = AdMobId(analyticsId: .interstitialAd, adId: "ca-app-pub-7197936742422632/9679225995")
+    var native = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-7197936742422632/8623157019")
+    var floorNativeAd1 = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-7197936742422632/8623157019")
+    var floorNativeAd2 = AdMobId(analyticsId: .nativeAd, adId: "ca-app-pub-7197936742422632/8623157019")
+    var rewarded = AdMobId(analyticsId: .rewardedAd, adId: "ca-app-pub-7197936742422632/7571937404")
+    var banner = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-7197936742422632/8957171267")
+    var banner1 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-7197936742422632/8957171267")
+    var banner2 = AdMobId(analyticsId: .bannerAd, adId: "ca-app-pub-7197936742422632/8957171267")
+#endif
 
     var onboardingReviewEnabled = true
     var splashInterstitialEnabled = true
@@ -103,66 +116,50 @@ class RemoteConfigManager: NSObject {
         let jsonString = remoteConfig["ad_config"].stringValue
         
         guard !jsonString.isEmpty,
-              let jsonData = jsonString.data(using: .utf8) else {
+              let jsonData = jsonString.data(using: .utf8),
+              let dict = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
             print("⚠️ Remote Config JSON is empty or invalid, using default values")
             return
         }
         
-        do {
-            let decoder = JSONDecoder()
-            let config = try decoder.decode(RemoteConfigData.self, from: jsonData)
-            
-            // Update non-ad properties with nil coalescing
-            self.iap_varient = config.iapScreenVariant ?? "A"
-            self.maxInterstitalAdCounter = config.adCounter ?? self.maxInterstitalAdCounter
-            self.adLoaderCounter = config.adLoaderCounter ?? self.adLoaderCounter
-            self.splashInterstitialEnabled = config.splashInterstitial?.status ?? self.splashInterstitialEnabled
-            self.onboardingReviewEnabled = config.onboardingReviewEnabled ?? self.onboardingReviewEnabled
-            self.showInterstitalAfterOnboarding = config.showInterstitialAfterOnboarding ?? self.showInterstitalAfterOnboarding
-            self.showScannerNativeAtBottom = config.showScannerNativeAtBottom ?? self.showScannerNativeAtBottom
-            
-#if DEBUG
-// do nothing
-#else
-                if let appOpen = config.appOpen {
-                    self.appOpen = AdMobId(analyticsId: .appOpenAd, adId: appOpen.status ? appOpen.id : "")
-                }
-                if let interstitial = config.interstitial {
-                    self.interstitial = AdMobId(analyticsId: .interstitialAd, adId: interstitial.status ? interstitial.id : "")
-                }
-                if let highECPM = config.highECPMInterstitial {
-                    self.highECPMinterstitial = AdMobId(analyticsId: .interstitialAd, adId: highECPM.status ? highECPM.id : "")
-                }
-                if let native = config.native {
-                    self.native = AdMobId(analyticsId: .nativeAd, adId: native.status ? native.id : "")
-                }
-                if let floorNative1 = config.floorNative1 {
-                    self.floorNativeAd1 = AdMobId(analyticsId: .nativeAd, adId: floorNative1.status ? floorNative1.id : "")
-                }
-                if let floorNative2 = config.floorNative2 {
-                    self.floorNativeAd2 = AdMobId(analyticsId: .nativeAd, adId: floorNative2.status ? floorNative2.id : "")
-                }
-                if let rewarded = config.rewarded {
-                    self.rewarded = AdMobId(analyticsId: .rewardedAd, adId: rewarded.status ? rewarded.id : "")
-                }
-                if let banner = config.banner {
-                    self.banner = AdMobId(analyticsId: .bannerAd, adId: banner.status ? banner.id : "")
-                }
-                if let banner1 = config.banner1 {
-                    self.banner1 = AdMobId(analyticsId: .bannerAd, adId: banner1.status ? banner1.id : "")
-                }
-                if let banner2 = config.banner2 {
-                    self.banner2 = AdMobId(analyticsId: .bannerAd, adId: banner2.status ? banner2.id : "")
-                }
-#endif
-
-            print("✅ Remote Config loaded successfully")
-            print("📊 Ad Counter: \(self.maxInterstitalAdCounter)")
-            print("📊 Splash Interstitial: \(self.splashInterstitialEnabled)")
-            
-        } catch {
-            print("❌ Failed to decode Remote Config JSON: \(error.localizedDescription)")
-            print("📄 JSON String: \(jsonString)")
+        // Helper to parse bools safely
+        func getBool(_ key: String, from dict: [String: Any]) -> Bool? {
+            if let b = dict[key] as? Bool { return b }
+            if let i = dict[key] as? Int { return i == 1 }
+            if let s = dict[key] as? String { return s.lowercased() == "true" || s == "1" }
+            return nil
         }
+        
+        // Helper to parse ints safely
+        func getInt(_ key: String, from dict: [String: Any]) -> Int? {
+            if let i = dict[key] as? Int { return i }
+            if let s = dict[key] as? String { return Int(s) }
+            return nil
+        }
+        
+        // Helper to parse ad config safely
+        func getAdConfig(_ key: String, from dict: [String: Any]) -> (status: Bool, id: String)? {
+            guard let adDict = dict[key] as? [String: Any] else { return nil }
+            let status = getBool("status", from: adDict) ?? false
+            let id = (adDict["id"] as? String) ?? ""
+            return (status, id)
+        }
+        
+        // Update non-ad properties
+        self.iap_varient = (dict["iap_screen_variant"] as? String) ?? "A"
+        self.maxInterstitalAdCounter = getInt("ad_counter", from: dict) ?? self.maxInterstitalAdCounter
+        self.adLoaderCounter = getInt("ad_loader_counter", from: dict) ?? self.adLoaderCounter
+        
+        if let splashDict = dict["splash_interstitial"] as? [String: Any] {
+            self.splashInterstitialEnabled = getBool("status", from: splashDict) ?? self.splashInterstitialEnabled
+        }
+        
+        self.onboardingReviewEnabled = getBool("onboarding_review_enabled", from: dict) ?? self.onboardingReviewEnabled
+        self.showInterstitalAfterOnboarding = getBool("show_interstitial_after_onboarding", from: dict) ?? self.showInterstitalAfterOnboarding
+        self.showScannerNativeAtBottom = getBool("show_scanner_native_at_bottom", from: dict) ?? self.showScannerNativeAtBottom
+        
+        print("✅ Remote Config loaded successfully (Ad IDs Hardcoded)")
+        print("📊 Ad Counter: \(self.maxInterstitalAdCounter)")
+        print("📊 Splash Interstitial: \(self.splashInterstitialEnabled)")
     }
 }
